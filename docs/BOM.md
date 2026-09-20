@@ -34,15 +34,30 @@ trap note underneath for why that distinction matters.
 
 | Item | Variant | Qty | Price | Shipping |
 |---|---|---|---|---|
-| 2.4in 240x320 SPI TFT | With Touch ILI9341, 14-pin, 42.8x77mm | 1 | ₪20.83 | free |
+| 2.4in 240x320 SPI TFT | With Touch **ILI9341**, 14-pin, 42.8x77mm | 1 | ₪20.83 | free |
 | Kaisaya VU panel meter | 500µA 630Ω, 34mm, white face, warm backlight | 2 | ₪11.34 ea | ₪16.01 |
-| WS2812B strip | Black PCB, 1m, 60 LED/m, IP30 | 1 | ₪12.02 | free |
+| WS2812B strip | **Black PCB, 1m, 60 LED/m, IP30** | 1 | ₪12.02 | free |
+| MAX98357A I2S amp | 5-pack (spares for learning to solder) | 1 | ₪17.96 | free |
+| PCA9685 16ch PWM | 1PCS | 1 | ₪9.94 | free |
+| Resistor kit | 820pcs, 30 values, 1% metal film, 10Ω-1MΩ | 1 | ₪17.40 | free |
+| Electrolytic cap kit | 12 values x 10pcs | 1 | ₪10.06 | free |
+| LED assortment | 5mm box, 100pcs | 1 | ₪7.66 | free |
 | CHANZON Dupont kit | 3x40pin M-M/M-F/F-F, 20cm | 1 | ₪3.06 | free |
+| | | | **₪121.61** | +₪16.01 |
 
-Still to add: PCA9685, arcade buttons, mushroom and flip cover, rotary switch and
-knobs, mech switches and keycaps, toggles, MAX98357A and speaker, LEDs and
-bezels, R/C kit, breadboards and perfboard, JST kit, silicone wire, heat shrink,
+Still to add: arcade buttons (see open question), mushroom and flip cover, rotary
+switch and knobs, mech switches and keycaps, toggles, speaker, chrome LED bezels,
+3mm white LEDs, breadboards and perfboard, JST kit, silicone wire, heat shrink,
 panel connectors, fasteners, and the tools.
+
+**Open question: the arcade buttons.** Approve and Deny must light, because the
+buttons going dark when a call is un-approvable is core to the safety model.
+Cheap arcade buttons at ₪0.53 are not illuminated, and every illuminated arcade
+listing found so far is a "Max Combo" bundle with no quick-add. The alternative
+is a 16-19mm illuminated metal pushbutton at ₪2-4, which lights properly, panel
+mounts with a nut, suits the matte black instrument look, and eases a very tight
+control deck. It loses the satisfying slap of a big plastic arcade button.
+Needs a call before ordering.
 
 **Two pricing traps, both verified.**
 
