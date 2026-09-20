@@ -41,7 +41,7 @@ Full reasoning in [docs/SAFETY.md](docs/SAFETY.md).
 | 20 | Display | 2.4 inch IPS SPI, 320x240, in a recessed CRT bezel |
 | 21 | Session selector | 6-position rotary switch, 1-5 plus ALL |
 | 22 | Encoder | Menu, scrolling, snake, long-press shutdown |
-| 23 | Arcade | APPROVE and DENY, 24mm lit, live only when a prompt is pending |
+| 23 | APPROVE / DENY | 19mm illuminated metal pushbuttons, 3-6V ring LED, momentary self-reset, pre-wired. Live only when a prompt is pending. Amended while sourcing: illuminated arcade buttons were either unavailable outside bundle listings or 45mm, too large for the deck. |
 | 24 | Panic | 22mm mushroom under a hinged flip cover |
 | 25 | Mech keys | 4: CLD (focus or launch), NEW, PLAN, MIC (push to talk) |
 | 26 | Toggles | MUTE, NIGHT, AUTO-ACCEPT |

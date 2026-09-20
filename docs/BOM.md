@@ -43,21 +43,29 @@ trap note underneath for why that distinction matters.
 | Electrolytic cap kit | 12 values x 10pcs | 1 | ₪10.06 | free |
 | LED assortment | 5mm box, 100pcs | 1 | ₪7.66 | free |
 | CHANZON Dupont kit | 3x40pin M-M/M-F/F-F, 20cm | 1 | ₪3.06 | free |
-| | | | **₪121.61** | +₪16.01 |
+| PTEN metal pushbutton, DENY | **red ring, 3-6V, 19mm, self-reset, pre-wired** | 1 | ₪9.58 | free |
+| PTEN metal pushbutton, APPROVE | **green ring, 3-6V, 19mm, self-reset, pre-wired** | 1 | ₪9.58 | free |
+| | | | **₪140.77** | +₪16.01 |
 
-Still to add: arcade buttons (see open question), mushroom and flip cover, rotary
-switch and knobs, mech switches and keycaps, toggles, speaker, chrome LED bezels,
-3mm white LEDs, breadboards and perfboard, JST kit, silicone wire, heat shrink,
-panel connectors, fasteners, and the tools.
+Still to add: mushroom and flip cover, rotary switch and knobs, mech switches and
+keycaps, toggles, speaker, chrome LED bezels, 3mm white LEDs, breadboards and
+perfboard, JST kit, silicone wire, heat shrink, panel connectors, fasteners, and
+the tools.
 
-**Open question: the arcade buttons.** Approve and Deny must light, because the
-buttons going dark when a call is un-approvable is core to the safety model.
-Cheap arcade buttons at ₪0.53 are not illuminated, and every illuminated arcade
-listing found so far is a "Max Combo" bundle with no quick-add. The alternative
-is a 16-19mm illuminated metal pushbutton at ₪2-4, which lights properly, panel
-mounts with a nut, suits the matte black instrument look, and eases a very tight
-control deck. It loses the satisfying slap of a big plastic arcade button.
-Needs a call before ordering.
+**Arcade buttons resolved: illuminated metal pushbuttons instead.** Approve and
+Deny must light, because going dark when a call is un-approvable is the visible
+half of the safety model. Cheap arcade buttons at ₪0.53 are not illuminated, and
+every illuminated arcade listing found was a "Max Combo" bundle with no quick-add
+or was 45mm, too large for a 160mm deck that also carries a mushroom, two knobs,
+four keycaps and three toggles. The PTEN 19mm metal pushbutton lights properly,
+panel mounts with a nut, suits the matte black instrument look, and ships with
+wires attached, which spares soldering to tiny terminals.
+
+**Two specs on these that are easy to get wrong.** The listing offers
+**self-reset** and self-locking; self-locking would latch and break the button
+semantics entirely. And it offers 3-6V, 12-24V and **220V** LEDs on the same
+dropdown, which resets to 220V whenever the colour is changed. Both were verified
+per button before adding.
 
 **Two pricing traps, both verified.**
 
