@@ -34,7 +34,7 @@ One codebase, one binary per platform, same behaviour. Responsibilities:
 
 ```
 daemon/src/
-  index.ts          bootstrap, profile detection
+  index.ts          bootstrap, host detection for the action backend
   http.ts           hook ingest endpoint
   scrub.ts          redaction and truncation
   classify.ts       event -> state, denylist evaluation

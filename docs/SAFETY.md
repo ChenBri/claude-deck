@@ -71,18 +71,25 @@ a regex on a knob. The menu can enable and disable whole categories.
 **The deck makes the safe path fast and the dangerous path slower.** That is the
 opposite of what a convenience gadget usually does, and it is the point.
 
-### 5. Profiles per machine
+### 5. Same capabilities on both machines
 
-The daemon identifies its host at handshake and the deck asks what it is allowed
-to do.
+The deck performs the full action set on the Windows desktop and on the work Mac
+alike: approve, deny, interrupt, keys, push to talk.
 
-| Profile | Machine | Actions |
+| Machine | Actions | Action path |
 |---|---|---|
-| `home` | Windows desktop | Full: approve, deny, interrupt, keys, macros |
-| `work` | Mac | **Read-only.** Status, lamps, screen, sound, needles. HID gadget disabled at the kernel config level, not merely ignored in software. |
+| Windows desktop | Full | Win32 window focus and key send |
+| Mac | Full | osascript, Accessibility permission granted once |
 
-On the work profile the deck is not a keyboard at all. It does not enumerate as
-one. There is nothing to misfire.
+This is safe because the protection against the production-database case was
+never the profile. It is **rule 4**: database commands are on the denylist, so
+the approve button is dark and dead for them on every machine. Combined with
+rules 1 through 3, the worst a misfire can do is approve a call that is already
+on screen, already classified safe, and already less than 90 seconds old.
+
+The daemon still identifies its host at handshake, because the action
+implementations differ per platform and the audit log records which machine
+approved what.
 
 ### 6. No route to the outside world
 

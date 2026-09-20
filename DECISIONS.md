@@ -14,7 +14,7 @@ pixel-art screen and two analog needles, driven by Claude Code hooks.
 | 5 | Filesystem | Read-only root with RAM overlay | Power loss can never corrupt the OS. |
 | 6 | History | Third writable partition, /var/deck | Settings and stats. Written only on state transitions. |
 | 7 | Shutdown | Long-press the encoder, plus a lit rocker on the back | Clean shutdown with a goodbye animation. |
-| 8 | Stack | Python on the Pi, TypeScript daemon on Windows and macOS | One daemon codebase, per-machine profiles. |
+| 8 | Stack | Python on the Pi, TypeScript daemon on Windows and macOS | One daemon codebase, platform-specific action implementations. |
 | 9 | Config | Encoder menu as the interface, YAML underneath | Regexes cannot be typed on a knob, so the menu writes the file. |
 
 ## Safety
@@ -24,7 +24,7 @@ pixel-art screen and two analog needles, driven by Claude Code hooks.
 | 10 | Button path | Daemon-verified. HID emits only F13-F20, never a printable key. |
 | 11 | Approve semantics | "Approve request X", matched against what is on screen, 90s expiry. |
 | 12 | Denylist | All four categories: database, destructive fs and git, infrastructure, secrets. |
-| 13 | Work Mac | Read-only profile. HID gadget disabled at kernel config level. |
+| 13 | Machines | Full action set on Windows and on the Mac alike. The denylist, not a profile, is what protects production access. |
 | 14 | Scrubbing | Truncate and redact before anything leaves the PC. |
 | 15 | Audit | SQLite log on the PC of every deck-originated action. |
 
@@ -86,9 +86,11 @@ Full reasoning in [docs/SAFETY.md](docs/SAFETY.md).
 |---|---|---|
 | 46 | Wiring | Perfboard first, custom PCB HAT as a later revision |
 | 47 | Tools | Full soldering kit purchased new |
-| 48 | Sourcing | Mixed: local and Amazon for the fast starter order, AliExpress and LCSC for the rest |
-| 49 | Sequencing | Software and simulator now, parts in parallel, build on arrival |
-| 50 | Budget | No hard ceiling. Landed at roughly $500 all-in including tools. |
+| 48 | Sourcing | AliExpress only, one order, everything at once. Case, legend strip, ballast plate and isopropyl fabricated or bought locally because they cannot be catalogue items. |
+| 49 | Sequencing | Software and simulator now, single order in parallel, one build when it all lands. No early partial build. |
+| 50 | Budget | No hard ceiling. Landed at roughly $416 all-in including every tool. |
+| 51 | MIC key | Daemon receives the hotkey and invokes the OS dictation shortcut: Win+H on Windows, the configured dictation shortcut on macOS. |
+| 52 | Fabrication | Local Tel Aviv print shop for the PETG case and the laser-cut legend strip, ordered after the electronics arrive so every cutout is measured. |
 
 ## Hardware constraints resolved
 
@@ -103,9 +105,3 @@ Full reasoning in [docs/SAFETY.md](docs/SAFETY.md).
 - **Power.** 2.08A peak, so a 5V 3A supply.
 
 Details in [docs/HARDWARE.md](docs/HARDWARE.md).
-
-## Still open
-
-- Exact text for the four keycap legends and the engraved strip.
-- Whether the MIC key uses the OS dictation hotkey or something better.
-- Print service choice: local Tel Aviv shop versus an online service.
