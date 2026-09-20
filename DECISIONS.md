@@ -36,7 +36,7 @@ Full reasoning in [docs/SAFETY.md](docs/SAFETY.md).
 |---|---|---|
 | 16 | Lamps | 5: READY, WORKING, BLOCKED, DONE, LINK |
 | 17 | Legends | Backlit engraved acrylic strip, laser cut |
-| 18 | Ambient | NeoPixel ring around the screen bezel, plus underglow |
+| 18 | Ambient | WS2812B strip for both the bezel halo and the underglow. Amended while sourcing: a circular ring does not fit a rectangular bezel, and 1m of 60/m strip covers the ~300mm halo perimeter and the ~300mm underglow with spare. |
 | 19 | Meters | Two analog needles: CONTEXT and ACTIVITY |
 | 20 | Display | 2.4 inch IPS SPI, 320x240, in a recessed CRT bezel |
 | 21 | Session selector | 6-position rotary switch, 1-5 plus ALL |

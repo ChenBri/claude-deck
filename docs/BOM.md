@@ -27,6 +27,42 @@ before ordering, both have moved in recent years.
 **Spares.** A few cheap, critical parts are ordered in twos. A dead display or a
 cooked level shifter three weeks into the build otherwise stops everything.
 
+## Cart in progress, verified prices
+
+Prices below are read from the cart, not from the search tile. See the pricing
+trap note underneath for why that distinction matters.
+
+| Item | Variant | Qty | Price | Shipping |
+|---|---|---|---|---|
+| 2.4in 240x320 SPI TFT | With Touch ILI9341, 14-pin, 42.8x77mm | 1 | ₪20.83 | free |
+| Kaisaya VU panel meter | 500µA 630Ω, 34mm, white face, warm backlight | 2 | ₪11.34 ea | ₪16.01 |
+| WS2812B strip | Black PCB, 1m, 60 LED/m, IP30 | 1 | ₪12.02 | free |
+| CHANZON Dupont kit | 3x40pin M-M/M-F/F-F, 20cm | 1 | ₪3.06 | free |
+
+Still to add: PCA9685, arcade buttons, mushroom and flip cover, rotary switch and
+knobs, mech switches and keycaps, toggles, MAX98357A and speaker, LEDs and
+bezels, R/C kit, breadboards and perfboard, JST kit, silicone wire, heat shrink,
+panel connectors, fasteners, and the tools.
+
+**Two pricing traps, both verified.**
+
+1. **Welcome-deal pricing is one per account.** Huge numbers of listings advertise
+   ₪3.06 or ₪3.40. That is a first-order promotional price, and it is consumed by
+   whichever item uses it first. The display tile said ₪3.06 and landed in the
+   cart at **₪20.83**. The LED strip tile said ₪3.40 and landed at **₪12.02**.
+   Always read the price back from the cart.
+2. **The variant trap.** Multi-variant listings advertise the cheapest variant,
+   not the one in the title. Checked on 2026-09-20: the top-selling "Raspberry Pi
+   Zero 2 W" listing at ₪93.77 defaults to bundle **Zero V1.3**, the original 2015
+   single-core board, which cannot run this project. Its actual Zero 2 W variant
+   is ₪234.22. Select and confirm the variant on every multi-variant line.
+
+**Design change made while sourcing.** The NeoPixel ring is dropped. A circular
+ring does not fit a rectangular CRT bezel, and the halo around an ~80x70mm bezel
+is about 300mm of perimeter, which is 18 LEDs of 60/m strip. Underglow is another
+18. One metre of strip covers both jobs, fits the geometry, and costs less than a
+ring plus a strip. Decision 18 is amended accordingly.
+
 **Variant trap, verified.** Most AliExpress listings for these parts are
 multi-variant, and the advertised price is always the cheapest variant, not the
 one in the title. Checked on 2026-09-20: the top-selling "Raspberry Pi Zero 2 W"
