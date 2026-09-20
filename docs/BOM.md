@@ -57,7 +57,10 @@ Twenty-one lines, verified against the cart on 2026-09-20.
 | Electrolytic cap kit | 12 values x 10pcs | 1 | ₪10.06 |
 | LED assortment | 5mm box, 100pcs | 1 | ₪3.06 |
 | CHANZON Dupont kit | 3x40pin M-M/M-F/F-F, 20cm | 1 | ₪3.06 |
-| | | | **₪232.97** |
+| 2.54mm connector kit | 310pcs, housings 1-8 pin + male/female crimps | 1 | ₪10.99 |
+| Silicone hookup wire | **22AWG**, 5 colours x 5m, dispenser box | 1 | ₪31.36 |
+| Heat shrink assortment | **560pcs with box**, multiple diameters and colours | 1 | ₪20.94 |
+| | | | **₪296.26** |
 
 Plus ₪16.01 shipping on the meters. Everything else ships free.
 
@@ -69,9 +72,19 @@ checking out, or you will buy less than half the order and not notice.
 Also at checkout: re-tick the meters and switch their shipping from Standard
 ₪16.01 back to Economy ₪7.91.
 
-Still to add: 3mm white LEDs for the legend backlight, JST-XH kit, silicone wire,
-heat shrink, panel-mount USB-C and barrel jack, rocker switch, fasteners and
-heat-set inserts, and the eleven tools.
+Still to add: 3mm white LEDs for the legend backlight, panel-mount USB-C and
+barrel jack, rocker switch, fasteners and heat-set inserts, and the eleven tools.
+
+**JST-XH dropped in favour of a 2.54mm Dupont-style kit.** Every JST-XH listing
+sells housings and crimp terminals as separate one-per-account variants, so a
+usable set cannot be assembled from one order. The 310-piece 2.54mm kit contains
+housings from 1 to 8 pin plus both male and female crimps in a single SKU, works
+with the same SN-28B crimper, and still gives polarised, serviceable connectors
+between subassemblies. Decision 46's intent is unchanged.
+
+**Wire is 22AWG rather than the 24/26AWG first specified.** One gauge has to
+carry both the 5V LED run, which approaches an amp, and the signal wiring. 22AWG
+covers both; 24AWG would be marginal on the power leg.
 
 **The mushroom latches, and that is now deliberate.** Every 22mm mushroom on
 AliExpress is an emergency-stop head: push to lock, twist to release. Genuine
