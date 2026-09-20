@@ -42,7 +42,7 @@ Full reasoning in [docs/SAFETY.md](docs/SAFETY.md).
 | 21 | Session selector | 6-position rotary switch, 1-5 plus ALL |
 | 22 | Encoder | Menu, scrolling, snake, long-press shutdown |
 | 23 | APPROVE / DENY | 19mm illuminated metal pushbuttons, 3-6V ring LED, momentary self-reset, pre-wired. Live only when a prompt is pending. Amended while sourcing: illuminated arcade buttons were either unavailable outside bundle listings or 45mm, too large for the deck. |
-| 24 | Panic | 22mm mushroom under a hinged flip cover |
+| 24 | Panic | 22mm XB2-542 mushroom e-stop, 1NO1NC, **latching**. Amended while sourcing: spring-return mushrooms are not sold on AliExpress. Firmware fires on the press edge and holds an INTERRUPTED state until the twist-release, so the latched head visibly shows a killed run. Flip cover dropped as redundant. |
 | 25 | Mech keys | 4: CLD (focus or launch), NEW, PLAN, MIC (push to talk) |
 | 26 | Toggles | MUTE, NIGHT, AUTO-ACCEPT |
 | 27 | Back panel | Panel-mount USB-C, barrel jack, lit rocker, SD cutout |

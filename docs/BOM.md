@@ -32,25 +32,47 @@ cooked level shifter three weeks into the build otherwise stops everything.
 Prices below are read from the cart, not from the search tile. See the pricing
 trap note underneath for why that distinction matters.
 
-| Item | Variant | Qty | Price | Shipping |
-|---|---|---|---|---|
-| 2.4in 240x320 SPI TFT | With Touch **ILI9341**, 14-pin, 42.8x77mm | 1 | ₪20.83 | free |
-| Kaisaya VU panel meter | 500µA 630Ω, 34mm, white face, warm backlight | 2 | ₪11.34 ea | ₪16.01 |
-| WS2812B strip | **Black PCB, 1m, 60 LED/m, IP30** | 1 | ₪12.02 | free |
-| MAX98357A I2S amp | 5-pack (spares for learning to solder) | 1 | ₪17.96 | free |
-| PCA9685 16ch PWM | 1PCS | 1 | ₪9.94 | free |
-| Resistor kit | 820pcs, 30 values, 1% metal film, 10Ω-1MΩ | 1 | ₪17.40 | free |
-| Electrolytic cap kit | 12 values x 10pcs | 1 | ₪10.06 | free |
-| LED assortment | 5mm box, 100pcs | 1 | ₪7.66 | free |
-| CHANZON Dupont kit | 3x40pin M-M/M-F/F-F, 20cm | 1 | ₪3.06 | free |
-| PTEN metal pushbutton, DENY | **red ring, 3-6V, 19mm, self-reset, pre-wired** | 1 | ₪9.58 | free |
-| PTEN metal pushbutton, APPROVE | **green ring, 3-6V, 19mm, self-reset, pre-wired** | 1 | ₪9.58 | free |
-| | | | **₪140.77** | +₪16.01 |
+Sixteen lines, verified against the cart on 2026-09-20.
 
-Still to add: mushroom and flip cover, rotary switch and knobs, mech switches and
-keycaps, toggles, speaker, chrome LED bezels, 3mm white LEDs, breadboards and
-perfboard, JST kit, silicone wire, heat shrink, panel connectors, fasteners, and
-the tools.
+| Item | Variant | Qty | Price |
+|---|---|---|---|
+| 2.4in 240x320 SPI TFT | With Touch **ILI9341**, 14-pin, 42.8x77mm | 1 | ₪20.83 |
+| Kaisaya VU panel meter | 500µA 630Ω, 34mm, white face, warm backlight | 2 | ₪22.68 |
+| WS2812B strip | **Black PCB, 1m, 60 LED/m, IP30** | 1 | ₪12.02 |
+| MAX98357A I2S amp | 5-pack (spares for learning to solder) | 1 | ₪17.96 |
+| Speaker | **4Ω 3W, 40mm** | 1 | ₪10.84 |
+| PCA9685 16ch PWM | 1PCS | 1 | ₪9.94 |
+| PTEN metal pushbutton, APPROVE | **green ring, 3-6V, 19mm, self-reset, pre-wired** | 1 | ₪9.18 |
+| PTEN metal pushbutton, DENY | **red ring, 3-6V, 19mm, self-reset, pre-wired** | 1 | ₪9.58 |
+| XB2-542 mushroom | **1NO1NC**, 22mm, latching e-stop | 1 | ₪14.90 |
+| SR16 rotary band switch | **1 Pole 6 position**, 15mm shaft | 1 | ₪5.31 |
+| Aluminium pointer knob | 20x15mm, 6mm knurled shaft, black | 2 | ₪2.89 |
+| MTS-102 toggle switch | SPDT ON/ON, 10-pack | 1 | ₪9.06 |
+| Resistor kit | 820pcs, 30 values, 1% metal film, 10Ω-1MΩ | 1 | ₪17.40 |
+| Electrolytic cap kit | 12 values x 10pcs | 1 | ₪10.06 |
+| LED assortment | 5mm box, 100pcs | 1 | ₪3.06 |
+| CHANZON Dupont kit | 3x40pin M-M/M-F/F-F, 20cm | 1 | ₪3.06 |
+| | | | **₪178.77** |
+
+Plus ₪16.01 shipping on the meters. Everything else ships free.
+
+Still to add: mech switches and keycaps, chrome LED bezels, 3mm white LEDs,
+breadboards, perfboard, JST kit, silicone wire, heat shrink, panel-mount USB-C
+and barrel jack, rocker switch, fasteners and heat-set inserts, and the tools.
+
+**The mushroom latches, and that is now deliberate.** Every 22mm mushroom on
+AliExpress is an emergency-stop head: push to lock, twist to release. Genuine
+spring-return mushrooms (XB2-BA42) did not surface. Rather than substitute a
+non-mushroom button, the latching head is kept and the firmware handles it: fire
+the interrupt on the press edge, then hold an INTERRUPTED state until the twist
+releases the contact. The physically latched button becomes a visible indicator
+that a run was killed, which is arguably better than a momentary. The 1NO1NC
+contact block gives the Pi a clean normally-open contact. Decision 24 amended.
+
+**The flip-up safety cover is dropped.** The e-stop head is already ~40mm and
+guarded by its own collar, and covers are sized for 22mm flat buttons rather than
+mushroom heads. The latching behaviour supplies the deliberateness the cover was
+there to provide.
 
 **Arcade buttons resolved: illuminated metal pushbuttons instead.** Approve and
 Deny must light, because going dark when a call is un-approvable is the visible
