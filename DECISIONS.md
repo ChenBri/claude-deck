@@ -1,38 +1,111 @@
 # claude-deck: decision log
 
 A hand-built physical status panel for Claude Code. Lights, buttons, an animated
-pixel-art screen and an analog needle, driven by Claude Code hooks.
+pixel-art screen and two analog needles, driven by Claude Code hooks.
 
-## Locked
+## System
 
 | # | Decision | Choice | Notes |
 |---|---|---|---|
-| 1 | Brain | Raspberry Pi Zero 2 W | Full Linux. 512MB, quad A53. Header is unpopulated, must be soldered. |
-| 2 | PC link | USB gadget mode: HID keyboard + USB ethernet, WiFi as fallback | One data cable. HID needs no drivers; RNDIS on Win10 may need a fallback to WiFi. |
-| 3 | Power | Separate 5V 3A supply into PWR IN port | Data port stays data-only. No USB current limits, no backfeed. |
-| 4 | Indicators | Full panel: discrete labelled LEDs + NeoPixels + display | |
-| 5 | Display | 2.4" IPS SPI, 320x240 (ST7789/ILI9341) | Rendered at low logical res, scaled. pygame on fbtft framebuffer. |
-| 6 | Screen content | Animated pixel mascot + HUD strip + live tool ticker + idle dashboard | No stats/history screen. |
-| 7 | Art pipeline | Generated as code-defined pixel grids to PNG sheets, refinable in Piskel | Original mascot, not Anthropic's asset. |
-| 8 | Inputs | Lit arcade approve/deny/panic, rotary encoder, mech keys, mute toggle | |
-| 9 | Analog | Moving-needle panel meter, PWM driven | |
-| 10 | Audio | MAX98357A I2S DAC + speaker, physical mute | |
-| 11 | Enclosure | Online 3D print service, retro terminal / tiny CRT form | |
-| 12 | Tools | Buying a full soldering kit | |
-| 13 | Budget | No hard ceiling, optimise for cool | |
-| 14 | Name | claude-deck | |
+| 1 | Brain | Raspberry Pi Zero 2 W | Full Linux. Header unpopulated, must be soldered. |
+| 2 | PC link | USB gadget: HID keyboard + USB ethernet | Composite device. ECM for macOS, RNDIS for Windows. |
+| 3 | Network | USB point-to-point only, WiFi behind a panel toggle | 10.55.0.1 to 10.55.0.2. Not on the LAN, not routable. |
+| 4 | Power | Separate 5V 3A supply into PWR IN | Data port stays data-only. No backfeed, no current limits. |
+| 5 | Filesystem | Read-only root with RAM overlay | Power loss can never corrupt the OS. |
+| 6 | History | Third writable partition, /var/deck | Settings and stats. Written only on state transitions. |
+| 7 | Shutdown | Long-press the encoder, plus a lit rocker on the back | Clean shutdown with a goodbye animation. |
+| 8 | Stack | Python on the Pi, TypeScript daemon on Windows and macOS | One daemon codebase, per-machine profiles. |
+| 9 | Config | Encoder menu as the interface, YAML underneath | Regexes cannot be typed on a knob, so the menu writes the file. |
 
-## Hardware constraints already resolved
+## Safety
 
-- **Pin budget.** NeoPixels on GPIO12 (PWM0, `rpi_ws281x`, root via systemd).
-  Display on SPI0. Audio on I2S (GPIO18/19/21). Discrete LEDs offloaded to a
-  PCA9685 over I2C so they cost zero GPIO and get 12-bit PWM for breathing.
-  Buttons and encoder take the remainder.
-- **Logic levels.** Pi is 3.3V, WS2812B wants 5V data. 74AHCT125 level shifter required.
-- **No analog out.** The VU meter is driven by filtered PWM (or an MCP4725 DAC on I2C).
+| # | Decision | Choice |
+|---|---|---|
+| 10 | Button path | Daemon-verified. HID emits only F13-F20, never a printable key. |
+| 11 | Approve semantics | "Approve request X", matched against what is on screen, 90s expiry. |
+| 12 | Denylist | All four categories: database, destructive fs and git, infrastructure, secrets. |
+| 13 | Work Mac | Read-only profile. HID gadget disabled at kernel config level. |
+| 14 | Scrubbing | Truncate and redact before anything leaves the PC. |
+| 15 | Audit | SQLite log on the PC of every deck-originated action. |
 
-## Open
+Full reasoning in [docs/SAFETY.md](docs/SAFETY.md).
 
-See the question rounds in the session. Nothing below the line is settled yet:
-states and priority, multi-session handling, LED count and legends, exact button
-map and keystrokes, meter source, sound design, wiring approach, sourcing, phases.
+## Panel
+
+| # | Decision | Choice |
+|---|---|---|
+| 16 | Lamps | 5: READY, WORKING, BLOCKED, DONE, LINK |
+| 17 | Legends | Backlit engraved acrylic strip, laser cut |
+| 18 | Ambient | NeoPixel ring around the screen bezel, plus underglow |
+| 19 | Meters | Two analog needles: CONTEXT and ACTIVITY |
+| 20 | Display | 2.4 inch IPS SPI, 320x240, in a recessed CRT bezel |
+| 21 | Session selector | 6-position rotary switch, 1-5 plus ALL |
+| 22 | Encoder | Menu, scrolling, snake, long-press shutdown |
+| 23 | Arcade | APPROVE and DENY, 24mm lit, live only when a prompt is pending |
+| 24 | Panic | 22mm mushroom under a hinged flip cover |
+| 25 | Mech keys | 4: CLD (focus or launch), NEW, PLAN, MIC (push to talk) |
+| 26 | Toggles | MUTE, NIGHT, AUTO-ACCEPT |
+| 27 | Back panel | Panel-mount USB-C, barrel jack, lit rocker, SD cutout |
+
+## Screen
+
+| # | Decision | Choice |
+|---|---|---|
+| 28 | Style | Warm CRT phosphor UI, full-colour mascot, scanlines and slight bloom |
+| 29 | Art pipeline | Code-defined pixel grids rendered to PNG, refinable in Piskel |
+| 30 | Mascot | Original starburst character, not Anthropic artwork |
+| 31 | HUD | Session name, elapsed time, context bar |
+| 32 | Ticker | Live tool name and target, sanitized |
+| 33 | Idle dashboard | Clock, date, your name, weather from the daemon, git status of the last repo, today's totals |
+| 34 | Easter egg | Snake, playable on the encoder after a few minutes idle |
+| 35 | DONE behaviour | Auto-clears back to READY after a few minutes |
+
+## Sound
+
+| # | Decision | Choice |
+|---|---|---|
+| 36 | Style | Chiptune blips generated in code, one per event |
+| 37 | Events | Blocked, finished, error, task start and subagent spawn |
+| 38 | Output | MAX98357A I2S amp, 40mm speaker, hard MUTE toggle |
+
+## Enclosure
+
+| # | Decision | Choice |
+|---|---|---|
+| 39 | Form | Retro terminal. Vertical face with a recessed CRT bezel, sloped control deck. |
+| 40 | Size | 160 x 120 x 100 mm. Upper face 95mm, deck 55mm deep. |
+| 41 | Colour | Matte black with orange accents |
+| 42 | Process | FDM PETG via a print service. MJF nylon reprint later if wanted. |
+| 43 | CAD | OpenSCAD, case as parametric code in this repo |
+| 44 | Ballast | 3mm steel plate in the base plus rubber feet, about 1kg total |
+| 45 | Fasteners | M3 brass heat-set inserts |
+
+## Build
+
+| # | Decision | Choice |
+|---|---|---|
+| 46 | Wiring | Perfboard first, custom PCB HAT as a later revision |
+| 47 | Tools | Full soldering kit purchased new |
+| 48 | Sourcing | Mixed: local and Amazon for the fast starter order, AliExpress and LCSC for the rest |
+| 49 | Sequencing | Software and simulator now, parts in parallel, build on arrival |
+| 50 | Budget | No hard ceiling. Landed at roughly $500 all-in including tools. |
+
+## Hardware constraints resolved
+
+- **Pin budget.** I2S audio claims GPIO18/19/21, which kills SPI1 and PCM.
+  NeoPixels therefore run on GPIO12 (PWM0) via `rpi_ws281x` as root in a systemd
+  service. Display on SPI0. Lamps and both meters offloaded to a PCA9685 on I2C.
+  Rotary switch, mech keys and toggles offloaded to an MCP23017. Buttons and the
+  encoder stay on real GPIO for latency.
+- **Logic levels.** 74AHCT125 between the Pi and the WS2812B data line.
+- **No analog output.** Meters driven by PCA9685 PWM through an RC filter with a
+  calibration trimpot each.
+- **Power.** 2.08A peak, so a 5V 3A supply.
+
+Details in [docs/HARDWARE.md](docs/HARDWARE.md).
+
+## Still open
+
+- Exact text for the four keycap legends and the engraved strip.
+- Whether the MIC key uses the OS dictation hotkey or something better.
+- Print service choice: local Tel Aviv shop versus an online service.
