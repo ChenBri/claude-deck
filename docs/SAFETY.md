@@ -1,9 +1,9 @@
 # Safety model
 
 A box that can approve permission prompts is, by construction, pointed at
-everything your agent can reach. On the work machine that includes production
-database access. This document is the argument for why the approve button is
-defensible, and the rules that make it so.
+everything your agent can reach, which on a work machine can include production
+systems. This document is the argument for why the approve button is defensible,
+and the rules that make it so.
 
 ## Threats being designed against
 
@@ -81,8 +81,8 @@ alike: approve, deny, interrupt, keys, push to talk.
 | Windows desktop | Full | Win32 window focus and key send |
 | Mac | Full | osascript, Accessibility permission granted once |
 
-This is safe because the protection against the production-database case was
-never the profile. It is **rule 4**: database commands are on the denylist, so
+This is safe because the protection against dangerous commands was never the
+per-machine profile. It is **rule 4**: database commands are on the denylist, so
 the approve button is dark and dead for them on every machine. Combined with
 rules 1 through 3, the worst a misfire can do is approve a call that is already
 on screen, already classified safe, and already less than 90 seconds old.
