@@ -14,6 +14,16 @@ before ordering, both have moved in recent years.
 **Spares.** A few cheap, critical parts are ordered in twos. A dead display or a
 cooked level shifter three weeks into the build otherwise stops everything.
 
+**Variant trap, verified.** Most AliExpress listings for these parts are
+multi-variant, and the advertised price is always the cheapest variant, not the
+one in the title. Checked on 2026-09-20: the top-selling "Raspberry Pi Zero 2 W"
+listing at ₪93.77 defaults to bundle **Zero V1.3**, the original 2015 single-core
+board, which cannot run this project. The Zero 2 W variant is a different price.
+Sorting search results by price and buying the top hit will put the wrong part in
+the cart. Select and confirm the variant on every multi-variant line: the Pi, the
+display, the meters, the arcade buttons, the toggles, the encoder and the
+soldering station.
+
 ---
 
 ## A. Core computer
