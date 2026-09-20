@@ -66,8 +66,13 @@ Twenty-one lines, verified against the cart on 2026-09-20.
 | ANENG 620A multimeter | 6000 counts, true RMS, capacitance, temp, AC/DC current | 1 | ₪62.21 |
 | SN-58B ratcheting crimper | **6 interchangeable jaws**, covers XH2.54 and DuPont2.54, cased | 1 | ₪46.88 |
 | Plier set | 4-piece: sprue cutter, needle nose, diagonal cutter, combination | 1 | ₪73.87 |
-| | | **Tools subtotal** | **₪441.59** |
-| | | **Cart total, 29 lines** | **₪737.85** |
+| Toolour helping hands | flexible arms, vise clamp base, PCB holder | 1 | ₪31.70 |
+| Desoldering braid | **2.0mm x 1.5M** | 1 | ₪3.06 |
+| | | **Tools subtotal** | **₪476.35** |
+| | | **Cart total, 30 lines** | **~₪772** |
+
+Read the exact total at checkout after pressing **Select all items**; the sidebar
+figure only reflects the ticked lines.
 
 Plus ₪16.01 shipping on the meters. Everything else ships free.
 
@@ -80,9 +85,14 @@ Also at checkout: re-tick the meters and switch their shipping from Standard
 ₪16.01 back to Economy ₪7.91.
 
 Still to add: 3mm white LEDs for the legend backlight, panel-mount USB-C and
-barrel jack, rocker switch, fasteners and heat-set inserts, wire stripper,
-helping hands, desoldering wick and pump, hot glue gun, precision screwdrivers,
-silicone mat, fume fan.
+barrel jack, rocker switch, fasteners and heat-set inserts, wire stripper, solder
+pump, hot glue gun, precision screwdrivers, silicone mat, fume fan.
+
+**The "Max Combo" wall.** Whole tool categories on AliExpress are dominated by
+listings that only sell through the Max Combo bundle flow, which has no quick-add
+and opens a bundle-builder page instead. Wire strippers, precision screwdriver
+sets and illuminated arcade buttons were all blocked this way. These need either
+a direct product-page visit or buying locally.
 
 **Third pricing trap: switching a variant can change the price several-fold, and
 the modal updates silently.** The plier set showed ₪12.18 for the single 5-inch
