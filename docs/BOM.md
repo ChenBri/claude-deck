@@ -32,7 +32,7 @@ cooked level shifter three weeks into the build otherwise stops everything.
 Prices below are read from the cart, not from the search tile. See the pricing
 trap note underneath for why that distinction matters.
 
-Sixteen lines, verified against the cart on 2026-09-20.
+Twenty-one lines, verified against the cart on 2026-09-20.
 
 | Item | Variant | Qty | Price |
 |---|---|---|---|
@@ -48,17 +48,30 @@ Sixteen lines, verified against the cart on 2026-09-20.
 | SR16 rotary band switch | **1 Pole 6 position**, 15mm shaft | 1 | ₪5.31 |
 | Aluminium pointer knob | 20x15mm, 6mm knurled shaft, black | 2 | ₪2.89 |
 | MTS-102 toggle switch | SPDT ON/ON, 10-pack | 1 | ₪9.06 |
+| Gateron G Pro 3.0 switch | **G Brown 3.0** tactile, pre-lubed, 10-pack | 1 | ₪10.53 |
+| DSA blank keycaps | **orange**, 1U, PBT, 20-pack | 1 | ₪15.10 |
+| Chrome LED bezel holder | 5mm metal, 10-pack | 1 | ₪7.26 |
+| Breadboard | **830 tie points**, MB-102 | 2 | ₪15.67 |
+| Perfboard | double-sided, **8x12cm** | 1 | ₪5.64 |
 | Resistor kit | 820pcs, 30 values, 1% metal film, 10Ω-1MΩ | 1 | ₪17.40 |
 | Electrolytic cap kit | 12 values x 10pcs | 1 | ₪10.06 |
 | LED assortment | 5mm box, 100pcs | 1 | ₪3.06 |
 | CHANZON Dupont kit | 3x40pin M-M/M-F/F-F, 20cm | 1 | ₪3.06 |
-| | | | **₪178.77** |
+| | | | **₪232.97** |
 
 Plus ₪16.01 shipping on the meters. Everything else ships free.
 
-Still to add: mech switches and keycaps, chrome LED bezels, 3mm white LEDs,
-breadboards, perfboard, JST kit, silicone wire, heat shrink, panel-mount USB-C
-and barrel jack, rocker switch, fasteners and heat-set inserts, and the tools.
+**Checkout trap: AliExpress does not auto-select newly added cart lines.** At 21
+lines in the cart, only 10 were ticked for checkout and the estimated total read
+₪94.42 instead of ₪232.97. Hit **Select all items** on the cart page before
+checking out, or you will buy less than half the order and not notice.
+
+Also at checkout: re-tick the meters and switch their shipping from Standard
+₪16.01 back to Economy ₪7.91.
+
+Still to add: 3mm white LEDs for the legend backlight, JST-XH kit, silicone wire,
+heat shrink, panel-mount USB-C and barrel jack, rocker switch, fasteners and
+heat-set inserts, and the eleven tools.
 
 **The mushroom latches, and that is now deliberate.** Every 22mm mushroom on
 AliExpress is an emergency-stop head: push to lock, twist to release. Genuine
