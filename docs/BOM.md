@@ -60,7 +60,14 @@ Twenty-one lines, verified against the cart on 2026-09-20.
 | 2.54mm connector kit | 310pcs, housings 1-8 pin + male/female crimps | 1 | ₪10.99 |
 | Silicone hookup wire | **22AWG**, 5 colours x 5m, dispenser box | 1 | ₪31.36 |
 | Heat shrink assortment | **560pcs with box**, multiple diameters and colours | 1 | ₪20.94 |
-| | | | **₪296.26** |
+| | | **Parts subtotal** | **₪296.26** |
+| FNIRSI HS-02A soldering kit | 100-450°C, **6 tips + 100W PD adapter + stand + case**, EU plug | 1 | ₪241.79 |
+| MECHANIC HX-T100 solder | **63% tin leaded**, rosin core, **0.6mm**, 55g | 1 | ₪16.84 |
+| ANENG 620A multimeter | 6000 counts, true RMS, capacitance, temp, AC/DC current | 1 | ₪62.21 |
+| SN-58B ratcheting crimper | **6 interchangeable jaws**, covers XH2.54 and DuPont2.54, cased | 1 | ₪46.88 |
+| Plier set | 4-piece: sprue cutter, needle nose, diagonal cutter, combination | 1 | ₪73.87 |
+| | | **Tools subtotal** | **₪441.59** |
+| | | **Cart total, 29 lines** | **₪737.85** |
 
 Plus ₪16.01 shipping on the meters. Everything else ships free.
 
@@ -73,7 +80,18 @@ Also at checkout: re-tick the meters and switch their shipping from Standard
 ₪16.01 back to Economy ₪7.91.
 
 Still to add: 3mm white LEDs for the legend backlight, panel-mount USB-C and
-barrel jack, rocker switch, fasteners and heat-set inserts, and the eleven tools.
+barrel jack, rocker switch, fasteners and heat-set inserts, wire stripper,
+helping hands, desoldering wick and pump, hot glue gun, precision screwdrivers,
+silicone mat, fume fan.
+
+**Third pricing trap: switching a variant can change the price several-fold, and
+the modal updates silently.** The plier set showed ₪12.18 for the single 5-inch
+plier; selecting the 4-piece variant made it **₪73.87**. Read the price back
+*after* every variant change, not just before.
+
+**Age gate.** Searching "automatic wire stripper" triggers an AliExpress
+age-verification interstitial. Route around it with a different query rather than
+confirming, or confirm it yourself.
 
 **JST-XH dropped in favour of a 2.54mm Dupont-style kit.** Every JST-XH listing
 sells housings and crimp terminals as separate one-per-account variants, so a
