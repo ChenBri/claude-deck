@@ -90,6 +90,20 @@ which is what makes NIGHT mode and the blocked-state pulse possible.
 | B | 6 | Toggle AUTO-ACCEPT |
 | B | 7 | spare |
 
+## Meters, as ordered
+
+Kaisaya 500µA / 630Ω analog panel meter, 34mm face, white dial, warm backlight.
+Two ordered.
+
+- **Series resistance.** Full scale needs 5V / 500µA = 10kΩ total, minus the 630Ω
+  coil. The planned 2.2k fixed plus 10k trimpot covers this with room either side.
+- **Backlight is specified 6-12V and our rail is 5V**, so the stock lamp will be
+  dim or dead. Plan on replacing it with a white LED and series resistor driven
+  from PCA9685 channel 11, which is already allocated to meter backlight. This is
+  a known easy mod and it also gives the backlight dimming under NIGHT mode.
+- **Case cutout is 34mm**, not the ~45x40mm the first draft assumed. Update the
+  OpenSCAD panel parameters accordingly.
+
 ## Meter drive circuit, per meter
 
 ```

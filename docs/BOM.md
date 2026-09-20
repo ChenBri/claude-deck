@@ -1,7 +1,20 @@
 # Bill of materials
 
-One order, placed once, everything at the same time. AliExpress for every
-catalogue part and every tool. Prices in USD.
+Three suppliers, all ordered the same day. Prices in USD unless shown in shekels.
+
+| Source | Covers | Why |
+|---|---|---|
+| **Digi-Key** | Pi Zero 2 W, and the genuine ICs (see `digikey-bom.csv`) | $15 for the Pi against ₪234 on AliExpress. In stock today. Removes counterfeit risk on the logic chips. Upload the CSV to their BOM tool. |
+| **piitel.co.il** | SanDisk 32GB Ultra microSD, ₪50 | A real card from an Israeli reseller. AliExpress offers only fake-capacity listings at this size. |
+| **AliExpress** | Everything else: sections C through J | Genuinely the best value for modules, LEDs, mechanical parts and tools. |
+
+**Sourcing checked 2026-09-20.** There is no Pi Zero 2 W shortage. It was in stock
+at eleven distributors that day: The Pi Hut £14.40, Digi-Key $15.00, Pi-Shop CHF
+17.10, BerryBase €17.90, Kubii €18.00, Botland PLN 72.90 and others. Farnell
+Israel lists the correct $14.89 price but cannot deliver until April 2027 on a
+54-week lead time, which is a Farnell supply situation and not a market one.
+piitel has the right price, ₪85 bare and ₪105 with headers, but both were out of
+stock. The ₪234 on AliExpress is pure markup.
 
 Lead time is 2 to 5 weeks. Items ship from different sellers and will arrive
 staggered over that window.

@@ -1,0 +1,7 @@
+Manufacturer Part Number,Quantity,Description
+SC0510,1,Raspberry Pi Zero 2 W - the brain
+SN74AHCT125N,2,TI quad 3-state buffer DIP-14 - 3.3V to 5V level shifter for WS2812B data
+MCP23017-E/SP,2,Microchip 16-bit I2C GPIO expander DIP-28 - rotary switch keys and toggles
+LM358P,2,TI dual op-amp DIP-8 - unity gain buffer for the analog meter drive
+PEC11R-4215F-S0024,2,Bourns 11mm incremental encoder with pushbutton - menu scrolling and snake
+3296W-1-103LF,2,Bourns 10k multiturn trimpot - analog meter full-scale calibration
