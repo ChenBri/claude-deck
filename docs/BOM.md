@@ -44,8 +44,9 @@ Twenty-one lines, verified against the cart on 2026-09-20.
 | PTEN metal pushbutton, APPROVE | **green ring, 3-6V, 19mm, self-reset, pre-wired** | 1 | ₪9.18 |
 | PTEN metal pushbutton, DENY | **red ring, 3-6V, 19mm, self-reset, pre-wired** | 1 | ₪9.58 |
 | XB2-542 mushroom | **1NO1NC**, 22mm, latching e-stop | 1 | ₪14.90 |
-| SR16 rotary band switch | **1 Pole 6 position**, 15mm shaft | 1 | ₪5.31 |
-| Aluminium pointer knob | 20x15mm, 6mm knurled shaft, black | 2 | ₪2.89 |
+| SR16 rotary band switch | **1 Pole 6 position**, 15mm shaft | 2 | ₪10.62 |
+| Aluminium pointer knob | 20x15mm, 6mm knurled shaft, black | 4 | ₪5.78 |
+| 10k linear potentiometer | panel mount, with knurled knob | 1 | ₪3.50 |
 | MTS-102 toggle switch | SPDT ON/ON, 10-pack | 1 | ₪9.06 |
 | Gateron G Pro 3.0 switch | **G Brown 3.0** tactile, pre-lubed, 10-pack | 1 | ₪10.53 |
 | DSA blank keycaps | **orange**, 1U, PBT, 20-pack | 1 | ₪15.10 |
@@ -64,7 +65,7 @@ Twenty-one lines, verified against the cart on 2026-09-20.
 | KCD1 rocker switch | round 20mm, **3-pin red illuminated** (LED is 12V, see note) | 1 | ₪3.63 |
 | KY-023 joystick | dual-axis analog thumbstick with push | 1 | ₪5.18 |
 | ADS1115 ADC | 16-bit, 4 channel, I2C, reads the joystick | 1 | ₪4.83 |
-| | | **Parts subtotal** | **₪306.26** |
+| | | **Parts subtotal** | **₪317.96** |
 | FNIRSI HS-02A soldering kit | 100-450°C, **6 tips + 100W PD adapter + stand + case**, EU plug | 1 | ₪241.79 |
 | MECHANIC HX-T100 solder | **63% tin leaded**, rosin core, **0.6mm**, 55g | 1 | ₪16.84 |
 | ANENG 620A multimeter | 6000 counts, true RMS, capacitance, temp, AC/DC current | 1 | ₪62.21 |
@@ -76,7 +77,7 @@ Twenty-one lines, verified against the cart on 2026-09-20.
 | Silicone soldering mat | anti-static, magnetic, 932°F | 1 | ₪11.73 |
 | Hot glue gun | 20W, **EU plug**, 10 sticks | 1 | ₪6.68 |
 | | | **Tools subtotal** | **₪495.06** |
-| | | **Cart total, 38 lines** | **~₪801** |
+| | | **Cart total, 39 lines** | **~₪813** |
 
 Read the exact total at checkout after pressing **Select all items**; the sidebar
 figure only reflects the ticked lines. Promotional prices also drift day to day
@@ -127,6 +128,13 @@ just needs its existing spare pins, no new IC either way.
 **Game Boy audio needs nothing new.** It plays out the same F1 MAX98357A amp
 and F2 speaker every other sound already uses. No BOM line, no section F
 change.
+
+**Effort dial, volume knob, speaker grille - added 2026-09-22.** The dial and
+knob reuse parts already in the cart (a second SR16 switch, a second pointer
+knob) except the potentiometer itself, which is a placeholder price like the
+display: any generic 10k linear pot is fine, none has been checked against a
+real listing yet. The speaker grille is a case feature, not a part - no BOM
+line at all.
 
 **The "Max Combo" wall.** Whole tool categories on AliExpress are dominated by
 listings that only sell through the Max Combo bundle flow, which has no quick-add
@@ -263,14 +271,15 @@ soldering station.
 | E1 | 24mm illuminated arcade button, 5V LED | 2 | 3.00 | 6.00 | APPROVE green, DENY red. |
 | E2 | 22mm mushroom head pushbutton | 1 | 4.50 | 4.50 | Momentary, not latching. |
 | E3 | Hinged safety flip cover, red | 1 | 3.50 | 3.50 | Diameter must match E2. |
-| E4 | 6-position rotary switch, 1 pole | 1 | 2.50 | 2.50 | Sessions 1-5 plus ALL. |
-| E5 | Pointer knob for E4 | 1 | 1.50 | 1.50 | |
+| E4 | 6-position rotary switch, 1 pole | 2 | 2.50 | 5.00 | One is the session selector, one is the effort dial (only 4 of its 6 positions wired: LOW/MED/HIGH/MAX). |
+| E5 | Pointer knob for E4 | 2 | 1.50 | 3.00 | |
 | E6 | EC11 rotary encoder with push | 2 | 1.20 | 2.40 | Second is a spare. |
 | E7 | Knurled knob for E6 | 1 | 1.20 | 1.20 | |
 | E8 | Mechanical key switches, Gateron | 8 | 0.75 | 6.00 | 4 for CLD/NEW/PLAN/MIC, 4 for Game Boy A/B/START/SELECT. Real switches with travel, not 6x6mm tacts, so the Game Boy buttons feel like something instead of a router reset button. |
 | E9 | Blank keycaps | 8 | 0.90 | 7.00 | Legends: CLD / NEW / PLAN / MIC / A / B / START / SELECT. |
 | E10 | SPDT mini toggle switches | 3 | 1.00 | 3.00 | MUTE, NIGHT, AUTO-ACCEPT. |
-| | | | | **37.60** | |
+| E11 | 10k linear potentiometer, panel mount, + knurled knob | 1 | 1.50 | 1.50 | Volume. Into the ADS1115's other spare channel (A2), same wiring style as the joystick's own axes. |
+| | | | | **43.10** | |
 
 ## F. Audio
 
@@ -364,17 +373,17 @@ Ordered later, once the perfboard build is proven and the layout is final.
 | B Display | 35.00 |
 | C Light and IO expansion | 29.30 |
 | D Analog meters | 17.00 |
-| E Controls | 37.60 |
+| E Controls | 43.10 |
 | F Audio | 6.00 |
 | G Back panel and wiring | 33.00 |
 | H Fasteners | 14.00 |
 | I Prototyping | 11.00 |
 | J Tools | 131.00 |
-| **AliExpress order** | **353.90** |
+| **AliExpress order** | **359.40** |
 | L Local fabrication | 66.00 |
-| **Build total** | **419.90** |
+| **Build total** | **425.40** |
 | Shipping across parcels | ~20.00 |
-| **All in** | **~440** |
+| **All in** | **~445** |
 | M PCB revision, later | 22.00 |
 
 A second deck would cost about **$200**, since the tools and the spares are

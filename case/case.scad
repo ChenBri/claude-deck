@@ -169,6 +169,23 @@ legend_w = 180;
 legend_h = 9;
 legend_depth = 1.5;
 
+// Speaker grille: cosmetic, ties the existing speaker into the retro-radio
+// look instead of hiding it. Sits in the two gaps that are otherwise dead
+// space either side of the lamp row, between the lamps and each meter.
+grille_hole_dia = 3;
+grille_cols = 3;
+grille_rows = 3;
+grille_pitch = 9;
+grille_offset_x = 61.5;   // centres the grille in the 67-110 / 190-233 gaps either side of the lamp row
+
+module speaker_grille(cx, cz) {
+    for (col = [0 : grille_cols - 1]) for (row = [0 : grille_rows - 1])
+        on_face(
+            cx + (col - (grille_cols - 1) / 2) * grille_pitch,
+            cz + (row - (grille_rows - 1) / 2) * grille_pitch
+        ) face_hole(grille_hole_dia);
+}
+
 module front_face_cuts() {
     // display: rectangular, not round - cut directly rather than via face_hole()
     translate([display_x, y2 - 1, display_z])
@@ -199,6 +216,10 @@ module front_face_cuts() {
         rotate([-90, 0, 0])
             linear_extrude(height = legend_depth + 0.01)
                 rounded_rect(legend_w, legend_h, 2);
+
+    // speaker grille, both sides
+    speaker_grille(display_x - grille_offset_x, row_z);
+    speaker_grille(display_x + grille_offset_x, row_z);
 }
 
 // ============================================================
@@ -213,11 +234,15 @@ joystick_cut = 26;
 approve_deny_dia = 19.2;
 panic_dia    = 22;
 gb_button_cut = 14;
+effort_dial_dia = 10;   // same SR16-family rotary switch as the session selector, 4 of its 6 positions wired
+volume_pot_dia  = 7;    // standalone panel-mount potentiometer, not the joystick's KY-023 pots
 
 // back row: nearer the rear face, for "set once" controls
 back_row_s = slope_length - 12;
 mech_key_x = [95, 117, 139, 161];   // 22mm pitch: a real ~7mm gap around a 15mm keycap
 toggle_x   = [190, 210, 230];       // 20mm pitch
+effort_dial_x = 256;    // new: room the 300mm-wide case has now that didn't exist at 260mm
+volume_pot_x  = 280;
 
 // front row: nearer the front edge, for hands-on controls
 front_row_s = 22;
@@ -227,6 +252,8 @@ module deck_cuts() {
     on_deck(65, back_row_s) deck_hole(encoder_dia);
     for (x = mech_key_x) on_deck(x, back_row_s) deck_square_hole(mech_key_cut);
     for (x = toggle_x)   on_deck(x, back_row_s) deck_hole(toggle_dia);
+    on_deck(effort_dial_x, back_row_s) deck_hole(effort_dial_dia);
+    on_deck(volume_pot_x, back_row_s) deck_hole(volume_pot_dia);
 
     on_deck(35, front_row_s) deck_square_hole(joystick_cut);
 
@@ -289,6 +316,8 @@ module keycap(w, height) {
 module deck_decor() {
     on_deck(30, back_row_s) translate([0,0,0]) knob(20, 12);
     on_deck(65, back_row_s) knob(14, 10);
+    on_deck(effort_dial_x, back_row_s) knob(20, 12);   // effort dial: reasoning effort, low/med/high/max
+    on_deck(volume_pot_x, back_row_s) knob(16, 10);    // volume knob
     for (x = mech_key_x) on_deck(x, back_row_s) translate([0, 0, 2]) keycap(mech_key_cut + 1, 4);
     on_deck(120, front_row_s + 10) translate([0, 0, 2]) keycap(gb_button_cut + 1, 4);
     on_deck(100, front_row_s - 10) translate([0, 0, 2]) keycap(gb_button_cut + 1, 4);

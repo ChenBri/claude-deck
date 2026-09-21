@@ -78,6 +78,13 @@ _GB_BUTTON_BINDINGS = {
     pygame.K_BACKSPACE: "START",
     pygame.K_RSHIFT: "SELECT",
 }
+_EFFORT_BINDINGS = {
+    pygame.K_F8: "LOW",
+    pygame.K_F9: "MED",
+    pygame.K_F10: "HIGH",
+    pygame.K_F11: "MAX",
+}
+VOLUME_STEP = 0.02  # per poll (~30fps), held -/= ramps the knob over ~1.7s end to end
 
 
 class SimPanel(Panel):
@@ -100,6 +107,8 @@ class SimPanel(Panel):
         self._button_leds = {name: 0.0 for name in BUTTON_LEDS}
         self._toggles = {"MUTE": False, "NIGHT": False, "AUTO_ACCEPT": False}
         self._selector = "ALL"  # matches Deck's own default so the drawn rotary isn't a lie at boot
+        self._effort = "MED"
+        self._volume = 1.0
         self._panic_latched = False
         self._closed = False
         self._encoder_mouse_down = False
@@ -149,6 +158,11 @@ class SimPanel(Panel):
         boxes[("gb_button", "B")] = pygame.Rect(gb_x, gb_y + 48, 30, 30)
         boxes[("gb_button", "SELECT")] = pygame.Rect(gb_x + 90, gb_y + 56, 18, 18)
         boxes[("gb_button", "START")] = pygame.Rect(gb_x + 135, gb_y + 56, 18, 18)
+
+        effort_y = gb_y + 80
+        for i, name in enumerate(("LOW", "MED", "HIGH", "MAX")):
+            boxes[("effort", name)] = pygame.Rect(side_x + i * 36, effort_y, 26, 26)
+        boxes[("volume", "volume")] = pygame.Rect(side_x + 170, effort_y - 5, 36, 36)
         return boxes
 
     # -- Panel interface ----------------------------------------------------
@@ -179,6 +193,8 @@ class SimPanel(Panel):
         self._draw_mech_keys()
         self._draw_joystick()
         self._draw_gb_buttons()
+        self._draw_effort()
+        self._draw_volume()
         zoomed = pygame.transform.scale(self._native, self._display.get_size())
         self._display.blit(zoomed, (0, 0))
         pygame.display.flip()
@@ -212,6 +228,15 @@ class SimPanel(Panel):
         ax = (1 if keys[pygame.K_RIGHT] else -1 if keys[pygame.K_LEFT] else 0)
         ay = (1 if keys[pygame.K_DOWN] else -1 if keys[pygame.K_UP] else 0)
         events.append(InputEvent("joystick", "axis", (ax, ay)))
+
+        # Volume knob: a real potentiometer reads continuously on hardware,
+        # so this emits every poll too, not just on change - held -/= ramps
+        # it, matching how a finger turning a real knob would.
+        if keys[pygame.K_MINUS]:
+            self._volume = max(0.0, self._volume - VOLUME_STEP)
+        elif keys[pygame.K_EQUALS]:
+            self._volume = min(1.0, self._volume + VOLUME_STEP)
+        events.append(InputEvent("volume", "level", self._volume))
         return events
 
     def close(self) -> None:
@@ -236,6 +261,9 @@ class SimPanel(Panel):
         elif key in _ROTARY_BINDINGS:
             self._selector = _ROTARY_BINDINGS[key]
             out.append(InputEvent("rotary", "selector", self._selector))
+        elif key in _EFFORT_BINDINGS:
+            self._effort = _EFFORT_BINDINGS[key]
+            out.append(InputEvent("rotary", "effort", self._effort))
         elif key == pygame.K_a:
             out.append(InputEvent("button", "APPROVE"))
         elif key == pygame.K_d:
@@ -266,6 +294,9 @@ class SimPanel(Panel):
             if kind == "rotary":
                 self._selector = name
                 return [InputEvent("rotary", "selector", name)]
+            if kind == "effort":
+                self._effort = name
+                return [InputEvent("rotary", "effort", name)]
             if kind == "encoder":
                 self._encoder_mouse_down = True
                 return [InputEvent("encoder", "push_down")]
@@ -388,3 +419,26 @@ class SimPanel(Panel):
             pygame.draw.circle(self._native, (224, 122, 42) if held else (60, 60, 64), rect.center, rect.width // 2)
             pygame.draw.circle(self._native, (140, 140, 144), rect.center, rect.width // 2, 2)
             gfx.draw_text(self._native, name, (rect.x - 4, rect.bottom + 2), size=10, color=(180, 180, 180))
+
+    def _draw_effort(self) -> None:
+        for pos in ("LOW", "MED", "HIGH", "MAX"):
+            rect = self._hitboxes[("effort", pos)]
+            active = self._effort == pos
+            color = (190, 120, 220) if active else (50, 50, 52)
+            pygame.draw.circle(self._native, color, rect.center, rect.width // 2)
+            pygame.draw.circle(self._native, (90, 90, 96), rect.center, rect.width // 2, 1)
+            gfx.draw_text(self._native, pos[:2], (rect.x + 4, rect.y + 6), size=9, color=(20, 20, 20) if active else (180, 180, 180))
+        first = self._hitboxes[("effort", "LOW")]
+        gfx.draw_text(self._native, "EFFORT", (first.x, first.bottom + 2), size=10, color=(180, 180, 180))
+
+    def _draw_volume(self) -> None:
+        rect = self._hitboxes[("volume", "volume")]
+        pygame.draw.circle(self._native, (60, 60, 64), rect.center, rect.width // 2)
+        pygame.draw.circle(self._native, (140, 140, 144), rect.center, rect.width // 2, 2)
+        angle = math.radians(210 - 240 * self._volume)
+        end = (
+            rect.centerx + rect.width * 0.35 * math.cos(angle),
+            rect.centery - rect.width * 0.35 * math.sin(angle),
+        )
+        pygame.draw.line(self._native, (224, 122, 42), rect.center, end, 2)
+        gfx.draw_text(self._native, "VOL", (rect.x + 2, rect.bottom + 2), size=10, color=(180, 180, 180))

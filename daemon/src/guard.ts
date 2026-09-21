@@ -46,6 +46,8 @@ export class Guard {
         return;
       case "denylist_toggle":
         return this.handleDenylistToggle(req);
+      case "effort_select":
+        return this.handleEffortSelect(req);
       default:
         return;
     }
@@ -86,6 +88,16 @@ export class Guard {
     this.audit.record(
       this.entry("denylist_toggle", "", null, "approved", `${category}=${Boolean(req.value)}`),
     );
+  }
+
+  private async handleEffortSelect(req: ActionRequest): Promise<void> {
+    const level = String(req.value ?? "");
+    if (!["LOW", "MED", "HIGH", "MAX"].includes(level)) {
+      this.audit.record(this.entry("effort_select", "", null, "rejected", `unknown level ${level}`));
+      return;
+    }
+    await this.actions.effortSelect(level);
+    this.audit.record(this.entry("effort_select", "", null, "approved", level));
   }
 
   private async handleMechKey(name: string): Promise<void> {

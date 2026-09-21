@@ -144,7 +144,16 @@ class App:
         return max(0.0, min(1.0, float(self.menu.settings.get("night_brightness", 0.2))))
 
     def _on_rotary(self, ev, frame_inputs: dict) -> None:
+        if ev.name == "effort":
+            if self.link is not None:
+                self.link.send_action("effort_select", value=ev.value)
+            return
         self.deck.set_selector(ev.value)
+
+    def _on_volume(self, ev, frame_inputs: dict) -> None:
+        # Purely local: the volume knob only ever affects this Pi's own
+        # audio output, no reason to round-trip it through the daemon.
+        chiptune.set_volume(ev.value)
 
     def _on_button(self, ev, frame_inputs: dict) -> None:
         # Real hardware: the physical press itself emits F13/F14 over HID, and

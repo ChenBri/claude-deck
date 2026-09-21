@@ -1,8 +1,9 @@
 """Chiptune blips, one per event, generated in code. No sample files.
 
 Output goes to the default pygame mixer device: the desktop speakers in the
-simulator, the MAX98357A I2S amp on the real panel. The MUTE toggle is
-respected here, not by the caller, so nothing needs to remember to check it.
+simulator, the MAX98357A I2S amp on the real panel. The MUTE toggle and the
+volume knob are both respected here, not by the caller, so nothing needs to
+remember to check them.
 
 Also owns the Game Boy app's audio: the mixer is stereo so PyBoy's raw
 samples need no reshaping, and channel 0 is reserved so a running game's
@@ -28,6 +29,7 @@ _EVENTS = {
 }
 
 _muted = False
+_volume = 1.0
 _ready = False
 _sounds: dict[str, pygame.mixer.Sound] = {}
 _gb_channel: pygame.mixer.Channel | None = None
@@ -80,11 +82,21 @@ def is_muted() -> bool:
     return _muted
 
 
+def set_volume(level: float) -> None:
+    """level is 0..1, straight off the volume knob (a real potentiometer
+    into a spare ADS1115 channel on real hardware, see docs/HARDWARE.md).
+    Independent of MUTE: the knob sets the level, MUTE is a hard override
+    to silent regardless of where the knob sits."""
+    global _volume
+    _volume = max(0.0, min(1.0, level))
+
+
 def play(event: str) -> None:
     if _muted or not _ready:
         return
     sound = _sounds.get(event)
     if sound is not None:
+        sound.set_volume(_volume)
         sound.play()
 
 
@@ -96,5 +108,5 @@ def queue_gb_audio(stereo_int16_bytes: bytes) -> None:
     so this doesn't need to track whether playback already started."""
     if not _ready or not stereo_int16_bytes:
         return
-    _gb_channel.set_volume(0.0 if _muted else 1.0)
+    _gb_channel.set_volume(0.0 if _muted else _volume)
     _gb_channel.queue(pygame.mixer.Sound(buffer=stereo_int16_bytes))

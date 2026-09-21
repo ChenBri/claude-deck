@@ -58,6 +58,15 @@ export const macosActions: HostActions = {
     await keystroke("p", "option down");
   },
 
+  async effortSelect(level) {
+    // Option+1..4, same "placeholder, tune it locally" status as planMode()
+    // above - there's no confirmed way yet to change Claude Code's
+    // reasoning effort from an external keystroke.
+    const digitByLevel: Record<string, string> = { LOW: "1", MED: "2", HIGH: "3", MAX: "4" };
+    const digit = digitByLevel[level];
+    if (digit) await keystroke(digit, "option down");
+  },
+
   async pushToTalk() {
     await osascript(`
       ${activateApp()}

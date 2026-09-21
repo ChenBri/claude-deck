@@ -15,9 +15,11 @@ MECH_KEYS = ("CLD", "NEW", "PLAN", "MIC")
 TOGGLES = ("MUTE", "NIGHT", "AUTO_ACCEPT")
 ROTARY_POSITIONS = ("1", "2", "3", "4", "5", "ALL")
 GB_BUTTONS = ("A", "B", "START", "SELECT")  # Game Boy app only, see ui/scenes/gameboy.py
+EFFORT_POSITIONS = ("LOW", "MED", "HIGH", "MAX")  # reasoning-effort dial, DECISIONS.md #59
 
-# Logical canvas the scene compositor draws into; the panel scales it to the
-# physical 320x240 display (2x, nearest-neighbour).
+# Logical canvas the scene compositor draws into; the panel scales it to
+# whatever the physical display's own resolution is (ui.render.OUTPUT_WIDTH/
+# HEIGHT), letterboxed rather than an exact multiple - see ui/render.py.
 CANVAS_WIDTH = 160
 CANVAS_HEIGHT = 120
 
@@ -31,7 +33,7 @@ PIXEL_COUNT = 30  # WS2812B: halo + underglow, per docs/HARDWARE.md
 
 @dataclass
 class InputEvent:
-    kind: str  # "button" | "toggle" | "rotary" | "encoder" | "joystick" | "mech_key" | "gb_button" | "panic"
+    kind: str  # "button" | "toggle" | "rotary" | "encoder" | "joystick" | "mech_key" | "gb_button" | "panic" | "volume"
     name: str
     value: object = None
 

@@ -85,8 +85,8 @@ which is what makes NIGHT mode and the blocked-state pulse possible.
 |---|---|---|
 | PCA9685 | 0x40 | lamps, legend backlight, button LEDs, meters |
 | MCP23017 #1 | 0x20 (A0-A2 low) | rotary switch, mech keys, toggles |
-| MCP23017 #2 | 0x21 (A0 high) | joystick push, Game Boy A/B/START/SELECT, spares |
-| ADS1115 | 0x48 (ADDR to GND) | joystick X on A0, Y on A1; A2/A3 spare |
+| MCP23017 #2 | 0x21 (A0 high) | joystick push, Game Boy A/B/START/SELECT, effort dial, spares |
+| ADS1115 | 0x48 (ADDR to GND) | joystick X on A0, Y on A1; volume pot on A2; A3 spare |
 
 Four devices, no address clashes, one bus. The second MCP23017 was ordered as a
 spare from Digi-Key and is now the joystick's home.
@@ -110,6 +110,21 @@ down A while wiggling the joystick needs to not feel like poking a router's
 reset button. See DECISIONS.md #55. The layout is provisional until the
 case itself is designed (decision 49: case comes after the electronics
 arrive), and may need the deck a little larger, same as the joystick did.
+
+## Effort dial
+
+A second SR16-family rotary switch (DECISIONS.md #59), same part as the
+session selector, only 4 of its positions wired: LOW/MED/HIGH/MAX, on
+MCP23017 #2's remaining spares, active low with pull-ups. Sends a labelled
+action to the daemon; see `daemon/src/actions/` for the (placeholder,
+unconfirmed) host action it triggers.
+
+## Volume knob
+
+A standalone panel-mount potentiometer, not the joystick's KY-023 pots, wired
+the same way as the joystick's own axes: swept across 3.3V, read by the
+ADS1115 at 16 bits on A2. Purely local to the Pi - scales `chiptune.py`'s
+mixer output, no daemon round-trip. Independent of the MUTE toggle.
 
 ## Game Boy audio
 

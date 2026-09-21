@@ -54,6 +54,15 @@ export const windowsActions: HostActions = {
     await sendKeys("%p"); // Alt+P, wired to whatever launches plan mode locally
   },
 
+  async effortSelect(level) {
+    // Alt+1..4, same "placeholder hotkey, tune it locally" status as
+    // planMode() above - there's no confirmed way yet to change Claude
+    // Code's reasoning effort from an external keystroke.
+    const keyByLevel: Record<string, string> = { LOW: "%1", MED: "%2", HIGH: "%3", MAX: "%4" };
+    const keys = keyByLevel[level];
+    if (keys) await sendKeys(keys);
+  },
+
   async pushToTalk() {
     // Win+H (Windows dictation). SendKeys can't hit the Windows key, so this
     // goes through a tiny keybd_event P/Invoke instead.
