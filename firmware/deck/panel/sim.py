@@ -24,6 +24,7 @@ from deck.ui import gfx
 from deck.ui.render import OUTPUT_HEIGHT, OUTPUT_WIDTH, compose_output
 
 WINDOW_W, WINDOW_H = 700, 560
+SIM_ZOOM = 1.6  # desktop-only magnification; real hardware has no equivalent, it's a fixed 320x240 panel
 
 LAMP_COLORS = {
     "READY": (70, 210, 100),
@@ -68,7 +69,13 @@ class SimPanel(Panel):
     def __init__(self) -> None:
         pygame.display.init()
         pygame.font.init()
-        self._window = pygame.display.set_mode((WINDOW_W, WINDOW_H))
+        # Everything draws onto this native-resolution surface; present()
+        # zooms the whole thing into the actual OS window so desktop text
+        # is readable without changing any real-hardware-shared layout math.
+        self._native = pygame.Surface((WINDOW_W, WINDOW_H))
+        self._display = pygame.display.set_mode(
+            (round(WINDOW_W * SIM_ZOOM), round(WINDOW_H * SIM_ZOOM))
+        )
         pygame.display.set_caption("claude-deck simulator")
         self._clock = pygame.time.Clock()
 
@@ -136,7 +143,7 @@ class SimPanel(Panel):
         self._button_leds[name] = max(0.0, min(1.0, level))
 
     def present(self, canvas: pygame.Surface) -> None:
-        self._window.fill((26, 22, 20))
+        self._native.fill((26, 22, 20))
         self._draw_bezel_and_screen(canvas)
         self._draw_lamps()
         self._draw_meters()
@@ -148,6 +155,8 @@ class SimPanel(Panel):
         self._draw_encoder()
         self._draw_mech_keys()
         self._draw_joystick()
+        zoomed = pygame.transform.scale(self._native, self._display.get_size())
+        self._display.blit(zoomed, (0, 0))
         pygame.display.flip()
         self._clock.tick(30)
 
@@ -158,7 +167,9 @@ class SimPanel(Panel):
             if e.type == pygame.QUIT:
                 self._closed = True
             elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
-                mouse_downs.append(e.pos)
+                # e.pos is in real (zoomed) window pixels; hitboxes are in
+                # native coordinates, so unzoom before hit-testing.
+                mouse_downs.append((e.pos[0] / SIM_ZOOM, e.pos[1] / SIM_ZOOM))
             elif e.type == pygame.MOUSEBUTTONUP and e.button == 1:
                 if self._encoder_mouse_down:
                     self._encoder_mouse_down = False
@@ -239,29 +250,29 @@ class SimPanel(Panel):
     def _draw_bezel_and_screen(self, canvas: pygame.Surface) -> None:
         bx, by = BEZEL_POS
         bezel = pygame.Rect(bx - 6, by - 6, OUTPUT_WIDTH + 12, OUTPUT_HEIGHT + 12)
-        pygame.draw.rect(self._window, (10, 8, 8), bezel, border_radius=8)
+        pygame.draw.rect(self._native, (10, 8, 8), bezel, border_radius=8)
         output = compose_output(canvas)
-        self._window.blit(output, BEZEL_POS)
+        self._native.blit(output, BEZEL_POS)
 
     def _draw_lamps(self) -> None:
         for name, rect in ((n, r) for (k, n), r in self._hitboxes.items() if k == "lamp"):
             level = self._lamps[name]
             base = LAMP_COLORS[name]
             color = tuple(int(c * (0.15 + 0.85 * level)) for c in base)
-            pygame.draw.circle(self._window, color, rect.center, 10)
-            pygame.draw.circle(self._window, (0, 0, 0), rect.center, 10, 1)
-            gfx.draw_text(self._window, name, (rect.x - 6, rect.bottom + 2), size=8, color=(180, 180, 180))
+            pygame.draw.circle(self._native, color, rect.center, 10)
+            pygame.draw.circle(self._native, (0, 0, 0), rect.center, 10, 1)
+            gfx.draw_text(self._native, name, (rect.x - 6, rect.bottom + 2), size=11, color=(180, 180, 180))
 
     def _draw_meters(self) -> None:
         for name, rect in ((n, r) for (k, n), r in self._hitboxes.items() if k == "meter"):
             center = rect.center
             radius = rect.width // 2
-            pygame.draw.circle(self._window, (30, 30, 32), center, radius)
-            pygame.draw.circle(self._window, (90, 90, 96), center, radius, 1)
+            pygame.draw.circle(self._native, (30, 30, 32), center, radius)
+            pygame.draw.circle(self._native, (90, 90, 96), center, radius, 1)
             angle = math.radians(210 - 240 * self._meters[name])
             end = (center[0] + radius * 0.85 * math.cos(angle), center[1] - radius * 0.85 * math.sin(angle))
-            pygame.draw.line(self._window, (240, 170, 40), center, end, 2)
-            gfx.draw_text(self._window, name, (rect.x, rect.bottom + 2), size=8, color=(180, 180, 180))
+            pygame.draw.line(self._native, (240, 170, 40), center, end, 2)
+            gfx.draw_text(self._native, name, (rect.x, rect.bottom + 2), size=11, color=(180, 180, 180))
 
     def _draw_pixels(self) -> None:
         bx, by = BEZEL_POS
@@ -272,11 +283,11 @@ class SimPanel(Panel):
         for i in range(halo_count):
             angle = 2 * math.pi * i / halo_count
             pos = (cx + rx * math.cos(angle), cy + ry * math.sin(angle))
-            pygame.draw.circle(self._window, self._pixels[i], pos, 3)
+            pygame.draw.circle(self._native, self._pixels[i], pos, 3)
         underglow_y = by + OUTPUT_HEIGHT + 10
         for i in range(underglow_count):
             x = bx + i * (OUTPUT_WIDTH // max(underglow_count - 1, 1))
-            pygame.draw.circle(self._window, self._pixels[halo_count + i], (x, underglow_y), 3)
+            pygame.draw.circle(self._native, self._pixels[halo_count + i], (x, underglow_y), 3)
 
     def _draw_buttons(self) -> None:
         for name in BUTTON_LEDS:
@@ -285,54 +296,54 @@ class SimPanel(Panel):
             ring = (70, 210, 100) if name == "APPROVE" else (220, 60, 50)
             off = (50, 50, 52)
             fill = tuple(int(o + (r - o) * level) for o, r in zip(off, ring))
-            pygame.draw.circle(self._window, fill, rect.center, rect.width // 2)
-            pygame.draw.circle(self._window, ring, rect.center, rect.width // 2, 2)
-            gfx.draw_text(self._window, name, (rect.x - 4, rect.bottom + 2), size=8, color=(180, 180, 180))
+            pygame.draw.circle(self._native, fill, rect.center, rect.width // 2)
+            pygame.draw.circle(self._native, ring, rect.center, rect.width // 2, 2)
+            gfx.draw_text(self._native, name, (rect.x - 4, rect.bottom + 2), size=11, color=(180, 180, 180))
 
     def _draw_panic(self) -> None:
         rect = self._hitboxes[("panic", "panic")]
         color = (120, 20, 16) if self._panic_latched else (200, 40, 32)
-        pygame.draw.circle(self._window, color, rect.center, rect.width // 2)
-        pygame.draw.circle(self._window, (20, 8, 8), rect.center, rect.width // 2, 2)
-        gfx.draw_text(self._window, "PANIC", (rect.x - 6, rect.bottom + 2), size=8, color=(180, 180, 180))
+        pygame.draw.circle(self._native, color, rect.center, rect.width // 2)
+        pygame.draw.circle(self._native, (20, 8, 8), rect.center, rect.width // 2, 2)
+        gfx.draw_text(self._native, "PANIC", (rect.x - 6, rect.bottom + 2), size=11, color=(180, 180, 180))
 
     def _draw_toggles(self) -> None:
         for name in ("MUTE", "NIGHT", "AUTO_ACCEPT"):
             rect = self._hitboxes[("toggle", name)]
             on = self._toggles[name]
-            pygame.draw.rect(self._window, (50, 50, 52), rect, border_radius=10)
+            pygame.draw.rect(self._native, (50, 50, 52), rect, border_radius=10)
             knob_x = rect.right - 10 if on else rect.left + 10
-            pygame.draw.circle(self._window, (70, 210, 100) if on else (120, 120, 124), (knob_x, rect.centery), 8)
-            gfx.draw_text(self._window, name, (rect.x, rect.bottom + 2), size=7, color=(180, 180, 180))
+            pygame.draw.circle(self._native, (70, 210, 100) if on else (120, 120, 124), (knob_x, rect.centery), 8)
+            gfx.draw_text(self._native, name, (rect.x, rect.bottom + 2), size=10, color=(180, 180, 180))
 
     def _draw_rotary(self) -> None:
         for pos in ("1", "2", "3", "4", "5", "ALL"):
             rect = self._hitboxes[("rotary", pos)]
             active = self._selector == pos
             color = (240, 170, 40) if active else (50, 50, 52)
-            pygame.draw.circle(self._window, color, rect.center, rect.width // 2)
-            pygame.draw.circle(self._window, (90, 90, 96), rect.center, rect.width // 2, 1)
-            gfx.draw_text(self._window, pos, (rect.x + 2, rect.y + 6), size=8, color=(20, 20, 20) if active else (180, 180, 180))
+            pygame.draw.circle(self._native, color, rect.center, rect.width // 2)
+            pygame.draw.circle(self._native, (90, 90, 96), rect.center, rect.width // 2, 1)
+            gfx.draw_text(self._native, pos, (rect.x + 2, rect.y + 6), size=11, color=(20, 20, 20) if active else (180, 180, 180))
 
     def _draw_encoder(self) -> None:
         rect = self._hitboxes[("encoder", "encoder")]
-        pygame.draw.circle(self._window, (60, 60, 64), rect.center, rect.width // 2)
-        pygame.draw.circle(self._window, (140, 140, 144), rect.center, rect.width // 2, 2)
-        gfx.draw_text(self._window, "ENC", (rect.x + 8, rect.bottom + 2), size=8, color=(180, 180, 180))
+        pygame.draw.circle(self._native, (60, 60, 64), rect.center, rect.width // 2)
+        pygame.draw.circle(self._native, (140, 140, 144), rect.center, rect.width // 2, 2)
+        gfx.draw_text(self._native, "ENC", (rect.x + 8, rect.bottom + 2), size=11, color=(180, 180, 180))
 
     def _draw_mech_keys(self) -> None:
         for name in MECH_KEYS:
             rect = self._hitboxes[("mech_key", name)]
-            pygame.draw.rect(self._window, (60, 60, 64), rect, border_radius=4)
-            pygame.draw.rect(self._window, (140, 140, 144), rect, 1, border_radius=4)
-            gfx.draw_text(self._window, name, (rect.x - 2, rect.bottom + 2), size=7, color=(180, 180, 180))
+            pygame.draw.rect(self._native, (60, 60, 64), rect, border_radius=4)
+            pygame.draw.rect(self._native, (140, 140, 144), rect, 1, border_radius=4)
+            gfx.draw_text(self._native, name, (rect.x - 2, rect.bottom + 2), size=10, color=(180, 180, 180))
 
     def _draw_joystick(self) -> None:
         rect = self._hitboxes[("joystick", "joystick")]
-        pygame.draw.rect(self._window, (40, 40, 44), rect, border_radius=6)
+        pygame.draw.rect(self._native, (40, 40, 44), rect, border_radius=6)
         keys = pygame.key.get_pressed()
         ax = (1 if keys[pygame.K_RIGHT] else -1 if keys[pygame.K_LEFT] else 0)
         ay = (1 if keys[pygame.K_DOWN] else -1 if keys[pygame.K_UP] else 0)
         knob = (rect.centerx + ax * 18, rect.centery + ay * 18)
-        pygame.draw.circle(self._window, (224, 122, 42), knob, 10)
-        gfx.draw_text(self._window, "JOY", (rect.x + 4, rect.bottom + 2), size=8, color=(180, 180, 180))
+        pygame.draw.circle(self._native, (224, 122, 42), knob, 10)
+        gfx.draw_text(self._native, "JOY", (rect.x + 4, rect.bottom + 2), size=11, color=(180, 180, 180))

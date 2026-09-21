@@ -61,25 +61,40 @@ class DaemonLink:
         self.registry = registry
         self.on_link_alive_change = on_link_alive_change
         self.on_idle_info = on_idle_info or (lambda info: None)
+        self.listen_host = listen_host
+        self.listen_port = listen_port
         self.daemon_host = daemon_host
         self.daemon_port = daemon_port
         self.heartbeat_timeout = heartbeat_timeout
 
         self._last_seen = 0.0
         self._alive = False
-        self._server = ThreadingHTTPServer((listen_host, listen_port), _Handler)
-        self._server.link = self  # type: ignore[attr-defined]
-        self._server_thread = threading.Thread(target=self._server.serve_forever, daemon=True)
+        self._server: ThreadingHTTPServer | None = None
         self._monitor_thread = threading.Thread(target=self._monitor, daemon=True)
         self._stop = threading.Event()
 
     def start(self) -> None:
-        self._server_thread.start()
+        try:
+            self._server = ThreadingHTTPServer((self.listen_host, self.listen_port), _Handler)
+        except OSError as exc:
+            print(
+                f"link.py: could not bind {self.listen_host}:{self.listen_port} ({exc.strerror}). "
+                "Expected until the USB gadget link is configured, or the env vars are set for "
+                "local dev - see README.md. The deck will show OFFLINE until this binds."
+            )
+            return
+        self._server.link = self  # type: ignore[attr-defined]
+        threading.Thread(target=self._server.serve_forever, daemon=True).start()
         self._monitor_thread.start()
+        print(
+            f"link.py: listening on {self.listen_host}:{self.listen_port}, "
+            f"sending actions to {self.daemon_host}:{self.daemon_port}"
+        )
 
     def stop(self) -> None:
         self._stop.set()
-        self._server.shutdown()
+        if self._server is not None:
+            self._server.shutdown()
 
     def _on_request(self, path: str, body: bytes) -> None:
         self._last_seen = time.monotonic()

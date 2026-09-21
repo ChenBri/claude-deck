@@ -65,6 +65,12 @@ export function startActionListener(guard: Guard): http.Server {
         "Expected until the USB gadget link is configured; button actions from the Pi won't arrive.",
     );
   });
+  server.on("listening", () => {
+    console.log(
+      `link/transport: action listener up on ${LISTEN_HOST}:${LISTEN_PORT}, ` +
+        `sending events to the Pi at ${PI_HOST}:${PI_PORT}`,
+    );
+  });
   server.listen(LISTEN_PORT, LISTEN_HOST);
   return server;
 }
