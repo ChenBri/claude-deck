@@ -1,0 +1,18 @@
+# daemon (TypeScript)
+daemon/node_modules/
+daemon/dist/
+daemon/audit.sqlite
+
+# firmware (Python)
+firmware/__pycache__/
+firmware/**/__pycache__/
+firmware/.pytest_cache/
+firmware/var/
+firmware/sessions/
+
+# recorded hook corpora (may contain project-specific paths/content)
+sessions/
+
+# editor/OS cruft
+.vscode/
+.DS_Store

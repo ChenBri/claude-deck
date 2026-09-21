@@ -1,0 +1,31 @@
+{
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [{ "type": "command", "command": "node /absolute/path/to/claude-deck/hooks/emit.js SessionStart" }] }
+    ],
+    "UserPromptSubmit": [
+      { "hooks": [{ "type": "command", "command": "node /absolute/path/to/claude-deck/hooks/emit.js UserPromptSubmit" }] }
+    ],
+    "PreToolUse": [
+      { "matcher": "*", "hooks": [{ "type": "command", "command": "node /absolute/path/to/claude-deck/hooks/emit.js PreToolUse" }] }
+    ],
+    "PostToolUse": [
+      { "matcher": "*", "hooks": [{ "type": "command", "command": "node /absolute/path/to/claude-deck/hooks/emit.js PostToolUse" }] }
+    ],
+    "Notification": [
+      { "hooks": [{ "type": "command", "command": "node /absolute/path/to/claude-deck/hooks/emit.js Notification" }] }
+    ],
+    "PreCompact": [
+      { "hooks": [{ "type": "command", "command": "node /absolute/path/to/claude-deck/hooks/emit.js PreCompact" }] }
+    ],
+    "Stop": [
+      { "hooks": [{ "type": "command", "command": "node /absolute/path/to/claude-deck/hooks/emit.js Stop" }] }
+    ],
+    "SubagentStop": [
+      { "hooks": [{ "type": "command", "command": "node /absolute/path/to/claude-deck/hooks/emit.js SubagentStop" }] }
+    ],
+    "SessionEnd": [
+      { "hooks": [{ "type": "command", "command": "node /absolute/path/to/claude-deck/hooks/emit.js SessionEnd" }] }
+    ]
+  }
+}
