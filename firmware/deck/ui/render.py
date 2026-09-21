@@ -88,12 +88,18 @@ def compose_output(canvas: pygame.Surface) -> pygame.Surface:
     """Scale the logical canvas 2x nearest-neighbour and lay a light CRT pass
     (scanlines + a soft additive bloom) on top. Shared by SimPanel and
     RealPanel so the look is identical on the desktop and on the real display.
+
+    Tuned deliberately weak: at this resolution (160x120 logical, small UI
+    text like the ticker and settings menu), a wide/strong bloom radius
+    smears glyph strokes into an unreadable glow well before it looks like
+    a CRT. "Slight bloom" per docs/DECISIONS.md #28 means legible-but-warm,
+    not blurred.
     """
     scaled = pygame.transform.scale(canvas, (OUTPUT_WIDTH, OUTPUT_HEIGHT))
 
-    bloom_small = pygame.transform.smoothscale(canvas, (CANVAS_WIDTH // 3, CANVAS_HEIGHT // 3))
+    bloom_small = pygame.transform.smoothscale(canvas, (CANVAS_WIDTH // 2, CANVAS_HEIGHT // 2))
     bloom = pygame.transform.smoothscale(bloom_small, (OUTPUT_WIDTH, OUTPUT_HEIGHT))
-    bloom.set_alpha(40)
+    bloom.set_alpha(22)
     scaled.blit(bloom, (0, 0), special_flags=pygame.BLEND_RGB_ADD)
 
     scanlines = _scanline_overlay()
@@ -109,6 +115,6 @@ def _scanline_overlay() -> pygame.Surface:
     if _scanline_cache is None:
         overlay = pygame.Surface((OUTPUT_WIDTH, OUTPUT_HEIGHT), pygame.SRCALPHA)
         for y in range(0, OUTPUT_HEIGHT, 2):
-            pygame.draw.line(overlay, (0, 0, 0, 60), (0, y), (OUTPUT_WIDTH, y))
+            pygame.draw.line(overlay, (0, 0, 0, 32), (0, y), (OUTPUT_WIDTH, y))
         _scanline_cache = overlay
     return _scanline_cache
