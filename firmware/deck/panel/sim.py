@@ -75,7 +75,7 @@ class SimPanel(Panel):
         self._lamps = {name: 0.0 for name in LAMPS}
         self._meters = {name: 0.0 for name in METERS}
         self._pixels = [(0, 0, 0)] * PIXEL_COUNT
-        self._button_leds = {name: False for name in BUTTON_LEDS}
+        self._button_leds = {name: 0.0 for name in BUTTON_LEDS}
         self._toggles = {"MUTE": False, "NIGHT": False, "AUTO_ACCEPT": False}
         self._selector = "ALL"  # matches Deck's own default so the drawn rotary isn't a lie at boot
         self._panic_latched = False
@@ -132,8 +132,8 @@ class SimPanel(Panel):
     def set_pixels(self, colors) -> None:
         self._pixels = list(colors)
 
-    def set_button_led(self, name: str, on: bool) -> None:
-        self._button_leds[name] = on
+    def set_button_led(self, name: str, level: float) -> None:
+        self._button_leds[name] = max(0.0, min(1.0, level))
 
     def present(self, canvas: pygame.Surface) -> None:
         self._window.fill((26, 22, 20))
@@ -281,9 +281,10 @@ class SimPanel(Panel):
     def _draw_buttons(self) -> None:
         for name in BUTTON_LEDS:
             rect = self._hitboxes[("button", name)]
-            lit = self._button_leds[name]
+            level = self._button_leds[name]
             ring = (70, 210, 100) if name == "APPROVE" else (220, 60, 50)
-            fill = ring if lit else (50, 50, 52)
+            off = (50, 50, 52)
+            fill = tuple(int(o + (r - o) * level) for o, r in zip(off, ring))
             pygame.draw.circle(self._window, fill, rect.center, rect.width // 2)
             pygame.draw.circle(self._window, ring, rect.center, rect.width // 2, 2)
             gfx.draw_text(self._window, name, (rect.x - 4, rect.bottom + 2), size=8, color=(180, 180, 180))

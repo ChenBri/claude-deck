@@ -43,8 +43,9 @@ class Panel(ABC):
         """len(colors) == PIXEL_COUNT, each an (r, g, b) 0..255 tuple."""
 
     @abstractmethod
-    def set_button_led(self, name: str, on: bool) -> None:
-        """name in BUTTON_LEDS. Live only while a prompt is pending."""
+    def set_button_led(self, name: str, level: float) -> None:
+        """name in BUTTON_LEDS, level 0..1. 0 means dead: live only while a
+        prompt is pending; NIGHT mode scales the "on" level down from there."""
 
     @abstractmethod
     def present(self, canvas) -> None:

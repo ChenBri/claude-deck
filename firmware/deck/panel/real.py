@@ -35,7 +35,7 @@ class RealPanel(Panel):
     def set_pixels(self, colors) -> None:
         raise NotImplementedError
 
-    def set_button_led(self, name: str, on: bool) -> None:
+    def set_button_led(self, name: str, level: float) -> None:
         raise NotImplementedError
 
     def present(self, canvas) -> None:

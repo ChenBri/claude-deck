@@ -45,6 +45,7 @@ class App:
         self.canvas = new_canvas()
         self.idle_info: dict = {}
         self.active_game: str | None = None
+        self.night_on = False
         self._encoder_down_at: float | None = None
         self._boot_started = time.monotonic()
         self._last_prune = time.monotonic()
@@ -94,9 +95,19 @@ class App:
     def _on_toggle(self, ev, frame_inputs: dict) -> None:
         if ev.name == "MUTE":
             chiptune.set_muted(ev.value)
+        elif ev.name == "NIGHT":
+            self.night_on = bool(ev.value)
         elif ev.name == "AUTO_ACCEPT" and self.link is not None:
             self.link.send_action("toggle", name="AUTO_ACCEPT", value=ev.value)
-        # NIGHT is read straight off the panel's toggle state when dimming lamps/pixels.
+
+    def _brightness(self) -> float:
+        """Dim factor for the PCA9685-driven indicators (lamps, button LEDs)
+        under NIGHT mode. Never applied to set_meter(): those channels are
+        the needle position itself, not a backlight, and dimming them would
+        falsify the reading."""
+        if not self.night_on:
+            return 1.0
+        return max(0.0, min(1.0, float(self.menu.settings.get("night_brightness", 0.2))))
 
     def _on_rotary(self, ev, frame_inputs: dict) -> None:
         self.deck.set_selector(ev.value)
@@ -201,14 +212,15 @@ class App:
     def _update_indicators(self, now: float) -> None:
         state = self.deck.current_state(now)
         lamp_name = LAMP.get(state)
+        brightness = self._brightness()
         for name in ("READY", "WORKING", "BLOCKED", "DONE", "LINK"):
             if name == "LINK":
-                self.panel.set_lamp(name, 1.0 if self.deck.link_alive else 0.0)
+                self.panel.set_lamp(name, brightness if self.deck.link_alive else 0.0)
             else:
-                self.panel.set_lamp(name, 1.0 if lamp_name == name else 0.0)
+                self.panel.set_lamp(name, brightness if lamp_name == name else 0.0)
 
-        self.panel.set_button_led("APPROVE", self.deck.approve_button_live(now))
-        self.panel.set_button_led("DENY", state == State.BLOCKED_PERMISSION)
+        self.panel.set_button_led("APPROVE", brightness if self.deck.approve_button_live(now) else 0.0)
+        self.panel.set_button_led("DENY", brightness if state == State.BLOCKED_PERMISSION else 0.0)
 
 
 def main() -> None:
