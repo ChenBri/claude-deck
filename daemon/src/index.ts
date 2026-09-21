@@ -6,7 +6,7 @@ import { loadHostActions } from "./actions";
 import { DenylistSettingsStore } from "./denylist";
 import { startHookIngest } from "./http";
 import { registerHotkeys } from "./link/hotkeys";
-import { sendIdleInfo, startActionListener } from "./link/transport";
+import { sendHeartbeat, sendIdleInfo, startActionListener } from "./link/transport";
 import { Guard } from "./guard";
 import { SessionRegistry } from "./sessions";
 import { DailyStats } from "./stats";
@@ -15,6 +15,9 @@ import { getGitStatus } from "./enrich/git";
 import { getWeather } from "./enrich/weather";
 
 const IDLE_INFO_INTERVAL_MS = 20_000;
+// Must stay well under firmware/deck/link.py's HEARTBEAT_TIMEOUT (5s), or
+// the Pi flags OFFLINE in the gap between heartbeats even with a live daemon.
+const HEARTBEAT_INTERVAL_MS = 2_000;
 const SESSION_PRUNE_INTERVAL_MS = 60_000;
 const SESSION_MAX_AGE_MS = 6 * 60 * 60 * 1000;
 
@@ -44,6 +47,9 @@ async function main(): Promise<void> {
   });
 
   setInterval(() => sessions.prune(SESSION_MAX_AGE_MS), SESSION_PRUNE_INTERVAL_MS);
+
+  sendHeartbeat(); // don't wait a full interval for the link to come up
+  setInterval(sendHeartbeat, HEARTBEAT_INTERVAL_MS);
 
   const userName = process.env.DECK_USER_NAME ?? process.env.USER ?? process.env.USERNAME ?? "";
   setInterval(async () => {

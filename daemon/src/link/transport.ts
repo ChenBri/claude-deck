@@ -35,6 +35,14 @@ export function sendIdleInfo(info: Record<string, unknown>): void {
   postJson(PI_HOST, PI_PORT, "/idle_info", info);
 }
 
+/** A bare keepalive, sent on its own schedule (see index.ts) independent of
+ * hook events or the idle-info refresh - those are irregular/slow and must
+ * not double as the link's liveness signal, or the Pi flags OFFLINE in the
+ * gaps between them even though the daemon never went anywhere. */
+export function sendHeartbeat(): void {
+  postJson(PI_HOST, PI_PORT, "/heartbeat", {});
+}
+
 function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve) => {
     const chunks: Buffer[] = [];
