@@ -67,7 +67,7 @@ The collisions and how they resolve:
 | 7 | APPROVE button LED |
 | 8 | DENY button LED |
 | 9 | CONTEXT meter, through RC filter |
-| 10 | ACTIVITY meter, through RC filter |
+| 10 | FIVE_HOUR meter, through RC filter |
 | 11 | Meter face backlight |
 | 12-15 | spare |
 

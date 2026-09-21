@@ -85,6 +85,7 @@ class SessionState:
     did_work: bool = False
     last_tool: str = ""
     last_target: str = ""
+    context_pct: float = 0.0  # of the model's context window; see daemon/src/enrich/usage.ts
     entered_at: float = field(default_factory=time.monotonic)
     last_event_at: float = field(default_factory=time.monotonic)
     _recent_tool_calls: list[float] = field(default_factory=list)
@@ -96,6 +97,8 @@ class SessionState:
     def handle(self, event: str, now: float | None = None, **meta) -> None:
         now = time.monotonic() if now is None else now
         self.last_event_at = now
+        if "context_pct" in meta:
+            self.context_pct = float(meta["context_pct"])
 
         if event == "SessionStart":
             self.did_work = False

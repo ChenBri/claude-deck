@@ -295,6 +295,10 @@ class App:
         self.panel.set_button_led("APPROVE", brightness if self.deck.approve_button_live(now) else 0.0)
         self.panel.set_button_led("DENY", brightness if state == State.BLOCKED_PERMISSION else 0.0)
 
+        session = self.deck.active_session()
+        self.panel.set_meter("CONTEXT", session.context_pct if session else 0.0)
+        self.panel.set_meter("FIVE_HOUR", float(self.idle_info.get("five_hour_pct", 0.0)))
+
         self.panel.set_pixels(pixels_for_state(state, now, brightness, PIXEL_COUNT))
 
 

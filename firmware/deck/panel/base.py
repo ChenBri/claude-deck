@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 LAMPS = ("READY", "WORKING", "BLOCKED", "DONE", "LINK")
-METERS = ("CONTEXT", "ACTIVITY")
+METERS = ("CONTEXT", "FIVE_HOUR")
 BUTTON_LEDS = ("APPROVE", "DENY")
 MECH_KEYS = ("CLD", "NEW", "PLAN", "MIC")
 TOGGLES = ("MUTE", "NIGHT", "AUTO_ACCEPT")

@@ -121,6 +121,18 @@ There's also `DECK_TERMINAL_TITLE_HINT` / `DECK_TERMINAL_APP_HINT` /
 `DECK_DICTATION_SHORTCUT` for tuning the Windows/macOS action backends to
 your actual terminal - see `daemon/src/actions/windows.ts` and `macos.ts`.
 
+**The FIVE_HOUR meter needs calibrating, it isn't a real quota number.**
+`DECK_FIVE_HOUR_TOKEN_BUDGET` (default 25,000,000) is what a full needle
+means: total weighted token usage across every Claude Code project in the
+trailing 5 hours, read straight from `~/.claude/projects/**/*.jsonl`
+(`DECK_CLAUDE_PROJECTS_DIR` if that's not where yours live). Anthropic
+doesn't publish a real 5-hour quota number or expose your actual remaining
+one anywhere a local process can read, so this is an estimate you tune by
+watching a few real windows against your own plan, not a fact. The CONTEXT
+meter needs no calibration: it's exact, read straight off the current
+session's own token usage against its model's context window. See
+`daemon/src/enrich/usage.ts` and DECISIONS.md #58.
+
 Set any of these in your shell (or a local launch script), not in a
 committed file. `.gitignore` already excludes `.env`, `.env.*`, and
 `*.local.env`, `firmware/var/` (the settings the encoder menu writes),

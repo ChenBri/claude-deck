@@ -13,6 +13,7 @@ import { DailyStats } from "./stats";
 import { AuditLog } from "./store";
 import { getGitStatus } from "./enrich/git";
 import { getWeather } from "./enrich/weather";
+import { fiveHourUsagePct } from "./enrich/usage";
 
 const IDLE_INFO_INTERVAL_MS = 20_000;
 // Must stay well under firmware/deck/link.py's HEARTBEAT_TIMEOUT (5s), or
@@ -61,6 +62,7 @@ async function main(): Promise<void> {
       weather: await getWeather(),
       git: await getGitStatus(lastCwd),
       totals: stats.summary(),
+      five_hour_pct: fiveHourUsagePct(),
     });
   }, IDLE_INFO_INTERVAL_MS);
 

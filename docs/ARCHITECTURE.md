@@ -46,7 +46,7 @@ daemon/src/
   actions/
     windows.ts      focus, send keys, launch
     macos.ts        same, via osascript
-  enrich/           weather, git status
+  enrich/           weather, git status, Claude Code's own local usage logs (the two meters)
   store.ts          SQLite audit log
 ```
 

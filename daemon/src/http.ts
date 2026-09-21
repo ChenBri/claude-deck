@@ -5,6 +5,7 @@
 import http, { IncomingMessage, ServerResponse } from "node:http";
 import { classify } from "./classify";
 import { DenylistSettingsStore } from "./denylist";
+import { contextPct } from "./enrich/usage";
 import { scrubPayload } from "./scrub";
 import { SessionRegistry } from "./sessions";
 import { DailyStats } from "./stats";
@@ -59,6 +60,13 @@ export function startHookIngest(deps: HookIngestDeps): http.Server {
     const scrubbed = scrubPayload(rawPayload) as Record<string, unknown>;
     const classified = classify(hookName, scrubbed, deps.denylistStore.get());
     if (!classified) return;
+
+    // Not part of classify()'s job (that's a pure mapping, no I/O): reads
+    // the session's own transcript for the CONTEXT meter, see enrich/usage.ts.
+    if (typeof cwd === "string") {
+      const pct = contextPct(classified.sessionId, cwd);
+      if (pct !== null) classified.meta.context_pct = pct;
+    }
 
     deps.sessions.applyClassified(classified);
     if (classified.event === "PreToolUse") deps.stats.recordToolCall();
