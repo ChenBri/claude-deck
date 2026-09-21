@@ -189,6 +189,7 @@ class App:
                     session=session,
                     tool_name=session.last_tool if session else "",
                     tool_target=session.last_target if session else "",
+                    tool_rate=session.tool_call_rate(now) if session else 0.0,
                     idle_info=self.idle_info,
                     inputs=frame_inputs,
                 )

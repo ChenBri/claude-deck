@@ -145,6 +145,30 @@ def test_done_auto_clears_to_ready():
     assert s.state is State.READY
 
 
+def test_tool_call_rate_counts_calls_in_window():
+    s = SessionState("a")
+    s.handle("SessionStart", now=0)
+    for t in (0.5, 1.0, 1.5, 2.0):
+        s.handle("PreToolUse", now=t, tool="Bash")
+    # 4 calls over a 10s window -> 0.4/s
+    assert s.tool_call_rate(now=2.0, window_seconds=10.0) == 0.4
+
+
+def test_tool_call_rate_prunes_calls_outside_window():
+    s = SessionState("a")
+    s.handle("SessionStart", now=0)
+    s.handle("PreToolUse", now=0, tool="Bash")
+    s.handle("PreToolUse", now=1, tool="Bash")
+    # 20s later, both calls have aged out of a 10s window
+    assert s.tool_call_rate(now=21.0, window_seconds=10.0) == 0.0
+
+
+def test_tool_call_rate_zero_before_any_tool_use():
+    s = SessionState("a")
+    s.handle("SessionStart", now=0)
+    assert s.tool_call_rate(now=0) == 0.0
+
+
 def test_precompact_enters_compacting():
     s = SessionState("a")
     s.handle("SessionStart", now=0)

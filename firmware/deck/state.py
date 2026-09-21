@@ -10,6 +10,7 @@ DEFAULT_IDLE_AFTER_SECONDS = 300.0
 APPROVAL_EXPIRY_SECONDS = 90.0
 SLOT_COUNT = 5  # rotary switch positions 1-5; position 6 is ALL, not a slot
 DEFAULT_SLOT_FREE_AFTER_SECONDS = 1800.0  # how long a finished session holds its slot
+TOOL_RATE_WINDOW_SECONDS = 10.0  # trailing window for the WORKING scene's animation speed
 
 
 class State(Enum):
@@ -86,6 +87,7 @@ class SessionState:
     last_target: str = ""
     entered_at: float = field(default_factory=time.monotonic)
     last_event_at: float = field(default_factory=time.monotonic)
+    _recent_tool_calls: list[float] = field(default_factory=list)
 
     def _enter(self, state: State, now: float) -> None:
         self.state = state
@@ -110,6 +112,7 @@ class SessionState:
             self.did_work = True
             self.last_tool = meta.get("tool", "")
             self.last_target = meta.get("target", "")
+            self._recent_tool_calls.append(now)
             if meta.get("tool") == "Task":
                 self.subagent_count += 1
                 self._enter(State.SUBAGENTS, now)
@@ -173,6 +176,16 @@ class SessionState:
             and self.pending is not None
             and self.pending.is_live(now)
         )
+
+    def tool_call_rate(self, now: float | None = None, window_seconds: float = TOOL_RATE_WINDOW_SECONDS) -> float:
+        """Tool calls per second over the trailing window; drives how fast
+        the WORKING scene's glyphs fly and the mascot types."""
+        now = time.monotonic() if now is None else now
+        cutoff = now - window_seconds
+        self._recent_tool_calls = [t for t in self._recent_tool_calls if t >= cutoff]
+        if not self._recent_tool_calls:
+            return 0.0
+        return len(self._recent_tool_calls) / window_seconds
 
 
 class SessionRegistry:
