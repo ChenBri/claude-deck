@@ -122,10 +122,12 @@ command into the terminal - a real, confirmed mechanism (see
 
 ## Volume knob
 
-A standalone panel-mount potentiometer, not the joystick's KY-023 pots, wired
-the same way as the joystick's own axes: swept across 3.3V, read by the
-ADS1115 at 16 bits on A2. Purely local to the Pi - scales `chiptune.py`'s
-mixer output, no daemon round-trip. Independent of the MUTE toggle.
+A standalone panel-mount potentiometer (RV24YN20S, 10K ohm, docs/BOM.md E11),
+not the joystick's KY-023 pots, wired the same way as the joystick's own
+axes: swept across 3.3V, read by the ADS1115 at 16 bits on A2. Real 24mm
+panel-mount part, nut-and-bushing mounted like the rotary switches, not a
+PCB-mount type. Purely local to the Pi - scales `chiptune.py`'s mixer
+output, no daemon round-trip. Independent of the MUTE toggle.
 
 ## Game Boy audio
 

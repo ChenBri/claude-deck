@@ -46,7 +46,7 @@ Twenty-one lines, verified against the cart on 2026-09-20.
 | XB2-542 mushroom | **1NO1NC**, 22mm, latching e-stop | 1 | ₪14.90 |
 | SR16 rotary band switch | **1 Pole 6 position**, 15mm shaft | 2 | ₪10.62 |
 | Aluminium pointer knob | 20x15mm, 6mm knurled shaft, black | 4 | ₪5.78 |
-| 10k linear potentiometer | panel mount, with knurled knob | 1 | ₪3.50 |
+| RV24YN20S potentiometer | **10K ohm**, 1 set/3 units, with A03 knob + dial plate | 1 | ₪4.22 |
 | MTS-102 toggle switch | SPDT ON/ON, 10-pack | 1 | ₪9.06 |
 | Gateron G Pro 3.0 switch | **G Brown 3.0** tactile, pre-lubed, 10-pack | 1 | ₪10.53 |
 | DSA blank keycaps | **orange**, 1U, PBT, 20-pack | 1 | ₪15.10 |
@@ -65,7 +65,7 @@ Twenty-one lines, verified against the cart on 2026-09-20.
 | KCD1 rocker switch | round 20mm, **3-pin red illuminated** (LED is 12V, see note) | 1 | ₪3.63 |
 | KY-023 joystick | dual-axis analog thumbstick with push | 1 | ₪5.18 |
 | ADS1115 ADC | 16-bit, 4 channel, I2C, reads the joystick | 1 | ₪4.83 |
-| | | **Parts subtotal** | **₪317.96** |
+| | | **Parts subtotal** | **₪318.68** |
 | FNIRSI HS-02A soldering kit | 100-450°C, **6 tips + 100W PD adapter + stand + case**, EU plug | 1 | ₪241.79 |
 | MECHANIC HX-T100 solder | **63% tin leaded**, rosin core, **0.6mm**, 55g | 1 | ₪16.84 |
 | ANENG 620A multimeter | 6000 counts, true RMS, capacitance, temp, AC/DC current | 1 | ₪62.21 |
@@ -77,7 +77,7 @@ Twenty-one lines, verified against the cart on 2026-09-20.
 | Silicone soldering mat | anti-static, magnetic, 932°F | 1 | ₪11.73 |
 | Hot glue gun | 20W, **EU plug**, 10 sticks | 1 | ₪6.68 |
 | | | **Tools subtotal** | **₪495.06** |
-| | | **Cart total, 39 lines** | **~₪813** |
+| | | **Cart total, 39 lines** | **~₪814** |
 
 Read the exact total at checkout after pressing **Select all items**; the sidebar
 figure only reflects the ticked lines. Promotional prices also drift day to day
@@ -132,12 +132,13 @@ just needs its existing spare pins, no new IC either way.
 and F2 speaker every other sound already uses. No BOM line, no section F
 change.
 
-**Effort dial, volume knob, speaker grille - added 2026-09-22.** The dial and
-knob reuse parts already in the cart (a second SR16 switch, a second pointer
-knob) except the potentiometer itself, which is a placeholder price like the
-display: any generic 10k linear pot is fine, none has been checked against a
-real listing yet. The speaker grille is a case feature, not a part - no BOM
-line at all.
+**Effort dial, volume knob, speaker grille - added 2026-09-22.** The dial
+reuses parts already in the cart (a second SR16 switch, a second pointer
+knob). The volume pot was a placeholder price at first; sourced properly the
+same day against a real listing (RV24YN20S, 10,000+ sold, 4.9/458 reviews) -
+₪4.22 for a set of 3 with the knob and dial plate already included, cheaper
+than the placeholder guessed and with 2 spares for free. The speaker grille
+is a case feature, not a part - no BOM line at all.
 
 **The "Max Combo" wall.** Whole tool categories on AliExpress are dominated by
 listings that only sell through the Max Combo bundle flow, which has no quick-add
@@ -282,8 +283,8 @@ soldering station.
 | E8 | Mechanical key switches, Gateron | 8 | 0.75 | 6.00 | 4 for CLD/NEW/PLAN/MIC, 4 for Game Boy A/B/START/SELECT. Real switches with travel, not 6x6mm tacts, so the Game Boy buttons feel like something instead of a router reset button. |
 | E9 | Blank keycaps | 8 | 0.90 | 7.00 | Legends: CLD / NEW / PLAN / MIC / A / B / START / SELECT. |
 | E10 | SPDT mini toggle switches | 3 | 1.00 | 3.00 | MUTE, NIGHT, AUTO-ACCEPT. |
-| E11 | 10k linear potentiometer, panel mount, + knurled knob | 1 | 1.50 | 1.50 | Volume. Into the ADS1115's other spare channel (A2), same wiring style as the joystick's own axes. |
-| | | | | **43.10** | |
+| E11 | RV24YN20S potentiometer, 10K ohm, with A03 knob + dial | 1 | 1.20 | 1.20 | Volume. Into the ADS1115's other spare channel (A2), same wiring style as the joystick's own axes. Real 24mm panel-mount part (RV24 series), same nut-and-bushing mounting as the rotary switches, not a PCB-mount type - comes 3 to a set, 2 spares free. |
+| | | | | **42.80** | |
 
 ## F. Audio
 
@@ -377,15 +378,15 @@ Ordered later, once the perfboard build is proven and the layout is final.
 | B Display | 40.00 |
 | C Light and IO expansion | 29.30 |
 | D Analog meters | 17.00 |
-| E Controls | 43.10 |
+| E Controls | 42.80 |
 | F Audio | 6.00 |
 | G Back panel and wiring | 33.00 |
 | H Fasteners | 14.00 |
 | I Prototyping | 11.00 |
 | J Tools | 131.00 |
-| **AliExpress order** | **366.90** |
+| **AliExpress order** | **366.60** |
 | L Local fabrication | 66.00 |
-| **Build total** | **432.90** |
+| **Build total** | **432.60** |
 | Shipping across parcels | ~20.00 |
 | **All in** | **~453** |
 | M PCB revision, later | 22.00 |
