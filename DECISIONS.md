@@ -95,6 +95,7 @@ Full reasoning in [docs/SAFETY.md](docs/SAFETY.md).
 | 54 | Game Boy app | PyBoy (GB/GBC) headless core, added 2026-09-21. Fourth home-screen app alongside Settings/Snake/Tetris. Draws into its own 160x144 canvas (native GB resolution), letterboxed onto the panel instead of the 160x120 canvas every other scene shares. |
 | 55 | Game Boy buttons | A, B, START, SELECT: four small tactile buttons wired to the second MCP23017's remaining spares, no new IC. The d-pad reuses the existing joystick rather than adding a fifth control. |
 | 56 | ROM handling | Never shipped in this public repo: each person drops their own legally-dumped .gb/.gbc files into firmware/roms/, which is gitignored except for its own README. Planned, not yet built: a fifth USB gadget function (mass storage, backed by a FAT image file on the writable partition, toggled from the Settings app) so ROMs can be dragged onto the deck as a drive from the connected PC instead of swapping the SD card. No hardware exists yet to build this against; see docs/HARDWARE.md. |
+| 57 | Game Boy audio | No new hardware: PyBoy's emulated audio is queued onto the existing `chiptune` mixer (now stereo) through a channel it reserves so a running game's stream and the deck's own event blips never steal each other's channel. Same MAX98357A amp and speaker, same MUTE toggle. |
 
 ## Hardware constraints resolved
 

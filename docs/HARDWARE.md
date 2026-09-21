@@ -101,6 +101,12 @@ A, B, START, SELECT: four momentary tactile buttons, active low with pull-ups,
 on MCP23017 #2 B1-B4. Game Boy app only; every other scene ignores them. See
 DECISIONS.md #55.
 
+## Game Boy audio
+
+No new hardware. The emulator's audio goes out the same I2S path as every
+other sound in this project: MAX98357A on GPIO18/19/21, into the 40mm
+speaker. See DECISIONS.md #57.
+
 ## MCP23017 #1, all inputs with pull-ups
 
 | Port | Pin | Input |

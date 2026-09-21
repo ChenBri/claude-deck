@@ -111,6 +111,10 @@ above because no specific listing has been checked yet; the E11 estimate is
 a placeholder. Scales fine either way, since MCP23017 #2 already has the
 spare pins and no new IC is needed.
 
+**Game Boy audio needs nothing new.** It plays out the same F1 MAX98357A amp
+and F2 speaker every other sound already uses. No BOM line, no section F
+change.
+
 **The "Max Combo" wall.** Whole tool categories on AliExpress are dominated by
 listings that only sell through the Max Combo bundle flow, which has no quick-add
 and opens a bundle-builder page instead. Wire strippers, precision screwdriver

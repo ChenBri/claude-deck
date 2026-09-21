@@ -3,6 +3,10 @@
 Output goes to the default pygame mixer device: the desktop speakers in the
 simulator, the MAX98357A I2S amp on the real panel. The MUTE toggle is
 respected here, not by the caller, so nothing needs to remember to check it.
+
+Also owns the Game Boy app's audio: the mixer is stereo so PyBoy's raw
+samples need no reshaping, and channel 0 is reserved so a running game's
+streamed audio is never interrupted by an event blip stealing its channel.
 """
 from __future__ import annotations
 
@@ -12,6 +16,7 @@ import pygame
 
 SAMPLE_RATE = 44100
 _AMPLITUDE = 12000
+_GB_CHANNEL_INDEX = 0
 
 # name -> list of (frequency_hz, duration_s) notes played in sequence
 _EVENTS = {
@@ -25,19 +30,24 @@ _EVENTS = {
 _muted = False
 _ready = False
 _sounds: dict[str, pygame.mixer.Sound] = {}
+_gb_channel: pygame.mixer.Channel | None = None
 
 
 def _square_wave(freq: float, duration: float) -> array.array:
     n = int(SAMPLE_RATE * duration)
     period = SAMPLE_RATE / freq
-    samples = array.array("h", [0] * n)
+    samples = array.array("h", [0]) * (n * 2)  # stereo interleaved, L == R
     for i in range(n):
         phase = (i % period) / period
-        samples[i] = _AMPLITUDE if phase < 0.5 else -_AMPLITUDE
+        value = _AMPLITUDE if phase < 0.5 else -_AMPLITUDE
+        samples[2 * i] = value
+        samples[2 * i + 1] = value
     # short linear fade at the tail to avoid a click between notes
     fade = min(200, n)
     for i in range(fade):
-        samples[n - 1 - i] = int(samples[n - 1 - i] * (i / fade))
+        scaled = int(samples[2 * (n - 1 - i)] * (i / fade))
+        samples[2 * (n - 1 - i)] = scaled
+        samples[2 * (n - 1 - i) + 1] = scaled
     return samples
 
 
@@ -49,10 +59,13 @@ def _build_event(notes) -> pygame.mixer.Sound:
 
 
 def init() -> None:
-    global _ready
+    global _ready, _gb_channel
     if _ready:
         return
-    pygame.mixer.init(frequency=SAMPLE_RATE, size=-16, channels=1)
+    pygame.mixer.init(frequency=SAMPLE_RATE, size=-16, channels=2)
+    pygame.mixer.set_num_channels(9)
+    pygame.mixer.set_reserved(1)  # channel 0: Game Boy streaming only, see queue_gb_audio
+    _gb_channel = pygame.mixer.Channel(_GB_CHANNEL_INDEX)
     for name, notes in _EVENTS.items():
         _sounds[name] = _build_event(notes)
     _ready = True
@@ -63,9 +76,25 @@ def set_muted(muted: bool) -> None:
     _muted = muted
 
 
+def is_muted() -> bool:
+    return _muted
+
+
 def play(event: str) -> None:
     if _muted or not _ready:
         return
     sound = _sounds.get(event)
     if sound is not None:
         sound.play()
+
+
+def queue_gb_audio(stereo_int16_bytes: bytes) -> None:
+    """Called once per drawn frame by the Game Boy app with however many
+    emulated frames' worth of audio it produced since the last call, already
+    stereo interleaved 16-bit to match the mixer format. Channel.queue()
+    plays immediately if the channel is idle and gaplessly appends otherwise,
+    so this doesn't need to track whether playback already started."""
+    if not _ready or not stereo_int16_bytes:
+        return
+    _gb_channel.set_volume(0.0 if _muted else 1.0)
+    _gb_channel.queue(pygame.mixer.Sound(buffer=stereo_int16_bytes))

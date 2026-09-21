@@ -78,7 +78,8 @@ firmware/deck/
       gameboy.py      PyBoy (GB/GBC) core, own 160x144 canvas, letterboxed
       boot.py         covers the ~25s Pi boot so it never looks broken
   audio/
-    chiptune.py       generated blips, one per event, mute switch respected
+    chiptune.py       generated blips, one per event, mute switch respected;
+                      also owns the mixer for the Game Boy app's streamed audio
 ```
 
 ## The simulator
