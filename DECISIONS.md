@@ -40,7 +40,7 @@ Full reasoning in [docs/SAFETY.md](docs/SAFETY.md).
 | 19 | Meters | Two analog needles: CONTEXT and ACTIVITY |
 | 20 | Display | 2.4 inch IPS SPI, 320x240, in a recessed CRT bezel |
 | 21 | Session selector | 6-position rotary switch, 1-5 plus ALL |
-| 22 | Encoder | Menu, scrolling, snake, long-press shutdown |
+| 22 | Encoder | Menu, scrolling, long-press shutdown. Snake steering moved to the joystick. |
 | 23 | APPROVE / DENY | 19mm illuminated metal pushbuttons, 3-6V ring LED, momentary self-reset, pre-wired. Live only when a prompt is pending. Amended while sourcing: illuminated arcade buttons were either unavailable outside bundle listings or 45mm, too large for the deck. |
 | 24 | Panic | 22mm XB2-542 mushroom e-stop, 1NO1NC, **latching**. Amended while sourcing: spring-return mushrooms are not sold on AliExpress. Firmware fires on the press edge and holds an INTERRUPTED state until the twist-release, so the latched head visibly shows a killed run. Flip cover dropped as redundant. |
 | 25 | Mech keys | 4: CLD (focus or launch), NEW, PLAN, MIC (push to talk) |
@@ -57,7 +57,7 @@ Full reasoning in [docs/SAFETY.md](docs/SAFETY.md).
 | 31 | HUD | Session name, elapsed time, context bar |
 | 32 | Ticker | Live tool name and target, sanitized |
 | 33 | Idle dashboard | Clock, date, your name, weather from the daemon, git status of the last repo, today's totals |
-| 34 | Easter egg | Snake, playable on the encoder after a few minutes idle |
+| 34 | Games | Snake and Tetris as first-class scenes, launched from the encoder menu when idle. Joystick steers, mech keys rotate and drop, encoder push pauses. |
 | 35 | DONE behaviour | Auto-clears back to READY after a few minutes |
 
 ## Sound
@@ -91,6 +91,7 @@ Full reasoning in [docs/SAFETY.md](docs/SAFETY.md).
 | 50 | Budget | No hard ceiling. Landed at roughly $416 all-in including every tool. |
 | 51 | MIC key | Daemon receives the hotkey and invokes the OS dictation shortcut: Win+H on Windows, the configured dictation shortcut on macOS. |
 | 52 | Fabrication | Local Tel Aviv print shop for the PETG case and the laser-cut legend strip, ordered after the electronics arrive so every cutout is measured. |
+| 53 | Joystick | KY-023 analog thumbstick read through an ADS1115 I2C ADC, push button on the second MCP23017. Added 2026-09-21 for games and menu navigation. The deck gains a ~26mm square cutout; case width may grow to 170mm. |
 
 ## Hardware constraints resolved
 

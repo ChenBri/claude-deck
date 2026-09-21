@@ -26,7 +26,7 @@ The collisions and how they resolve:
 
 | GPIO | Pin | Function |
 |---|---|---|
-| 2 | 3 | I2C1 SDA, to PCA9685 and MCP23017 |
+| 2 | 3 | I2C1 SDA, to PCA9685, two MCP23017, ADS1115 |
 | 3 | 5 | I2C1 SCL |
 | 4 | 7 | APPROVE button, active low, internal pull-up |
 | 5 | 29 | DENY button |
@@ -75,7 +75,26 @@ Channel current limit is 25mA sinking, 10mA sourcing. Lamps are wired as sinks
 from 5V with series resistors. All twelve channels breathe and dim in software,
 which is what makes NIGHT mode and the blocked-state pulse possible.
 
-## MCP23017, all inputs with pull-ups
+## I2C bus, addresses
+
+| Device | Address | Job |
+|---|---|---|
+| PCA9685 | 0x40 | lamps, legend backlight, button LEDs, meters |
+| MCP23017 #1 | 0x20 (A0-A2 low) | rotary switch, mech keys, toggles |
+| MCP23017 #2 | 0x21 (A0 high) | joystick push, spares |
+| ADS1115 | 0x48 (ADDR to GND) | joystick X on A0, Y on A1; A2/A3 spare |
+
+Four devices, no address clashes, one bus. The second MCP23017 was ordered as a
+spare from Digi-Key and is now the joystick's home.
+
+## Joystick
+
+KY-023 dual-axis thumbstick. VRx and VRy are 10k pots swept across 3.3V, read by
+the ADS1115 at 16 bits; centre reads ~1.65V. SW is the push button, active low,
+into MCP23017 #2 B0 with its internal pull-up. Deadzone and axis calibration live
+in the settings file. Snake and Tetris consume it as a 4-way plus centre.
+
+## MCP23017 #1, all inputs with pull-ups
 
 | Port | Pin | Input |
 |---|---|---|

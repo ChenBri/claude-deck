@@ -60,19 +60,29 @@ Twenty-one lines, verified against the cart on 2026-09-20.
 | 2.54mm connector kit | 310pcs, housings 1-8 pin + male/female crimps | 1 | ₪10.99 |
 | Silicone hookup wire | **22AWG**, 5 colours x 5m, dispenser box | 1 | ₪31.36 |
 | Heat shrink assortment | **560pcs with box**, multiple diameters and colours | 1 | ₪20.94 |
-| | | **Parts subtotal** | **₪296.26** |
+| USB-C panel pigtail | **USB-C female screw flange to micro-USB male**, ~32cm, variant A3 | 1 | ₪10.04 |
+| DC panel jack | **5.5x2.1mm**, pre-wired, with nut | 1 | ₪7.15 |
+| KCD1 rocker switch | round 20mm, **3-pin red illuminated** (LED is 12V, see note) | 1 | ₪3.63 |
+| KY-023 joystick | dual-axis analog thumbstick with push | 1 | ₪5.18 |
+| ADS1115 ADC | 16-bit, 4 channel, I2C, reads the joystick | 1 | ₪4.83 |
+| | | **Parts subtotal** | **₪327.09** |
 | FNIRSI HS-02A soldering kit | 100-450°C, **6 tips + 100W PD adapter + stand + case**, EU plug | 1 | ₪241.79 |
 | MECHANIC HX-T100 solder | **63% tin leaded**, rosin core, **0.6mm**, 55g | 1 | ₪16.84 |
 | ANENG 620A multimeter | 6000 counts, true RMS, capacitance, temp, AC/DC current | 1 | ₪62.21 |
 | SN-58B ratcheting crimper | **6 interchangeable jaws**, covers XH2.54 and DuPont2.54, cased | 1 | ₪46.88 |
 | Plier set | 4-piece: sprue cutter, needle nose, diagonal cutter, combination | 1 | ₪73.87 |
-| Toolour helping hands | flexible arms, vise clamp base, PCB holder | 1 | ₪31.70 |
-| Desoldering braid | **2.0mm x 1.5M** | 1 | ₪3.06 |
-| | | **Tools subtotal** | **₪476.35** |
-| | | **Cart total, 30 lines** | **~₪772** |
+| Toolour helping hands | flexible arms, vise clamp base, PCB holder | 1 | ₪17.85 |
+| Desoldering braid | **2.5mm x 1.5M** | 1 | ₪4.81 |
+| Desoldering pump | all-aluminium | 1 | ₪12.40 |
+| Silicone soldering mat | anti-static, magnetic, 932°F | 1 | ₪11.73 |
+| Hot glue gun | 20W, **EU plug**, 10 sticks | 1 | ₪6.68 |
+| | | **Tools subtotal** | **₪495.06** |
+| | | **Cart total, 39 lines** | **~₪822** |
 
 Read the exact total at checkout after pressing **Select all items**; the sidebar
-figure only reflects the ticked lines.
+figure only reflects the ticked lines. Promotional prices also drift day to day
+(the helping hands charged ₪31.70 when added and read ₪17.85 a day later), so
+treat every figure here as approximate until the order confirmation.
 
 Plus ₪16.01 shipping on the meters. Everything else ships free.
 
@@ -84,9 +94,15 @@ checking out, or you will buy less than half the order and not notice.
 Also at checkout: re-tick the meters and switch their shipping from Standard
 ₪16.01 back to Economy ₪7.91.
 
-Still to add: 3mm white LEDs for the legend backlight, panel-mount USB-C and
-barrel jack, rocker switch, fasteners and heat-set inserts, wire stripper, solder
-pump, hot glue gun, precision screwdrivers, silicone mat, fume fan.
+**Not in the cart, buy locally:** wire stripper, precision screwdriver set, fume
+fan, M2.5/M3 screws and standoffs, M3 heat-set inserts, rubber feet. The first
+three are behind the Max Combo wall below; the fasteners are cheaper and faster
+from any Tel Aviv hardware shop than shipped. The 3mm white LEDs line is dropped:
+the 100-piece 5mm assortment includes white and backlights the legend strip fine.
+
+**Rocker switch LED note.** The KCD1's internal LED is sized for 12V and will be
+dim or dark on the 5V rail. Either live with it (the LINK lamp already shows
+power) or swap the internal series resistor for ~220Ω, a two-minute mod.
 
 **The "Max Combo" wall.** Whole tool categories on AliExpress are dominated by
 listings that only sell through the Max Combo bundle flow, which has no quick-add

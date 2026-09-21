@@ -73,7 +73,8 @@ firmware/deck/
       done.py         victory hop and confetti
       compacting.py   sweeps papers into a box
       idle.py         clock, date, your name, weather, git status, today's totals
-      snake.py        playable on the encoder after a few minutes idle
+      snake.py        joystick steers, encoder push pauses
+      tetris.py       joystick moves, mech keys rotate and drop
       boot.py         covers the ~25s Pi boot so it never looks broken
   audio/
     chiptune.py       generated blips, one per event, mute switch respected
