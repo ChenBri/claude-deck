@@ -224,6 +224,50 @@ def test_deck_panic_latches_until_release():
     assert deck.current_state(now=1) is State.WORKING
 
 
+def test_registry_assigns_slots_first_available_in_order():
+    reg = SessionRegistry()
+    reg.handle("s-alice", "SessionStart", now=0)
+    reg.handle("s-bob", "SessionStart", now=0)
+    assert reg.aggregate("1").session_id == "s-alice"
+    assert reg.aggregate("2").session_id == "s-bob"
+    assert reg.aggregate("3") is None
+
+
+def test_registry_slot_is_fixed_until_dropped():
+    reg = SessionRegistry()
+    reg.handle("s-alice", "SessionStart", now=0)
+    reg.handle("s-bob", "SessionStart", now=0)
+    reg.handle("s-carol", "SessionStart", now=0)
+    # ending "s-alice" (slot 1) must not shift bob/carol down to fill the gap
+    reg.drop("s-alice")
+    assert reg.aggregate("1") is None
+    assert reg.aggregate("2").session_id == "s-bob"
+    assert reg.aggregate("3").session_id == "s-carol"
+
+    # the freed slot 1 goes to the next brand-new session
+    reg.handle("s-dave", "SessionStart", now=1)
+    assert reg.aggregate("1").session_id == "s-dave"
+
+
+def test_registry_more_than_five_sessions_only_reachable_via_all():
+    reg = SessionRegistry()
+    for i in range(7):
+        reg.handle(f"s{i}", "SessionStart", now=0)
+    slots = {reg.aggregate(str(n)).session_id for n in range(1, 6)}
+    assert slots == {"s0", "s1", "s2", "s3", "s4"}
+    assert reg.aggregate("ALL") is not None  # s5, s6 still visible via ALL
+
+
+def test_registry_prune_frees_stale_slot():
+    reg = SessionRegistry()
+    reg.handle("s-alice", "SessionStart", now=0)
+    reg.prune(max_age_seconds=100, now=50)
+    assert reg.aggregate("1").session_id == "s-alice"  # not stale yet
+    reg.prune(max_age_seconds=100, now=200)
+    assert reg.aggregate("1") is None
+    assert reg.get("s-alice") is None
+
+
 def test_deck_approve_button_live_tracks_selector():
     deck = Deck(selector="a")
     deck.registry.handle("a", "SessionStart", now=0)

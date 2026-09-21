@@ -21,6 +21,7 @@ from deck.ui.scenes.menu import draw_menu
 
 BOOT_SECONDS = 3.0  # trimmed way down from the real ~25s Pi boot for desktop dev
 LONG_PRESS_SECONDS = 1.5
+PRUNE_INTERVAL_SECONDS = 30.0
 
 
 def build_panel(name: str) -> Panel:
@@ -46,6 +47,7 @@ class App:
         self.active_game: str | None = None
         self._encoder_down_at: float | None = None
         self._boot_started = time.monotonic()
+        self._last_prune = time.monotonic()
 
         self.link = None
         if use_link:
@@ -168,6 +170,9 @@ class App:
             frame_inputs: dict = {}
             self._handle_events(self.panel.poll_inputs(), frame_inputs)
             self.deck.tick(now)
+            if now - self._last_prune >= PRUNE_INTERVAL_SECONDS:
+                self._last_prune = now
+                self.deck.registry.prune(now=now)
 
             booting = (now - self._boot_started) < BOOT_SECONDS
             if self.active_game and self.deck.current_state(now) is not State.IDLE:

@@ -77,7 +77,7 @@ class SimPanel(Panel):
         self._pixels = [(0, 0, 0)] * PIXEL_COUNT
         self._button_leds = {name: False for name in BUTTON_LEDS}
         self._toggles = {"MUTE": False, "NIGHT": False, "AUTO_ACCEPT": False}
-        self._selector = "1"
+        self._selector = "ALL"  # matches Deck's own default so the drawn rotary isn't a lie at boot
         self._panic_latched = False
         self._closed = False
         self._encoder_mouse_down = False
