@@ -22,3 +22,8 @@ sessions/
 # editor/OS cruft
 .vscode/
 .DS_Store
+
+# case (OpenSCAD): rendered previews and export artifacts, not source
+case/*.png
+case/*.stl
+case/*.echo
