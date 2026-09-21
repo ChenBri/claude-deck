@@ -4,7 +4,7 @@
 
 import http, { IncomingMessage, ServerResponse } from "node:http";
 import { classify } from "./classify";
-import { DenylistSettings } from "./denylist";
+import { DenylistSettingsStore } from "./denylist";
 import { scrubPayload } from "./scrub";
 import { SessionRegistry } from "./sessions";
 import { DailyStats } from "./stats";
@@ -30,7 +30,7 @@ function readBody(req: IncomingMessage): Promise<string> {
 export interface HookIngestDeps {
   sessions: SessionRegistry;
   stats: DailyStats;
-  denylistSettings: DenylistSettings;
+  denylistStore: DenylistSettingsStore;
   onCwdSeen: (cwd: string) => void;
 }
 
@@ -57,7 +57,7 @@ export function startHookIngest(deps: HookIngestDeps): http.Server {
     if (typeof cwd === "string") deps.onCwdSeen(cwd);
 
     const scrubbed = scrubPayload(rawPayload) as Record<string, unknown>;
-    const classified = classify(hookName, scrubbed, deps.denylistSettings);
+    const classified = classify(hookName, scrubbed, deps.denylistStore.get());
     if (!classified) return;
 
     deps.sessions.applyClassified(classified);

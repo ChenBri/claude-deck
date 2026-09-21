@@ -3,7 +3,7 @@
 
 import os from "node:os";
 import { loadHostActions } from "./actions";
-import { defaultDenylistSettings } from "./denylist";
+import { DenylistSettingsStore } from "./denylist";
 import { startHookIngest } from "./http";
 import { registerHotkeys } from "./link/hotkeys";
 import { sendIdleInfo, startActionListener } from "./link/transport";
@@ -24,14 +24,15 @@ async function main(): Promise<void> {
   const sessions = new SessionRegistry();
   const stats = new DailyStats();
   const audit = new AuditLog();
-  const guard = new Guard(sessions, actions, audit, stats, host);
+  const denylistStore = new DenylistSettingsStore();
+  const guard = new Guard(sessions, actions, audit, stats, denylistStore, host);
 
   let lastCwd: string | null = null;
 
   startHookIngest({
     sessions,
     stats,
-    denylistSettings: defaultDenylistSettings,
+    denylistStore,
     onCwdSeen: (cwd) => {
       lastCwd = cwd;
     },

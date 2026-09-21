@@ -3,6 +3,7 @@
  * a verified id into a real action on the host. */
 
 import { HostActions } from "./actions/types";
+import { DenylistSettingsStore, isDenylistCategory } from "./denylist";
 import { SessionRegistry } from "./sessions";
 import { DailyStats } from "./stats";
 import { AuditEntry, AuditLog } from "./store";
@@ -12,6 +13,7 @@ export interface ActionRequest {
   session_id?: string;
   request_id?: string;
   name?: string;
+  category?: string;
   value?: unknown;
 }
 
@@ -21,6 +23,7 @@ export class Guard {
     private actions: HostActions,
     private audit: AuditLog,
     private stats: DailyStats,
+    private denylistStore: DenylistSettingsStore,
     private host: string,
   ) {}
 
@@ -41,6 +44,8 @@ export class Guard {
           this.sessions.setAutoAccept(req.session_id, Boolean(req.value));
         }
         return;
+      case "denylist_toggle":
+        return this.handleDenylistToggle(req);
       default:
         return;
     }
@@ -69,6 +74,18 @@ export class Guard {
     this.sessions.clearPending(sessionId);
     this.stats.recordApproval(approve);
     this.audit.record(this.entry(kind, sessionId, requestId, approve ? "approved" : "denied", null, tool, target));
+  }
+
+  private handleDenylistToggle(req: ActionRequest): void {
+    const category = req.category ?? "";
+    if (!isDenylistCategory(category)) {
+      this.audit.record(this.entry("denylist_toggle", "", null, "rejected", `unknown category ${category}`));
+      return;
+    }
+    this.denylistStore.setCategory(category, Boolean(req.value));
+    this.audit.record(
+      this.entry("denylist_toggle", "", null, "approved", `${category}=${Boolean(req.value)}`),
+    );
   }
 
   private async handleMechKey(name: string): Promise<void> {

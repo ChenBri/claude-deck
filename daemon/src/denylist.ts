@@ -1,12 +1,8 @@
 /**
  * Dangerous-call detection. All four categories from docs/SAFETY.md rule 4.
  * Patterns live here, not the encoder menu, because you cannot type a regex
- * on a knob; the menu only flips whole categories on and off.
- *
- * NOTE: category enable/disable is not yet synced from the Pi's settings
- * menu (firmware/deck/menu.py) to this daemon over the link. Until that
- * wiring exists, every category defaults to enabled here, which is the safe
- * (fail-closed) default.
+ * on a knob; the menu only flips whole categories on and off (synced in via
+ * DenylistSettingsStore, see link/transport.ts's "denylist_toggle" action).
  */
 
 export type DenylistCategory = "database" | "destructive_fs_git" | "infrastructure" | "secrets";
@@ -46,6 +42,27 @@ export interface DenylistSettings {
 export const defaultDenylistSettings: DenylistSettings = {
   enabled: { database: true, destructive_fs_git: true, infrastructure: true, secrets: true },
 };
+
+const CATEGORIES = Object.keys(defaultDenylistSettings.enabled) as DenylistCategory[];
+
+export function isDenylistCategory(value: string): value is DenylistCategory {
+  return (CATEGORIES as string[]).includes(value);
+}
+
+/** Live, mutable denylist settings, synced from the Pi's encoder menu
+ * (firmware/deck/menu.py) over link/transport.ts's action endpoint. Starts
+ * fail-closed (every category enabled) until the Pi says otherwise. */
+export class DenylistSettingsStore {
+  private settings: DenylistSettings = { enabled: { ...defaultDenylistSettings.enabled } };
+
+  get(): DenylistSettings {
+    return this.settings;
+  }
+
+  setCategory(category: DenylistCategory, enabled: boolean): void {
+    this.settings = { enabled: { ...this.settings.enabled, [category]: enabled } };
+  }
+}
 
 /** Returns the first matching category, or null if the call is clean. */
 export function matchDenylist(text: string, settings: DenylistSettings = defaultDenylistSettings): DenylistCategory | null {
