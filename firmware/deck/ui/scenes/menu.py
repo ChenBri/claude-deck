@@ -1,5 +1,6 @@
-"""Settings menu overlay. Not state-driven like the other scenes, so it lives
-outside SceneManager: main.py draws it directly on top when menu.open."""
+"""Settings app overlay. Not state-driven like the other scenes, so it lives
+outside SceneManager: main.py draws it directly when App.current_app ==
+"settings"."""
 from __future__ import annotations
 
 from deck.menu import ITEMS, Menu, _get

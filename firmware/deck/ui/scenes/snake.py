@@ -61,7 +61,10 @@ class SnakeScene(Scene):
 
     def _handle_input(self, ctx: Context) -> None:
         if ctx.inputs.get("encoder_push_edge", False):
-            self._paused = not self._paused
+            if self.game_over:
+                self._reset()
+            else:
+                self._paused = not self._paused
 
         jx, jy = ctx.inputs.get("joystick", (0, 0))
         if jx or jy:
@@ -105,6 +108,11 @@ class SnakeScene(Scene):
             pygame.draw.rect(canvas, color, (x * CELL, y * CELL, CELL - 1, CELL - 1))
 
         if self.game_over:
-            draw_text(canvas, "game over", (canvas.get_width() // 2 - 24, canvas.get_height() // 2), size=10)
+            cx, cy = canvas.get_width() // 2, canvas.get_height() // 2
+            pygame.draw.rect(canvas, (10, 8, 8), (cx - 34, cy - 10, 68, 32))
+            draw_text(canvas, "game over", (cx - 24, cy - 6), size=10)
+            draw_text(canvas, "push: retry", (cx - 28, cy + 8), size=7, color=(160, 160, 160))
         elif self._paused:
-            draw_text(canvas, "paused", (canvas.get_width() // 2 - 18, canvas.get_height() // 2), size=10)
+            cx, cy = canvas.get_width() // 2, canvas.get_height() // 2
+            pygame.draw.rect(canvas, (10, 8, 8), (cx - 24, cy - 6, 48, 16))
+            draw_text(canvas, "paused", (cx - 18, cy), size=10)

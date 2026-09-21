@@ -1,7 +1,12 @@
-"""Encoder-driven settings menu. Regexes cannot be typed on a knob, so the
-menu only flips booleans and steps numbers; it writes /var/deck/settings.yaml,
-which is where the real regex patterns for the denylist categories live,
-hand-edited, not through this menu.
+"""Settings, one of the apps reachable from the home screen. Regexes cannot
+be typed on a knob, so the menu only flips booleans and steps numbers; it
+writes /var/deck/settings.yaml, which is where the real regex patterns for
+the denylist categories live, hand-edited, not through this menu.
+
+main.py owns whether Settings is currently showing (App.current_app ==
+"settings"); this class only tracks which row is focused and applies
+changes, matching how the other apps (games) don't know whether they're
+on screen either.
 """
 from __future__ import annotations
 
@@ -37,9 +42,7 @@ class MenuItem:
 
 
 ITEMS = [
-    MenuItem("EXIT", "exit menu", "action"),
-    MenuItem("PLAY_SNAKE", "play: snake", "action"),
-    MenuItem("PLAY_TETRIS", "play: tetris", "action"),
+    MenuItem("EXIT", "back to apps", "action"),
     MenuItem("idle_after_seconds", "idle timeout (s)", "int", step=30, minimum=60, maximum=1800),
     MenuItem("denylist.database", "block: database", "bool"),
     MenuItem("denylist.destructive_fs_git", "block: fs/git", "bool"),
@@ -48,10 +51,6 @@ ITEMS = [
     MenuItem("wifi", "wifi radio", "bool"),
     MenuItem("night_brightness", "night brightness", "float", step=0.05, minimum=0.0, maximum=1.0),
 ]
-
-# Handled by main.py before Menu.activate() sees them: they launch a scene
-# rather than change a persisted setting.
-GAME_ACTIONS = {"PLAY_SNAKE": "snake", "PLAY_TETRIS": "tetris"}
 
 
 def _get(settings: dict, dotted_key: str):
@@ -74,7 +73,6 @@ class Menu:
     def __init__(self, settings_path: Path = DEFAULT_SETTINGS_PATH) -> None:
         self.settings_path = Path(settings_path)
         self.settings = self._load()
-        self.open = False
         self.focus = 0
 
     def _load(self) -> dict:
@@ -97,23 +95,16 @@ class Menu:
         return None if item.kind == "action" else _get(self.settings, item.key)
 
     def rotate(self, direction: int) -> None:
-        if not self.open:
-            return
         self.focus = (self.focus + direction) % len(ITEMS)
 
     def activate(self) -> None:
-        """Short encoder press: open the menu, or act on the focused item."""
-        if not self.open:
-            self.open = True
-            self.focus = 0
-            return
+        """Encoder push while Settings is showing: act on the focused item.
+        The EXIT item is intercepted by main.py before this is called."""
         item = self.current_item()
-        if item.kind == "action":
-            self.open = False
-        elif item.kind == "bool":
+        if item.kind == "bool":
             _set(self.settings, item.key, not _get(self.settings, item.key))
             self._save()
-        else:  # int / float: push steps through the range, then wraps
+        elif item.kind in ("int", "float"):  # push steps through the range, then wraps
             value = _get(self.settings, item.key) + item.step
             if value > item.maximum:
                 value = item.minimum

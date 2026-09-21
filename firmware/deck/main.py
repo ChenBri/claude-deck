@@ -11,13 +11,15 @@ import argparse
 import time
 
 from deck import link as link_mod
+from deck.apps import APPS
 from deck.audio import chiptune
-from deck.menu import GAME_ACTIONS, Menu, _get
+from deck.menu import Menu, _get
 from deck.panel.base import PIXEL_COUNT, Panel
 from deck.state import LAMP, Deck, State
 from deck.ui.pixels import pixels_for_state
-from deck.ui.render import SceneManager, new_canvas
+from deck.ui.render import GAMES, SceneManager, new_canvas
 from deck.ui.scenes.base import Context
+from deck.ui.scenes.home import draw_home
 from deck.ui.scenes.menu import draw_menu
 
 DENYLIST_CATEGORIES = ("database", "destructive_fs_git", "infrastructure", "secrets")
@@ -47,7 +49,11 @@ class App:
         self.scene_manager = SceneManager()
         self.canvas = new_canvas()
         self.idle_info: dict = {}
-        self.active_game: str | None = None
+        # None: plain IDLE dashboard (or a live session's own scene). "home":
+        # the app launcher. "settings", or a key from ui.render.GAMES: that
+        # app is showing.
+        self.current_app: str | None = None
+        self.home_index = 0
         self.night_on = False
         self._encoder_down_at: float | None = None
         self._boot_started = time.monotonic()
@@ -101,6 +107,8 @@ class App:
             frame_inputs["joystick"] = ev.value
         elif ev.name == "edge":
             frame_inputs.setdefault("joystick_edge", set()).update(ev.value)
+        elif ev.name == "push_edge":
+            frame_inputs["joystick_push_edge"] = True
 
     def _on_mech_key(self, ev, frame_inputs: dict) -> None:
         frame_inputs.setdefault("mech_keys", set()).add(ev.name)
@@ -168,24 +176,47 @@ class App:
                 self._encoder_short_press(frame_inputs)
 
     def _encoder_short_press(self, frame_inputs: dict) -> None:
-        if self.active_game is not None:
-            frame_inputs["encoder_push_edge"] = True
+        if self.current_app in GAMES:
+            frame_inputs["encoder_push_edge"] = True  # the game itself decides: pause, or retry if over
             return
 
-        if not self.menu.open:
-            self.menu.activate()  # opens it
+        if self.current_app == "settings":
+            item = self.menu.current_item()
+            if item.key == "EXIT":
+                self.current_app = "home"
+                return
+            self.menu.activate()
+            if item.key.startswith("denylist.") and self.link is not None:
+                category = item.key.split(".", 1)[1]
+                self.link.send_action(
+                    "denylist_toggle", category=category, value=_get(self.menu.settings, item.key)
+                )
             return
 
-        item = self.menu.current_item()
-        if item.key in GAME_ACTIONS:
-            self.active_game = GAME_ACTIONS[item.key]
-            self.menu.open = False
+        if self.current_app == "home":
+            app_id = APPS[self.home_index].id
+            if app_id == "settings":
+                self.menu.focus = 0
+            self.current_app = app_id
             return
 
-        self.menu.activate()
-        if item.key.startswith("denylist.") and self.link is not None:
-            category = item.key.split(".", 1)[1]
-            self.link.send_action("denylist_toggle", category=category, value=_get(self.menu.settings, item.key))
+        # current_app is None: idle dashboard (or attract-mode snake), open the launcher
+        self.current_app = "home"
+        self.home_index = 0
+
+    def _on_joystick_navigation(self, frame_inputs: dict) -> None:
+        """Home-screen left/right and the universal "back" button. Kept
+        separate from per-app input (which scenes read straight out of
+        frame_inputs) because it changes which app is showing at all."""
+        if self.current_app == "home":
+            edges = frame_inputs.get("joystick_edge", ())
+            if "left" in edges:
+                self.home_index = (self.home_index - 1) % len(APPS)
+            if "right" in edges:
+                self.home_index = (self.home_index + 1) % len(APPS)
+
+        if frame_inputs.get("joystick_push_edge") and self.current_app is not None:
+            self.current_app = None if self.current_app == "home" else "home"
 
     def _shutdown(self) -> None:
         # Real hardware: play the goodbye animation, then `sudo shutdown -h now`.
@@ -203,17 +234,20 @@ class App:
 
             frame_inputs: dict = {}
             self._handle_events(self.panel.poll_inputs(), frame_inputs)
+            self._on_joystick_navigation(frame_inputs)
             self.deck.tick(now)
             if now - self._last_prune >= PRUNE_INTERVAL_SECONDS:
                 self._last_prune = now
                 self.deck.registry.prune(now=now)
 
             booting = (now - self._boot_started) < BOOT_SECONDS
-            if self.active_game and self.deck.current_state(now) is not State.IDLE:
-                self.active_game = None  # a live session takes over the screen again
+            if self.current_app is not None and self.deck.current_state(now) is not State.IDLE:
+                self.current_app = None  # a live session takes the screen back over
 
-            if self.menu.open:
+            if self.current_app == "settings":
                 draw_menu(self.canvas, self.menu)
+            elif self.current_app == "home":
+                draw_home(self.canvas, self.home_index)
             else:
                 session = self.deck.active_session()
                 ctx = Context(
@@ -227,7 +261,8 @@ class App:
                     idle_info=self.idle_info,
                     inputs=frame_inputs,
                 )
-                self.scene_manager.draw(self.canvas, ctx, booting=booting, game=self.active_game)
+                game = self.current_app if self.current_app in GAMES else None
+                self.scene_manager.draw(self.canvas, ctx, booting=booting, game=game)
 
             self._update_indicators(now)
             self.panel.present(self.canvas)

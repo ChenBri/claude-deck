@@ -86,7 +86,10 @@ class TetrisScene(Scene):
 
     def _handle_input(self, ctx: Context) -> None:
         if ctx.inputs.get("encoder_push_edge", False):
-            self._paused = not self._paused
+            if self.game_over:
+                self._reset()
+            else:
+                self._paused = not self._paused
         if self._paused or self.game_over:
             return
 
@@ -145,6 +148,11 @@ class TetrisScene(Scene):
         pygame.draw.rect(canvas, (90, 90, 96), (ox - 1, 0, COLS * CELL + 2, ROWS * CELL), 1)
 
         if self.game_over:
-            draw_text(canvas, "game over", (ox + 8, canvas.get_height() // 2), size=9)
+            cy = canvas.get_height() // 2
+            pygame.draw.rect(canvas, (10, 8, 8), (ox, cy - 6, COLS * CELL, 30))
+            draw_text(canvas, "game over", (ox + 8, cy), size=9)
+            draw_text(canvas, "push: retry", (ox + 2, cy + 12), size=7, color=(160, 160, 160))
         elif self._paused:
-            draw_text(canvas, "paused", (ox + 14, canvas.get_height() // 2), size=9)
+            cy = canvas.get_height() // 2
+            pygame.draw.rect(canvas, (10, 8, 8), (ox, cy - 4, COLS * CELL, 16))
+            draw_text(canvas, "paused", (ox + 14, cy), size=9)
