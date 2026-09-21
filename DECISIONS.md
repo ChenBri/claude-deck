@@ -38,7 +38,7 @@ Full reasoning in [docs/SAFETY.md](docs/SAFETY.md).
 | 17 | Legends | Backlit engraved acrylic strip, laser cut |
 | 18 | Ambient | WS2812B strip for both the bezel halo and the underglow. Amended while sourcing: a circular ring does not fit a rectangular bezel, and 1m of 60/m strip covers the ~300mm halo perimeter and the ~300mm underglow with spare. |
 | 19 | Meters | Two analog needles: CONTEXT and FIVE_HOUR. Amended 2026-09-21: originally CONTEXT and a vague "ACTIVITY", never actually wired to data. Redefined to CONTEXT (exact: current session's own token usage against the model's window) and FIVE_HOUR (an estimate: local token usage across the trailing 5 hours, weighted toward real cost since raw cache-read tokens massively overstate usage, against a budget you calibrate yourself, since Anthropic doesn't expose real remaining quota anywhere local). A third meter for weekly usage was considered and dropped: same estimate problem plus unverified panel space, not worth it for a number nobody can fully vouch for. See #58. |
-| 20 | Display | 2.4 inch IPS SPI, 320x240, in a recessed CRT bezel |
+| 20 | Display | 11.6 inch HDMI panel + driver board, 1366x768, in a recessed bezel. Amended 2026-09-22: was 2.4 inch IPS SPI, 320x240. Chen wanted a genuinely monitor-class screen (260x150-220mm), which a hobbyist SPI TFT does not make past ~4-5in - this is a real interface change (HDMI, not SPI), not just a bigger cutout. See docs/HARDWARE.md for the freed-up GPIO pins and the open question on the driver board's supply voltage. |
 | 21 | Session selector | 6-position rotary switch, 1-5 plus ALL |
 | 22 | Encoder | Menu, scrolling, long-press shutdown. Snake steering moved to the joystick. |
 | 23 | APPROVE / DENY | 19mm illuminated metal pushbuttons, 3-6V ring LED, momentary self-reset, pre-wired. Live only when a prompt is pending. Amended while sourcing: illuminated arcade buttons were either unavailable outside bundle listings or 45mm, too large for the deck. |
@@ -73,7 +73,7 @@ Full reasoning in [docs/SAFETY.md](docs/SAFETY.md).
 | # | Decision | Choice |
 |---|---|---|
 | 39 | Form | Retro terminal. Vertical face with a recessed CRT bezel, sloped control deck. |
-| 40 | Size | 260 x 120 x 150 mm. Deck 55mm deep, rear face ~115mm tall. Amended 2026-09-22: the original 160 x 120 x 100mm was never checked against actual component footprints. Once case/case.scad laid out real part sizes (2.4in display, two 34mm meters, 5 lamps, rotary + encoder + 4 mech keys + 3 toggles + joystick + 4 Game Boy buttons + APPROVE/DENY + panic) with genuine finger-clearance rather than bare-minimum spacing, the real number came to roughly 250-280mm wide, not 160mm. Depth and height didn't need to grow nearly as much - this was a width problem specifically, from laying many controls out side by side. |
+| 40 | Size | 300 x 130 x 290 mm. Deck 55mm deep. Amended 2026-09-22 (twice): the original 160 x 120 x 100mm was never checked against actual component footprints. First pass: laying out real part sizes (the old 2.4in display, two 34mm meters, 5 lamps, rotary + encoder + 4 mech keys + 3 toggles + joystick + 4 Game Boy buttons + APPROVE/DENY + panic) with genuine finger-clearance came to roughly 250-280mm wide, landed on 260 x 120 x 150. Second pass: decision #20's display upgrade to an 11.6in monitor-class panel (257x144mm active area) leaves no room to flank it with the meters/lamps the way the small display's did, so those moved to a row below the screen instead, and the case grew again to fit the screen plus that row plus real bezel margin. |
 | 41 | Colour | Matte black with orange accents |
 | 42 | Process | FDM PETG via a print service. MJF nylon reprint later if wanted. |
 | 43 | CAD | OpenSCAD, case as parametric code in this repo |
@@ -88,7 +88,7 @@ Full reasoning in [docs/SAFETY.md](docs/SAFETY.md).
 | 47 | Tools | Full soldering kit purchased new |
 | 48 | Sourcing | AliExpress only, one order, everything at once. Case, legend strip, ballast plate and isopropyl fabricated or bought locally because they cannot be catalogue items. |
 | 49 | Sequencing | Software and simulator now, single order in parallel, one build when it all lands. No early partial build. |
-| 50 | Budget | No hard ceiling. Landed at roughly $416 all-in including every tool. |
+| 50 | Budget | No hard ceiling. Landed at roughly $416 all-in including every tool, now ~$440 after the joystick, Game Boy buttons, and the display's jump to an 11.6in HDMI panel - see docs/BOM.md for the running total. |
 | 51 | MIC key | Daemon receives the hotkey and invokes the OS dictation shortcut: Win+H on Windows, the configured dictation shortcut on macOS. |
 | 52 | Fabrication | Local Tel Aviv print shop for the PETG case and the laser-cut legend strip, ordered after the electronics arrive so every cutout is measured. |
 | 53 | Joystick | KY-023 analog thumbstick read through an ADS1115 I2C ADC, push button on the second MCP23017. Added 2026-09-21 for games and menu navigation. The deck gains a ~26mm square cutout; case width may grow to 170mm. |

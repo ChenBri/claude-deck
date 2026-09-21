@@ -17,12 +17,15 @@ class RealPanel(Panel):
         #   from adafruit_pca9685 import PCA9685    # lamps, button LEDs, meters
         #   from adafruit_mcp230xx.mcp23017 import MCP23017  # rotary, keys, toggles
         #   from rpi_ws281x import PixelStrip       # halo + underglow, GPIO12/PWM0, root
-        #   import spidev                            # display, SPI0
         #   import RPi.GPIO as GPIO                  # APPROVE/DENY/PANIC/encoder, real GPIO
+        # No spidev: the display is HDMI now (DECISIONS.md #20, an 11.6in
+        # 1366x768 panel + driver board), not the small SPI TFT this was
+        # first written against. GPIO8-11 (SPI0), 22/23 (DC/RST) and 17
+        # (backlight enable) are free as a result - see docs/HARDWARE.md.
         raise NotImplementedError(
             "RealPanel needs the Pi hardware libraries (adafruit-blinka, "
             "adafruit-circuitpython-pca9685, adafruit-circuitpython-mcp230xx, "
-            "rpi_ws281x, spidev, RPi.GPIO), which are only installable on the "
+            "rpi_ws281x, RPi.GPIO), which are only installable on the "
             "Pi itself. Run the simulator with --panel sim until parts land."
         )
 
@@ -39,8 +42,10 @@ class RealPanel(Panel):
         raise NotImplementedError
 
     def present(self, canvas) -> None:
-        # Real display path: compose_output(canvas) -> blit RGB565 rows over
-        # SPI0 to the ST7789/ILI9341 controller via spidev, DC/RST on GPIO22/23.
+        # Real display path: compose_output(canvas) -> present via pygame's
+        # KMSDRM/fbcon SDL video driver onto the HDMI framebuffer. No manual
+        # per-row transfer to a controller chip needed, unlike the old SPI
+        # TFT plan - HDMI just wants a normal pygame display surface.
         compose_output(canvas)
         raise NotImplementedError
 

@@ -23,8 +23,17 @@ from deck.panel.base import (
 from deck.ui import gfx
 from deck.ui.render import OUTPUT_HEIGHT, OUTPUT_WIDTH, compose_output
 
-WINDOW_W, WINDOW_H = 700, 560
-SIM_ZOOM = 1.6  # desktop-only magnification; real hardware has no equivalent, it's a fixed 320x240 panel
+WINDOW_W, WINDOW_H = 900, 600   # was 700x560; the preview bezel and side controls both grew with the bigger panel
+SIM_ZOOM = 1.6  # desktop-only magnification; real hardware has no equivalent, it's a fixed panel
+
+# The real panel is 1366x768 (DECISIONS.md #20) - too big to lay out at
+# 1:1 in a desktop dev window. PREVIEW_WIDTH/HEIGHT is what the rest of
+# this file's layout math uses instead; compose_output()'s true
+# OUTPUT_WIDTH x OUTPUT_HEIGHT result gets scaled down to this size only
+# at the final blit, in _draw_bezel_and_screen.
+PREVIEW_SCALE = 0.35
+PREVIEW_WIDTH = round(OUTPUT_WIDTH * PREVIEW_SCALE)
+PREVIEW_HEIGHT = round(OUTPUT_HEIGHT * PREVIEW_SCALE)
 
 LAMP_COLORS = {
     "READY": (70, 210, 100),
@@ -106,11 +115,11 @@ class SimPanel(Panel):
     def _build_hitboxes(self):
         boxes = {}
         bx, by = BEZEL_POS
-        lamp_y = by + OUTPUT_HEIGHT + 24
+        lamp_y = by + PREVIEW_HEIGHT + 24
         for i, name in enumerate(LAMPS):
             boxes[("lamp", name)] = pygame.Rect(bx + i * 52, lamp_y, 20, 20)
 
-        meter_x = bx + OUTPUT_WIDTH + 60
+        meter_x = bx + PREVIEW_WIDTH + 60
         for i, name in enumerate(METERS):
             boxes[("meter", name)] = pygame.Rect(meter_x + i * 100, by + 10, 80, 80)
 
@@ -268,10 +277,11 @@ class SimPanel(Panel):
 
     def _draw_bezel_and_screen(self, canvas: pygame.Surface) -> None:
         bx, by = BEZEL_POS
-        bezel = pygame.Rect(bx - 6, by - 6, OUTPUT_WIDTH + 12, OUTPUT_HEIGHT + 12)
+        bezel = pygame.Rect(bx - 6, by - 6, PREVIEW_WIDTH + 12, PREVIEW_HEIGHT + 12)
         pygame.draw.rect(self._native, (10, 8, 8), bezel, border_radius=8)
         output = compose_output(canvas)
-        self._native.blit(output, BEZEL_POS)
+        preview = pygame.transform.smoothscale(output, (PREVIEW_WIDTH, PREVIEW_HEIGHT))
+        self._native.blit(preview, BEZEL_POS)
 
     def _draw_lamps(self) -> None:
         for name, rect in ((n, r) for (k, n), r in self._hitboxes.items() if k == "lamp"):
@@ -297,15 +307,15 @@ class SimPanel(Panel):
         bx, by = BEZEL_POS
         halo_count = PIXEL_COUNT * 2 // 3
         underglow_count = PIXEL_COUNT - halo_count
-        cx, cy = bx + OUTPUT_WIDTH // 2, by + OUTPUT_HEIGHT // 2
-        rx, ry = OUTPUT_WIDTH // 2 + 14, OUTPUT_HEIGHT // 2 + 14
+        cx, cy = bx + PREVIEW_WIDTH // 2, by + PREVIEW_HEIGHT // 2
+        rx, ry = PREVIEW_WIDTH // 2 + 14, PREVIEW_HEIGHT // 2 + 14
         for i in range(halo_count):
             angle = 2 * math.pi * i / halo_count
             pos = (cx + rx * math.cos(angle), cy + ry * math.sin(angle))
             pygame.draw.circle(self._native, self._pixels[i], pos, 3)
-        underglow_y = by + OUTPUT_HEIGHT + 10
+        underglow_y = by + PREVIEW_HEIGHT + 10
         for i in range(underglow_count):
-            x = bx + i * (OUTPUT_WIDTH // max(underglow_count - 1, 1))
+            x = bx + i * (PREVIEW_WIDTH // max(underglow_count - 1, 1))
             pygame.draw.circle(self._native, self._pixels[halo_count + i], (x, underglow_y), 3)
 
     def _draw_buttons(self) -> None:

@@ -36,7 +36,6 @@ Twenty-one lines, verified against the cart on 2026-09-20.
 
 | Item | Variant | Qty | Price |
 |---|---|---|---|
-| 2.4in 240x320 SPI TFT | With Touch **ILI9341**, 14-pin, 42.8x77mm | 1 | ₪20.83 |
 | Kaisaya VU panel meter | 500µA 630Ω, 34mm, white face, warm backlight | 2 | ₪22.68 |
 | WS2812B strip | **Black PCB, 1m, 60 LED/m, IP30** | 1 | ₪12.02 |
 | MAX98357A I2S amp | 5-pack (spares for learning to solder) | 1 | ₪17.96 |
@@ -65,7 +64,7 @@ Twenty-one lines, verified against the cart on 2026-09-20.
 | KCD1 rocker switch | round 20mm, **3-pin red illuminated** (LED is 12V, see note) | 1 | ₪3.63 |
 | KY-023 joystick | dual-axis analog thumbstick with push | 1 | ₪5.18 |
 | ADS1115 ADC | 16-bit, 4 channel, I2C, reads the joystick | 1 | ₪4.83 |
-| | | **Parts subtotal** | **₪327.09** |
+| | | **Parts subtotal** | **₪306.26** |
 | FNIRSI HS-02A soldering kit | 100-450°C, **6 tips + 100W PD adapter + stand + case**, EU plug | 1 | ₪241.79 |
 | MECHANIC HX-T100 solder | **63% tin leaded**, rosin core, **0.6mm**, 55g | 1 | ₪16.84 |
 | ANENG 620A multimeter | 6000 counts, true RMS, capacitance, temp, AC/DC current | 1 | ₪62.21 |
@@ -77,7 +76,7 @@ Twenty-one lines, verified against the cart on 2026-09-20.
 | Silicone soldering mat | anti-static, magnetic, 932°F | 1 | ₪11.73 |
 | Hot glue gun | 20W, **EU plug**, 10 sticks | 1 | ₪6.68 |
 | | | **Tools subtotal** | **₪495.06** |
-| | | **Cart total, 39 lines** | **~₪822** |
+| | | **Cart total, 38 lines** | **~₪801** |
 
 Read the exact total at checkout after pressing **Select all items**; the sidebar
 figure only reflects the ticked lines. Promotional prices also drift day to day
@@ -103,6 +102,14 @@ the 100-piece 5mm assortment includes white and backlights the legend strip fine
 **Rocker switch LED note.** The KCD1's internal LED is sized for 12V and will be
 dim or dark on the 5V rail. Either live with it (the LINK lamp already shows
 power) or swap the internal series resistor for ~220Ω, a two-minute mod.
+
+**Display pulled from the verified cart, not dropped.** The 2.4in SPI TFT
+that was ₪20.83 above is gone along with the decision to use it (DECISIONS.md
+#20): the real display is now an 11.6in 1366x768 HDMI panel + driver board,
+a different part in a different price bracket, not sourced or priced against
+a real listing yet. Budget roughly $30-45 (~₪95-145) until a specific board
+is checked out - see section B below and docs/HARDWARE.md's note on the
+driver board's supply voltage, which is also still open.
 
 **Game Boy buttons upgraded to real switches.** First pass spec'd cheap 6x6mm
 tactile pushbuttons; revised after actually thinking about how it'd feel
@@ -222,8 +229,8 @@ soldering station.
 
 | # | Part | Qty | Unit | Total | Notes |
 |---|---|---|---|---|---|
-| B1 | 2.4 inch IPS SPI TFT, ST7789 or ILI9341, 320x240 | 2 | 9.00 | 18.00 | Must expose DC, RST and BL pins separately. Second is a spare. |
-| | | | | **18.00** | |
+| B1 | 11.6in 1366x768 HDMI LCD panel + driver board | 1 | 35.00 | 35.00 | Not sourced against a real listing yet - a placeholder within the real $30-45 range for this class of kit, not a checked-out price like most of this document. Confirm the driver board's input voltage before ordering (docs/HARDWARE.md): many want 12V, this build is 5V otherwise. |
+| | | | | **35.00** | |
 
 ## C. Light and IO expansion
 
@@ -354,7 +361,7 @@ Ordered later, once the perfboard build is proven and the layout is final.
 | Group | USD |
 |---|---|
 | A Core computer | 40.00 |
-| B Display | 18.00 |
+| B Display | 35.00 |
 | C Light and IO expansion | 29.30 |
 | D Analog meters | 17.00 |
 | E Controls | 37.60 |
@@ -363,11 +370,11 @@ Ordered later, once the perfboard build is proven and the layout is final.
 | H Fasteners | 14.00 |
 | I Prototyping | 11.00 |
 | J Tools | 131.00 |
-| **AliExpress order** | **336.90** |
+| **AliExpress order** | **353.90** |
 | L Local fabrication | 66.00 |
-| **Build total** | **402.90** |
+| **Build total** | **419.90** |
 | Shipping across parcels | ~20.00 |
-| **All in** | **~423** |
+| **All in** | **~440** |
 | M PCB revision, later | 22.00 |
 
 A second deck would cost about **$200**, since the tools and the spares are

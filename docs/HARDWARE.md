@@ -2,18 +2,22 @@
 
 ## Why the pinout looks like this
 
-A full panel wants NeoPixels, an SPI display, I2S audio, an I2C bus, an encoder,
-a 6-position rotary switch, four mech keys, three toggles and three buttons.
-That does not fit on 26 usable GPIOs without thought, and several of the
-peripherals collide on the same silicon.
+A full panel wants NeoPixels, I2S audio, an I2C bus, an encoder, a 6-position
+rotary switch, four mech keys, three toggles and three buttons. That does not
+fit on 26 usable GPIOs without thought, and several of the peripherals collide
+on the same silicon. The display used to be SPI (an early collision point,
+see below); it's HDMI now (DECISIONS.md #20, 11.6in 1366x768), which frees
+GPIO8-11, 17, 22 and 23 entirely rather than resolving a collision on them.
 
 The collisions and how they resolve:
 
 - **I2S audio takes GPIO18, 19 and 21.** Those are also SPI1 and the PCM
   peripheral, so once audio is in, SPI1 is gone and `rpi_ws281x` cannot use PCM.
 - **NeoPixels need precise timing**, which on a Pi means PWM, PCM or SPI DMA.
-  PCM is gone to audio, SPI0 is wanted for the display, so NeoPixels go on
-  **PWM0 via GPIO12**. `rpi_ws281x` needs root, so it runs in a systemd service.
+  PCM is gone to audio, so NeoPixels go on **PWM0 via GPIO12**. `rpi_ws281x`
+  needs root, so it runs in a systemd service. (SPI0 was the other DMA option
+  and is free now the display moved to HDMI, but PWM0 already works and
+  there's no reason to redo it.)
 - **The Pi has no analog output.** Both needles are driven from the PCA9685 at
   ~1.6kHz through an RC filter, with a trimpot per meter for full-scale calibration.
 - **Not enough input pins.** An MCP23017 on I2C adds 16, which absorbs the rotary
@@ -32,22 +36,22 @@ The collisions and how they resolve:
 | 5 | 29 | DENY button |
 | 6 | 31 | PANIC mushroom |
 | 7 | 26 | MCP23017 INT, interrupt on input change |
-| 8 | 24 | SPI0 CE0, display CS |
-| 9 | 21 | SPI0 MISO, unused, reserved |
-| 10 | 19 | SPI0 MOSI, display SDA |
-| 11 | 23 | SPI0 SCLK, display SCL |
+| 8 | 24 | spare, SPI0 CE0 (was display CS on the old SPI TFT) |
+| 9 | 21 | spare, SPI0 MISO |
+| 10 | 19 | spare, SPI0 MOSI (was display SDA) |
+| 11 | 23 | spare, SPI0 SCLK (was display SCL) |
 | 12 | 32 | NeoPixel data, PWM0, via 74AHCT125 |
 | 13 | 33 | spare, PWM1 |
 | 14 | 8 | spare, UART TX, serial console disabled |
 | 15 | 10 | spare, UART RX |
 | 16 | 36 | Encoder A |
-| 17 | 11 | Display backlight enable |
+| 17 | 11 | spare (was display backlight enable; HDMI panel's driver board handles its own backlight) |
 | 18 | 12 | I2S BCLK, MAX98357A |
 | 19 | 35 | I2S LRCLK |
 | 20 | 38 | spare |
 | 21 | 40 | I2S DIN |
-| 22 | 15 | Display DC |
-| 23 | 16 | Display RST |
+| 22 | 15 | spare (was display DC) |
+| 23 | 16 | spare (was display RST) |
 | 24 | 18 | spare |
 | 25 | 22 | Shutdown request / status |
 | 26 | 37 | Encoder B |
@@ -163,15 +167,26 @@ filter and the movement.
 | Load | Typical | Peak |
 |---|---|---|
 | Pi Zero 2 W | 350mA | 600mA |
-| Display with backlight | 80mA | 110mA |
+| Display + HDMI driver board | 400mA | 900mA |
 | NeoPixels, 30 total, capped at 40% brightness | 250mA | 700mA |
 | Speaker on transients | 80mA | 500mA |
 | Lamps and legend backlight, 7 channels | 90mA | 110mA |
 | Meters and their backlights | 40mA | 60mA |
-| **Total** | **890mA** | **2.08A** |
+| **Total** | **1.21A** | **2.87A** |
 
-A 5V 3A supply carries this with margin. A 2A supply will brown out the moment a
-white NeoPixel flash lands on top of a sound.
+**Unverified: the display row assumes 5V.** Was 80/110mA for the small SPI
+TFT; that number is gone along with the panel. Many generic HDMI/eDP driver
+boards for an 11.6in panel this size want **12V**, not the 5V this whole
+design otherwise runs on - some do offer a 5V option via jumper, but this
+needs checking against whatever specific board actually gets bought, not
+assumed. If it does turn out to be 12V-only, that is a second power rail
+(its own wall wart, or a 5V-to-12V boost converter), not something the
+existing 5V barrel jack and PCA9685 wiring can supply directly.
+
+A 5V 3A supply no longer carries this with real margin (2.87A peak is close
+to a 3A ceiling before the display row's own uncertainty). Plan on a 5V 4A
+supply for the logic side once the display's own power draw is confirmed,
+independent of whatever the panel itself needs.
 
 **Wire the power correctly.** 5V from the barrel jack goes to the Pi through the
 PWR IN micro-USB port. The USB data port only ever connects to the computer.

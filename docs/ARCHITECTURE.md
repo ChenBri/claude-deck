@@ -126,11 +126,13 @@ BLOCKED_PERMISSION > BLOCKED_INPUT > ERROR > WORKING > SUBAGENTS
 
 ## Rendering
 
-- Logical canvas 160x120, nearest-neighbour scaled 2x to the 320x240 panel.
-  Pixel art stays crisp and the drawing cost drops to a quarter. The Game Boy
-  app is the one exception: it hands `compose_output` its own 160x144 canvas
-  (native GB resolution), which gets the largest scale that still fits the
-  320x240 panel, letterboxed and centred, instead of the fixed 2x.
+- Logical canvas 160x120. Used to be an exact 2x fill of a 320x240 SPI panel;
+  the display is a 1366x768 HDMI panel now (DECISIONS.md #20), so
+  `compose_output` scales the canvas up to the largest size that still fits
+  (6.4x, 1024x768) and letterboxes the rest, rather than an exact multiple.
+  The Game Boy app hands in its own 160x144 canvas (native GB resolution)
+  and gets the same treatment. Pixel art stays crisp either way; the
+  tradeoff is unused width as black bars rather than a stretch.
 - Dirty-rect blitting: the mascot moves, the background does not.
 - A light CRT post pass, scanlines and slight bloom, to sell the enclosure.
 - Target 20 to 30 fps on a Zero 2 W, which is above classic handheld animation.

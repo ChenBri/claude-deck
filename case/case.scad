@@ -21,19 +21,37 @@
 // totalled up. Rebuilt at 260x150 with every position redone for real
 // spacing, agreed on directly rather than another round of reactive
 // single-mm growth.
+//
+// Stage 4 (superseded by stage 5 below): briefly tried a 4.0in 480x320
+// SPI panel at 260x180. Turned out "260mm width, 150-220mm height" was
+// describing the SCREEN Chen wanted, not the case - a screen that size
+// is a real 11.6in monitor-class panel, not an SPI TFT at all.
+//
+// Stage 5: 11.6in 1366x768 HDMI panel, 257x144mm active area (real
+// laptop-panel size, HDMI + driver board, common and cheap). This is
+// a different display interface, not just a bigger hole - SPI is out,
+// HDMI is in; firmware/deck/ui/render.py's OUTPUT_WIDTH/HEIGHT and
+// firmware/deck/panel/sim.py's window size move with it, and
+// docs/HARDWARE.md's SPI0 pin reservations for the display go away.
+//
+// A screen this wide also eats nearly the entire reasonable case
+// width on its own, so the meters/lamps/legend no longer fit beside
+// it the way the small display's did - they moved to a row below the
+// screen instead. Case grew to 300x290 to hold the screen, that row,
+// and a bit of real bezel margin around each.
 
 /* [Case envelope] */
-case_width      = 260;   // was 180 - see the scale note above
-case_depth      = 120;
-case_height     = 150;   // was 100
+case_width      = 300;   // was 260; the screen alone is 257mm wide
+case_depth      = 130;   // was 120; a driver board needs a bit more housing depth than the old SPI TFT
+case_height     = 290;   // was 180; screen (144mm) + the meter/lamp/legend row now stacks below it
 
 /* [Control deck] */
 deck_depth        = 55;
 deck_front_height = 10;
-deck_back_height  = 35;  // was 25; face still gets more room than that alone (see face_height)
+deck_back_height  = 40;  // unchanged - this is about reach ergonomics, not screen size
 
 /* [Rear face] */
-rear_face_depth = 30;
+rear_face_depth = 40;   // was 30; more room behind the panel for the HDMI driver board
 
 /* [Rendering] */
 $fn = 32;
@@ -115,29 +133,40 @@ module shell_silhouette() {
 }
 
 // ============================================================
-// Front face: display bezel, halo groove, lamps, meters, legend strip
+// Front face: display bezel, halo groove, meter/lamp/legend row
 // ============================================================
-display_w = 49;   // active area, 2.4in 320x240 4:3 - see docs/HARDWARE.md; a real part size, not grown
-display_h = 37;
+// Real 11.6in 1366x768 HDMI panel active area (DECISIONS.md #20).
+// Was 2.4in 320x240 (49x37mm), briefly 4.0in 480x320 (85x56mm) -
+// this is a different display interface (HDMI, not SPI), not just a
+// bigger hole; see the stage 5 note above.
+display_w = 257;
+display_h = 144;
 display_x = case_width / 2;
-display_z = deck_back_height + 65;   // upper-middle of the now-115mm face
 
-halo_margin = 10;      // groove sits this far outside the bezel opening
-halo_groove_w = 3;
+halo_margin = 15;      // groove sits this far outside the bezel opening
+halo_groove_w = 4;
 halo_groove_depth = 1.5;
+
+// Screen sits in the upper part of the face, with a 12mm margin to
+// the case top; everything else lives in a row below it, since a
+// screen this wide leaves no room to flank it the way the small
+// display's meters/lamps used to.
+display_z = case_height - 12 - halo_margin - display_h / 2;
+
+row_z = display_z - display_h / 2 - halo_margin - 12 - 20;   // meters + lamps row, below the halo
+legend_z = deck_back_height + 7;                              // legend strip, near the bottom of the face
 
 lamp_dia = 5;          // a real part size (BOM: chrome 5mm bezel holders), not grown
 lamp_count = 5;
-lamp_pitch = 16;
-lamp_z = deck_back_height + 25;
+lamp_pitch = 20;
+lamp_z = row_z;
 
 meter_dia = 34;        // a real part size (BOM: Kaisaya 34mm meter), not grown
-meter_offset_x = 78;   // either side of the display centreline; real clearance now, not bare-minimum
-meter_z = display_z;
+meter_offset_x = 100;   // either side of the display centreline, within the row below the screen
+meter_z = row_z;
 
-legend_w = 100;
+legend_w = 180;
 legend_h = 9;
-legend_z = deck_back_height + 10;
 legend_depth = 1.5;
 
 module front_face_cuts() {
@@ -152,16 +181,16 @@ module front_face_cuts() {
         rotate([-90, 0, 0])
             linear_extrude(height = halo_groove_depth + 0.01)
                 difference() {
-                    rounded_rect(display_w + 2 * halo_margin, display_h + 2 * halo_margin, 6);
-                    rounded_rect(display_w + 2 * halo_margin - halo_groove_w, display_h + 2 * halo_margin - halo_groove_w, 5);
+                    rounded_rect(display_w + 2 * halo_margin, display_h + 2 * halo_margin, 10);
+                    rounded_rect(display_w + 2 * halo_margin - halo_groove_w, display_h + 2 * halo_margin - halo_groove_w, 9);
                 }
 
-    // lamps: READY WORKING BLOCKED DONE LINK, evenly spaced under the display
+    // lamps: READY WORKING BLOCKED DONE LINK, centred in the row below the screen
     for (i = [0 : lamp_count - 1])
         on_face(display_x + (i - (lamp_count - 1) / 2) * lamp_pitch, lamp_z)
             face_hole(lamp_dia);
 
-    // meters: CONTEXT (left), FIVE_HOUR (right)
+    // meters: CONTEXT (left), FIVE_HOUR (right), same row as the lamps
     on_face(display_x - meter_offset_x, meter_z) face_hole(meter_dia);
     on_face(display_x + meter_offset_x, meter_z) face_hole(meter_dia);
 

@@ -21,9 +21,15 @@ from deck.ui.scenes.subagents import SubagentsScene
 from deck.ui.scenes.tetris import TetrisScene
 from deck.ui.scenes.working import WorkingScene
 
-OUTPUT_SCALE = 2
-OUTPUT_WIDTH = CANVAS_WIDTH * OUTPUT_SCALE
-OUTPUT_HEIGHT = CANVAS_HEIGHT * OUTPUT_SCALE
+
+# Physical panel resolution: 11.6in 1366x768 HDMI, DECISIONS.md #20 (was a
+# 320x240 SPI TFT, driven at an exact 2x fill; this is HDMI, not SPI, and
+# far bigger than 2x the logical canvas). compose_output() below scales
+# and letterboxes the 160x120 logical canvas to fit, same mechanism the
+# Game Boy app's own 160x144 canvas already relies on - nothing here
+# assumes an exact integer multiple of CANVAS_WIDTH/HEIGHT.
+OUTPUT_WIDTH = 1366
+OUTPUT_HEIGHT = 768
 
 _STATE_SCENES: dict[State, type[Scene]] = {
     State.READY: ReadyScene,
@@ -94,9 +100,12 @@ def compose_output(canvas: pygame.Surface) -> pygame.Surface:
 
     The scale is derived from whatever size `canvas` happens to be, not
     hardcoded to CANVAS_WIDTH/HEIGHT: every scene shares the 160x120 logical
-    canvas and gets an exact 2x fill, but the Game Boy app hands in its own
-    160x144 (native GB resolution, see ui/scenes/gameboy.py) and gets the
-    largest scale that still fits, letterboxed and centred.
+    canvas, and the Game Boy app hands in its own 160x144 (native GB
+    resolution, see ui/scenes/gameboy.py); both get the largest scale that
+    still fits the physical panel, letterboxed and centred. Neither is an
+    exact fit on the 1366x768 panel (DECISIONS.md #20), so there's always
+    some letterboxing - the 160x120 canvas lands at 6.4x, 1024x768, with
+    black bars either side rather than stretching to fill the width.
 
     Bloom is tuned deliberately weak: at this resolution, small UI text like
     the ticker and settings menu, a wide/strong bloom radius smears glyph
