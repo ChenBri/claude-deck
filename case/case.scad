@@ -39,11 +39,19 @@
 // it the way the small display's did - they moved to a row below the
 // screen instead. Case grew to 300x290 to hold the screen, that row,
 // and a bit of real bezel margin around each.
+//
+// Stage 6: hollowed out. A real wall thickness now, on every side
+// (front/back/top/deck slope, plus both width-direction end caps),
+// not a solid block - the previous stages only had a wall's worth of
+// material wherever a cutout happened to leave some. The bottom stays
+// open on purpose: DECISIONS.md #44 puts a 3mm steel ballast plate
+// there as the actual base, not a printed floor.
 
 /* [Case envelope] */
 case_width      = 300;   // was 260; the screen alone is 257mm wide
 case_depth      = 130;   // was 120; a driver board needs a bit more housing depth than the old SPI TFT
 case_height     = 290;   // was 180; screen (144mm) + the meter/lamp/legend row now stacks below it
+wall            = 3;     // FDM PETG shell thickness, same order as the 3mm steel ballast plate
 
 /* [Control deck] */
 deck_depth        = 55;
@@ -115,9 +123,12 @@ module deck_square_hole(w, h_cut = CUT) {
 }
 
 // ============================================================
-// Outer shell (still solid - wall thickness is the next pass)
+// Outer shell, hollowed to wall thickness
 // ============================================================
-module shell_silhouette() {
+// inset=0 gives the true outer silhouette; inset=wall gives the cavity
+// that gets carved out of it. Same profile either way, so the cavity
+// can't drift out of sync with the outside as numbers change above.
+module shell_profile(inset = 0) {
     profile = [
         [0, 0],
         [0, deck_front_height],
@@ -127,9 +138,30 @@ module shell_silhouette() {
         [case_depth, case_height],
         [case_depth, 0],
     ];
+    if (inset == 0) {
+        polygon(profile);
+    } else {
+        union() {
+            offset(delta = -inset) polygon(profile);
+            // extend past the true floor (z=0 here, before the profile's
+            // own rotate/extrude): no printed bottom, see the stage 6 note.
+            translate([0, -100])
+                square([case_depth, 100 + inset]);
+        }
+    }
+}
+
+module shell_silhouette() {
     rotate([90, 0, 90])
         linear_extrude(height = case_width)
-            polygon(profile);
+            shell_profile(0);
+}
+
+module shell_cavity() {
+    translate([wall, 0, 0])
+        rotate([90, 0, 90])
+            linear_extrude(height = case_width - 2 * wall)
+                shell_profile(wall);
 }
 
 // ============================================================
@@ -335,6 +367,7 @@ module deck_decor() {
 // ============================================================
 difference() {
     shell_silhouette();
+    shell_cavity();
     front_face_cuts();
     deck_cuts();
     back_panel_cuts();
