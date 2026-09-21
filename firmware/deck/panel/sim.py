@@ -13,7 +13,6 @@ import pygame
 
 from deck.panel.base import (
     BUTTON_LEDS,
-    GB_BUTTONS,
     LAMPS,
     MECH_KEYS,
     METERS,
@@ -133,8 +132,14 @@ class SimPanel(Panel):
         for i, name in enumerate(MECH_KEYS):
             boxes[("mech_key", name)] = pygame.Rect(side_x + 60 + i * 40, button_y + 5, 30, 30)
         boxes[("joystick", "joystick")] = pygame.Rect(side_x, toggle_y, 70, 70)
-        for i, name in enumerate(GB_BUTTONS):
-            boxes[("gb_button", name)] = pygame.Rect(side_x + 90 + i * 40, toggle_y + 5, 30, 30)
+        # Same diamond A/B offset a real Game Boy uses, not a row: B low-left,
+        # A high-right. START/SELECT are a smaller pair off to the side, real
+        # switches too (see DECISIONS.md #55) but a lot less prominent.
+        gb_x, gb_y = side_x + 90, toggle_y + 5
+        boxes[("gb_button", "A")] = pygame.Rect(gb_x + 40, gb_y, 30, 30)
+        boxes[("gb_button", "B")] = pygame.Rect(gb_x, gb_y + 48, 30, 30)
+        boxes[("gb_button", "SELECT")] = pygame.Rect(gb_x + 90, gb_y + 56, 18, 18)
+        boxes[("gb_button", "START")] = pygame.Rect(gb_x + 135, gb_y + 56, 18, 18)
         return boxes
 
     # -- Panel interface ----------------------------------------------------

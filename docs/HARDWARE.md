@@ -97,9 +97,15 @@ Game Boy app uses it as the d-pad.
 
 ## Game Boy buttons
 
-A, B, START, SELECT: four momentary tactile buttons, active low with pull-ups,
-on MCP23017 #2 B1-B4. Game Boy app only; every other scene ignores them. See
-DECISIONS.md #55.
+A, B, START, SELECT: four Gateron G Pro switches, active low with pull-ups,
+on MCP23017 #2 B1-B4, not 6x6mm tactile buttons. Game Boy app only; every
+other scene ignores them. Laid out like the real thing rather than a row: A
+and B diagonally offset, START/SELECT a smaller pair off to the side. This
+is the one part of the panel where genuine ergonomics matter, since holding
+down A while wiggling the joystick needs to not feel like poking a router's
+reset button. See DECISIONS.md #55. The layout is provisional until the
+case itself is designed (decision 49: case comes after the electronics
+arrive), and may need the deck a little larger, same as the joystick did.
 
 ## Game Boy audio
 

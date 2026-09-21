@@ -104,12 +104,18 @@ the 100-piece 5mm assortment includes white and backlights the legend strip fine
 dim or dark on the 5V rail. Either live with it (the LINK lamp already shows
 power) or swap the internal series resistor for ~220Ω, a two-minute mod.
 
-**Game Boy buttons, not yet sourced.** A/B/START/SELECT just need four cheap
-6x6mm tactile pushbuttons (any "tactile switch assortment" listing covers
-them for pennies) plus four small keycaps. Not added to the verified cart
-above because no specific listing has been checked yet; the E11 estimate is
-a placeholder. Scales fine either way, since MCP23017 #2 already has the
-spare pins and no new IC is needed.
+**Game Boy buttons upgraded to real switches.** First pass spec'd cheap 6x6mm
+tactile pushbuttons; revised after actually thinking about how it'd feel
+under a thumb, which is closer to a router reset button than a Game Boy face
+button. A/B/START/SELECT now use the same Gateron G Pro switch and DSA
+keycap already in the cart for CLD/NEW/PLAN/MIC (**the verified cart's
+Gateron 10-pack and keycap 20-pack already cover all eight**, only 4 of each
+were spoken for before, so this is a like-for-like part with zero new
+listings to check, not a new sourcing job). A/B sit in a diagonal offset
+(A upper-right, B lower-left) rather than a straight row, and START/SELECT
+are a smaller pair off to the side, both matching a real Game Boy's layout
+more than the panel's other rows-of-identical-switches do. MCP23017 #2 still
+just needs its existing spare pins, no new IC either way.
 
 **Game Boy audio needs nothing new.** It plays out the same F1 MAX98357A amp
 and F2 speaker every other sound already uses. No BOM line, no section F
@@ -254,11 +260,10 @@ soldering station.
 | E5 | Pointer knob for E4 | 1 | 1.50 | 1.50 | |
 | E6 | EC11 rotary encoder with push | 2 | 1.20 | 2.40 | Second is a spare. |
 | E7 | Knurled knob for E6 | 1 | 1.20 | 1.20 | |
-| E8 | Mechanical key switches, Gateron | 4 | 0.75 | 3.00 | |
-| E9 | Blank keycaps | 4 | 0.90 | 3.50 | Legends: CLD / NEW / PLAN / MIC. |
+| E8 | Mechanical key switches, Gateron | 8 | 0.75 | 6.00 | 4 for CLD/NEW/PLAN/MIC, 4 for Game Boy A/B/START/SELECT. Real switches with travel, not 6x6mm tacts, so the Game Boy buttons feel like something instead of a router reset button. |
+| E9 | Blank keycaps | 8 | 0.90 | 7.00 | Legends: CLD / NEW / PLAN / MIC / A / B / START / SELECT. |
 | E10 | SPDT mini toggle switches | 3 | 1.00 | 3.00 | MUTE, NIGHT, AUTO-ACCEPT. |
-| E11 | 6x6mm tactile pushbuttons | 4 | 0.10 | 0.40 | Game Boy A/B/START/SELECT. Not yet priced against a real listing, see note below. |
-| | | | | **31.50** | |
+| | | | | **37.60** | |
 
 ## F. Audio
 
@@ -352,17 +357,17 @@ Ordered later, once the perfboard build is proven and the layout is final.
 | B Display | 18.00 |
 | C Light and IO expansion | 29.30 |
 | D Analog meters | 17.00 |
-| E Controls | 31.50 |
+| E Controls | 37.60 |
 | F Audio | 6.00 |
 | G Back panel and wiring | 33.00 |
 | H Fasteners | 14.00 |
 | I Prototyping | 11.00 |
 | J Tools | 131.00 |
-| **AliExpress order** | **330.80** |
+| **AliExpress order** | **336.90** |
 | L Local fabrication | 66.00 |
-| **Build total** | **396.80** |
+| **Build total** | **402.90** |
 | Shipping across parcels | ~20.00 |
-| **All in** | **~416** |
+| **All in** | **~423** |
 | M PCB revision, later | 22.00 |
 
 A second deck would cost about **$200**, since the tools and the spares are
