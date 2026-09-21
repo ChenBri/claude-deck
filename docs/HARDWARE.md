@@ -81,7 +81,7 @@ which is what makes NIGHT mode and the blocked-state pulse possible.
 |---|---|---|
 | PCA9685 | 0x40 | lamps, legend backlight, button LEDs, meters |
 | MCP23017 #1 | 0x20 (A0-A2 low) | rotary switch, mech keys, toggles |
-| MCP23017 #2 | 0x21 (A0 high) | joystick push, spares |
+| MCP23017 #2 | 0x21 (A0 high) | joystick push, Game Boy A/B/START/SELECT, spares |
 | ADS1115 | 0x48 (ADDR to GND) | joystick X on A0, Y on A1; A2/A3 spare |
 
 Four devices, no address clashes, one bus. The second MCP23017 was ordered as a
@@ -92,7 +92,14 @@ spare from Digi-Key and is now the joystick's home.
 KY-023 dual-axis thumbstick. VRx and VRy are 10k pots swept across 3.3V, read by
 the ADS1115 at 16 bits; centre reads ~1.65V. SW is the push button, active low,
 into MCP23017 #2 B0 with its internal pull-up. Deadzone and axis calibration live
-in the settings file. Snake and Tetris consume it as a 4-way plus centre.
+in the settings file. Snake and Tetris consume it as a 4-way plus centre; the
+Game Boy app uses it as the d-pad.
+
+## Game Boy buttons
+
+A, B, START, SELECT: four momentary tactile buttons, active low with pull-ups,
+on MCP23017 #2 B1-B4. Game Boy app only; every other scene ignores them. See
+DECISIONS.md #55.
 
 ## MCP23017 #1, all inputs with pull-ups
 
@@ -170,6 +177,19 @@ The Pi presents a composite USB device over the data port:
 
 If Windows refuses to bind RNDIS cleanly, the fallback is WiFi for the data
 channel with HID still over USB. The `WIFI` toggle exists for exactly this.
+
+**Planned: a third gadget function, mass storage, for ROM transfer.** The
+composite gadget already carries CDC-ECM/RNDIS plus HID; a `g_mass_storage`
+function can sit alongside them, backed by a FAT32 image file on the
+writable `/var/deck` partition (root is read-only, so the backing file has
+to live on partition 3, see SD card layout below). Normal operation: the Pi
+loop-mounts that image at `/var/deck/roms` and the Game Boy app reads it
+like any other folder. Flip a new "USB drive mode" toggle in Settings: the
+Pi unmounts its own loop mount, binds the mass storage function via
+configfs, and the same image appears as a drive on the connected PC to drag
+ROMs onto. Flip it back and the Pi unbinds the function and re-mounts
+locally. Not implemented yet: no hardware to build the gadget config
+against, same status as RealPanel (see docs/BUILD.md phase 0). Decision 56.
 
 ## SD card layout
 

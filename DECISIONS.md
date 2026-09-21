@@ -92,6 +92,9 @@ Full reasoning in [docs/SAFETY.md](docs/SAFETY.md).
 | 51 | MIC key | Daemon receives the hotkey and invokes the OS dictation shortcut: Win+H on Windows, the configured dictation shortcut on macOS. |
 | 52 | Fabrication | Local Tel Aviv print shop for the PETG case and the laser-cut legend strip, ordered after the electronics arrive so every cutout is measured. |
 | 53 | Joystick | KY-023 analog thumbstick read through an ADS1115 I2C ADC, push button on the second MCP23017. Added 2026-09-21 for games and menu navigation. The deck gains a ~26mm square cutout; case width may grow to 170mm. |
+| 54 | Game Boy app | PyBoy (GB/GBC) headless core, added 2026-09-21. Fourth home-screen app alongside Settings/Snake/Tetris. Draws into its own 160x144 canvas (native GB resolution), letterboxed onto the panel instead of the 160x120 canvas every other scene shares. |
+| 55 | Game Boy buttons | A, B, START, SELECT: four small tactile buttons wired to the second MCP23017's remaining spares, no new IC. The d-pad reuses the existing joystick rather than adding a fifth control. |
+| 56 | ROM handling | Never shipped in this public repo: each person drops their own legally-dumped .gb/.gbc files into firmware/roms/, which is gitignored except for its own README. Planned, not yet built: a fifth USB gadget function (mass storage, backed by a FAT image file on the writable partition, toggled from the Settings app) so ROMs can be dragged onto the deck as a drive from the connected PC instead of swapping the SD card. No hardware exists yet to build this against; see docs/HARDWARE.md. |
 
 ## Hardware constraints resolved
 

@@ -75,6 +75,7 @@ firmware/deck/
       idle.py         clock, date, your name, weather, git status, today's totals
       snake.py        joystick steers, encoder push pauses
       tetris.py       joystick moves, mech keys rotate and drop
+      gameboy.py      PyBoy (GB/GBC) core, own 160x144 canvas, letterboxed
       boot.py         covers the ~25s Pi boot so it never looks broken
   audio/
     chiptune.py       generated blips, one per event, mute switch respected
@@ -125,7 +126,10 @@ BLOCKED_PERMISSION > BLOCKED_INPUT > ERROR > WORKING > SUBAGENTS
 ## Rendering
 
 - Logical canvas 160x120, nearest-neighbour scaled 2x to the 320x240 panel.
-  Pixel art stays crisp and the drawing cost drops to a quarter.
+  Pixel art stays crisp and the drawing cost drops to a quarter. The Game Boy
+  app is the one exception: it hands `compose_output` its own 160x144 canvas
+  (native GB resolution), which gets the largest scale that still fits the
+  320x240 panel, letterboxed and centred, instead of the fixed 2x.
 - Dirty-rect blitting: the mascot moves, the background does not.
 - A light CRT post pass, scanlines and slight bloom, to sell the enclosure.
 - Target 20 to 30 fps on a Zero 2 W, which is above classic handheld animation.

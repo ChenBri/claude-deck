@@ -57,6 +57,14 @@ Replay a recorded session into it at speed:
 python firmware/tools/replay.py sessions/2026-09-20.jsonl --speed 10
 ```
 
+Home screen has four apps: Settings, Snake, Tetris and Game Boy. The Game Boy
+app runs real .gb/.gbc ROMs through [PyBoy](https://github.com/Baekalfen/PyBoy);
+drop your own legally-dumped files into [firmware/roms/](firmware/roms/) (it's
+gitignored, nothing you put there is ever committed) and they show up in the
+in-app picker. Controls in the sim window: joystick is the d-pad, Z/C are
+A/B, Backspace/Right-Shift are Start/Select, encoder rotates the picker and
+push loads/pauses.
+
 ## Running the full stack locally (no hardware needed)
 
 The simulator above and `tools/record.py` / `tools/replay.py` already cover

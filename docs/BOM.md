@@ -104,6 +104,13 @@ the 100-piece 5mm assortment includes white and backlights the legend strip fine
 dim or dark on the 5V rail. Either live with it (the LINK lamp already shows
 power) or swap the internal series resistor for ~220Ω, a two-minute mod.
 
+**Game Boy buttons, not yet sourced.** A/B/START/SELECT just need four cheap
+6x6mm tactile pushbuttons (any "tactile switch assortment" listing covers
+them for pennies) plus four small keycaps. Not added to the verified cart
+above because no specific listing has been checked yet; the E11 estimate is
+a placeholder. Scales fine either way, since MCP23017 #2 already has the
+spare pins and no new IC is needed.
+
 **The "Max Combo" wall.** Whole tool categories on AliExpress are dominated by
 listings that only sell through the Max Combo bundle flow, which has no quick-add
 and opens a bundle-builder page instead. Wire strippers, precision screwdriver
@@ -246,7 +253,8 @@ soldering station.
 | E8 | Mechanical key switches, Gateron | 4 | 0.75 | 3.00 | |
 | E9 | Blank keycaps | 4 | 0.90 | 3.50 | Legends: CLD / NEW / PLAN / MIC. |
 | E10 | SPDT mini toggle switches | 3 | 1.00 | 3.00 | MUTE, NIGHT, AUTO-ACCEPT. |
-| | | | | **31.10** | |
+| E11 | 6x6mm tactile pushbuttons | 4 | 0.10 | 0.40 | Game Boy A/B/START/SELECT. Not yet priced against a real listing, see note below. |
+| | | | | **31.50** | |
 
 ## F. Audio
 
@@ -340,15 +348,15 @@ Ordered later, once the perfboard build is proven and the layout is final.
 | B Display | 18.00 |
 | C Light and IO expansion | 29.30 |
 | D Analog meters | 17.00 |
-| E Controls | 31.10 |
+| E Controls | 31.50 |
 | F Audio | 6.00 |
 | G Back panel and wiring | 33.00 |
 | H Fasteners | 14.00 |
 | I Prototyping | 11.00 |
 | J Tools | 131.00 |
-| **AliExpress order** | **330.40** |
+| **AliExpress order** | **330.80** |
 | L Local fabrication | 66.00 |
-| **Build total** | **396.40** |
+| **Build total** | **396.80** |
 | Shipping across parcels | ~20.00 |
 | **All in** | **~416** |
 | M PCB revision, later | 22.00 |
