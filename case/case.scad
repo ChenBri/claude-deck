@@ -7,62 +7,277 @@
 // #39: no reference image was given, so the proportions here are a first
 // design pass, not a locked shape.
 //
-// Stage 1 of this file: the outer shell silhouette only, solid, no wall
-// thickness and no cutouts yet - just to check the overall proportions
-// read as "retro terminal" before building anything on top of it.
+// Stage 2: every cutout (front face, control deck, back panel) plus
+// simple stand-in geometry for the knobs/keycaps/knobs so it reads as a
+// real control panel and not just a box with holes. Still solid (no wall
+// thickness / hollow interior yet) - that's the next pass once this
+// layout is confirmed, since it doesn't change anything visible from
+// outside.
+//
+// One change from the first pass: the rear face was only 48mm tall
+// there (deck rising to 52mm), and laying out the display + lamps +
+// legend + meters on it was a genuinely tight stack. Pulled the deck's
+// rise back to 15mm (a gentler, still-comfortable slope) so the face
+// gets 75mm instead - closer to DECISIONS.md #40's "95mm", and there's
+// room to actually lay things out without them touching.
 
 /* [Case envelope] */
-// Overall width. DECISIONS.md #40 says 160mm, but #53 (joystick) and #55
-// (Game Boy buttons) both already flagged this as likely needing to grow;
-// starting from that grown number rather than the original.
-case_width      = 170;
-// Total footprint, front to back.
+case_width      = 180;   // was 170; grown again for clearance between the Game Boy cluster and APPROVE/DENY/panic
 case_depth      = 120;
-// Total height at the tallest point (the rear face).
 case_height     = 100;
 
 /* [Control deck] */
-// How far the sloped control deck projects forward, per #40's "55mm deep".
 deck_depth        = 55;
-// Height of the low front lip, where the deck's leading edge sits.
-deck_front_height = 12;
-// Height where the deck meets the base of the rear vertical face - this is
-// the comfortable reach height for the rotary switch, encoder, joystick
-// etc. Not specified in DECISIONS.md; chosen for a gentle, comfortable
-// slope rather than to hit the letter of "upper face 95mm" (see note below).
-deck_back_height  = 52;
+deck_front_height = 10;
+deck_back_height  = 25;  // see note above: was 52, pulled back for face room
 
 /* [Rear face] */
-// NOTE on #40: "Upper face 95mm, deck 55mm deep" doesn't fully resolve
-// geometrically once the deck has to rise to a usable knob height - a 95mm
-// face plus a deck rising to anywhere above a few mm would overshoot the
-// 100mm case height. This model treats deck_back_height as the real
-// constraint (ergonomics) and lets the rear face be whatever's left above
-// it, rather than forcing exactly 95mm. Flagging this rather than quietly
-// picking one: happy to redo it either way once you've seen this.
-rear_face_depth = 30; // the rear face's own footprint depth, holds the display/electronics stack
+rear_face_depth = 30;
 
 /* [Rendering] */
-$fn = 48;
+$fn = 32;
 
+// ============================================================
+// Derived geometry
+// ============================================================
+front_apron_depth = case_depth - rear_face_depth - deck_depth;
+y1 = front_apron_depth;              // deck's front edge, along the depth axis
+y2 = y1 + deck_depth;                // deck's back edge = rear face's front plane
+face_height = case_height - deck_back_height;
+slope_rise   = deck_back_height - deck_front_height;
+slope_angle  = atan2(slope_rise, deck_depth);   // degrees above horizontal
+slope_length = sqrt(deck_depth * deck_depth + slope_rise * slope_rise);
+
+CUT = 200; // oversized cutter dimension, sliced away by later intersections where needed
+
+// ============================================================
+// Small helpers
+// ============================================================
+module rounded_rect(w, h, r) {
+    hull()
+        for (dx = [-1, 1]) for (dy = [-1, 1])
+            translate([dx * (w / 2 - r), dy * (h / 2 - r)])
+                circle(r = r);
+}
+
+// Places children on the sloped deck. Local (x, s, z): x is across the
+// case width (unchanged by the slope), s is distance up the slope from
+// its front edge, z is height above the deck surface (its normal).
+module on_deck(x, s, z = 0) {
+    translate([x, y1, deck_front_height])
+        rotate([slope_angle, 0, 0])
+            translate([0, s, z])
+                children();
+}
+
+// Places children on the rear vertical face. Local (x, z) match world
+// X and Z; the face's own plane is at world Y = y2.
+module on_face(x, z) {
+    translate([x, y2, z])
+        children();
+}
+
+// A cutter cylinder driven straight through the rear face (+Y).
+module face_hole(d, h = CUT) {
+    rotate([-90, 0, 0])
+        cylinder(d = d, h = h, $fn = 48);
+}
+
+// A cutter cylinder driven straight through the deck, along its normal.
+module deck_hole(d, h = CUT) {
+    translate([0, 0, -h / 2])
+        cylinder(d = d, h = h, $fn = 48);
+}
+
+module deck_square_hole(w, h_cut = CUT) {
+    translate([0, 0, -h_cut / 2])
+        linear_extrude(height = h_cut)
+            square([w, w], center = true);
+}
+
+// ============================================================
+// Outer shell (still solid - wall thickness is the next pass)
+// ============================================================
 module shell_silhouette() {
-    front_apron_depth = case_depth - rear_face_depth - deck_depth;
-    y1 = front_apron_depth;       // deck's front edge
-    y2 = y1 + deck_depth;         // deck's back edge / rear face's front surface
-
     profile = [
         [0, 0],
         [0, deck_front_height],
-        [y1, deck_front_height],       // flat low apron in front of the deck
-        [y2, deck_back_height],        // sloped deck
-        [y2, case_height],             // up the rear face
-        [case_depth, case_height],     // flat top
-        [case_depth, 0],               // down the back wall
+        [y1, deck_front_height],
+        [y2, deck_back_height],
+        [y2, case_height],
+        [case_depth, case_height],
+        [case_depth, 0],
     ];
-
     rotate([90, 0, 90])
         linear_extrude(height = case_width)
             polygon(profile);
 }
 
-shell_silhouette();
+// ============================================================
+// Front face: display bezel, halo groove, lamps, meters, legend strip
+// ============================================================
+display_w = 49;   // active area, 2.4in 320x240 4:3 - see docs/HARDWARE.md
+display_h = 37;
+display_x = case_width / 2;
+display_z = deck_back_height + 45;   // upper-middle of the face
+
+halo_margin = 7;      // groove sits this far outside the bezel opening
+halo_groove_w = 3;
+halo_groove_depth = 1.5;
+
+lamp_dia = 5;
+lamp_count = 5;
+lamp_pitch = 13;
+lamp_z = deck_back_height + 15;
+
+meter_dia = 34;
+meter_offset_x = 62;   // either side of the display centreline; clear of the halo groove
+meter_z = display_z;
+
+legend_w = 76;    // was 130: that reached far enough to clip into the meters
+legend_h = 9;
+legend_z = deck_back_height + 5;
+legend_depth = 1.5;
+
+module front_face_cuts() {
+    // display: rectangular, not round - cut directly rather than via face_hole()
+    translate([display_x, y2 - 1, display_z])
+        rotate([-90, 0, 0])
+            linear_extrude(height = CUT)
+                square([display_w, display_h], center = true);
+
+    // halo groove: a shallow rounded-rect ring around the bezel opening
+    translate([display_x, y2 - halo_groove_depth, display_z])
+        rotate([-90, 0, 0])
+            linear_extrude(height = halo_groove_depth + 0.01)
+                difference() {
+                    rounded_rect(display_w + 2 * halo_margin, display_h + 2 * halo_margin, 6);
+                    rounded_rect(display_w + 2 * halo_margin - halo_groove_w, display_h + 2 * halo_margin - halo_groove_w, 5);
+                }
+
+    // lamps: READY WORKING BLOCKED DONE LINK, evenly spaced under the display
+    for (i = [0 : lamp_count - 1])
+        on_face(display_x + (i - (lamp_count - 1) / 2) * lamp_pitch, lamp_z)
+            face_hole(lamp_dia);
+
+    // meters: CONTEXT (left), FIVE_HOUR (right)
+    on_face(display_x - meter_offset_x, meter_z) face_hole(meter_dia);
+    on_face(display_x + meter_offset_x, meter_z) face_hole(meter_dia);
+
+    // legend strip: shallow backlit recess, not a through-hole
+    translate([display_x, y2 - legend_depth, legend_z])
+        rotate([-90, 0, 0])
+            linear_extrude(height = legend_depth + 0.01)
+                rounded_rect(legend_w, legend_h, 2);
+}
+
+// ============================================================
+// Control deck: rotary, encoder, mech keys, toggles, joystick,
+// Game Boy buttons, APPROVE/DENY, panic
+// ============================================================
+rotary_dia   = 10;
+encoder_dia  = 7.5;
+mech_key_cut = 14;
+toggle_dia   = 6.5;
+joystick_cut = 26;
+approve_deny_dia = 19.2;
+panic_dia    = 22;
+gb_button_cut = 14;
+
+// back row: nearer the rear face, for "set once" controls
+back_row_s = slope_length - 12;
+mech_key_x = [64, 82, 100, 118];   // 18mm pitch, 4mm clear gap around a 14mm cut
+toggle_x   = [134, 146, 158];
+
+// front row: nearer the front edge, for hands-on controls
+front_row_s = 18;
+
+module deck_cuts() {
+    on_deck(20, back_row_s) deck_hole(rotary_dia);
+    on_deck(45, back_row_s) deck_hole(encoder_dia);
+    for (x = mech_key_x) on_deck(x, back_row_s) deck_square_hole(mech_key_cut);
+    for (x = toggle_x)   on_deck(x, back_row_s) deck_hole(toggle_dia);
+
+    on_deck(25, front_row_s) deck_square_hole(joystick_cut);
+
+    // Game Boy buttons: A upper-right / B lower-left of each other,
+    // START/SELECT a smaller pair alongside - same relative layout as
+    // firmware/deck/panel/sim.py's drawn mockup. Spaced so a 14mm cut
+    // never gets closer than an ~16mm centre distance to its neighbour.
+    on_deck(65, front_row_s + 10) deck_square_hole(gb_button_cut); // A
+    on_deck(50, front_row_s - 6)  deck_square_hole(gb_button_cut); // B
+    on_deck(78, front_row_s - 4)  deck_square_hole(gb_button_cut); // SELECT
+    on_deck(94, front_row_s - 4)  deck_square_hole(gb_button_cut); // START
+
+    on_deck(118, front_row_s) deck_hole(approve_deny_dia);
+    on_deck(142, front_row_s) deck_hole(approve_deny_dia);
+    on_deck(166, front_row_s) deck_hole(panic_dia);
+}
+
+// ============================================================
+// Back panel: USB-C, barrel jack, rocker switch, SD card slot
+// ============================================================
+usbc_w = 10; usbc_h = 4;
+barrel_dia = 12;
+rocker_dia = 20;   // KCD1 is really a rounded-rect "boat" shape; round is a simplification for now
+sd_slot_w = 15; sd_slot_h = 3;
+
+back_panel_z = (deck_back_height + case_height) / 2; // mid-height of the rear face's back side
+
+module back_panel_cuts() {
+    translate([40, case_depth - CUT / 2, back_panel_z])
+        rotate([-90, 0, 0])
+            linear_extrude(height = CUT)
+                square([usbc_w, usbc_h], center = true);
+
+    translate([70, case_depth - CUT / 2, back_panel_z])
+        rotate([-90, 0, 0])
+            cylinder(d = barrel_dia, h = CUT, $fn = 48);
+
+    translate([100, case_depth - CUT / 2, back_panel_z])
+        rotate([-90, 0, 0])
+            cylinder(d = rocker_dia, h = CUT, $fn = 48);
+
+    translate([130, case_depth - CUT / 2, back_panel_z])
+        rotate([-90, 0, 0])
+            linear_extrude(height = CUT)
+                square([sd_slot_w, sd_slot_h], center = true);
+}
+
+// ============================================================
+// Stand-in caps/knobs, so this reads as a control panel and not just
+// a box with holes in it. Purely cosmetic, not real part geometry.
+// ============================================================
+module knob(dia, height) {
+    color("Silver") cylinder(d = dia, h = height, $fn = 32);
+}
+
+module keycap(w, height) {
+    color("DarkOrange") cube([w, w, height], center = true);
+}
+
+module deck_decor() {
+    on_deck(20, back_row_s) translate([0,0,0]) knob(20, 12);
+    on_deck(45, back_row_s) knob(14, 10);
+    for (x = mech_key_x) on_deck(x, back_row_s) translate([0, 0, 2]) keycap(mech_key_cut + 1, 4);
+    on_deck(65, front_row_s + 10) translate([0, 0, 2]) keycap(gb_button_cut + 1, 4);
+    on_deck(50, front_row_s - 6)  translate([0, 0, 2]) keycap(gb_button_cut + 1, 4);
+    on_deck(78, front_row_s - 4)  translate([0, 0, 2]) keycap(gb_button_cut + 1, 4);
+    on_deck(94, front_row_s - 4)  translate([0, 0, 2]) keycap(gb_button_cut + 1, 4);
+    // APPROVE/DENY/panic decor caps dropped: they render invisible under
+    // --render specifically (a color/CGAL quirk I couldn't pin down, not
+    // a geometry problem) while sitting a few lines from a working knob().
+    // The holes themselves are correctly cut either way.
+    on_deck(25, front_row_s) color("DarkOrange") translate([0, 0, 6]) sphere(d = 12, $fn = 24);
+}
+
+// ============================================================
+// Assemble
+// ============================================================
+difference() {
+    shell_silhouette();
+    front_face_cuts();
+    deck_cuts();
+    back_panel_cuts();
+}
+deck_decor();
