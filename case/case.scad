@@ -14,22 +14,23 @@
 // layout is confirmed, since it doesn't change anything visible from
 // outside.
 //
-// One change from the first pass: the rear face was only 48mm tall
-// there (deck rising to 52mm), and laying out the display + lamps +
-// legend + meters on it was a genuinely tight stack. Pulled the deck's
-// rise back to 15mm (a gentler, still-comfortable slope) so the face
-// gets 75mm instead - closer to DECISIONS.md #40's "95mm", and there's
-// room to actually lay things out without them touching.
+// Stage 3: real-world scale check. 180x100 (was 170x100, was 160x100)
+// turned out to be a bare-minimum-clearance number, not a comfortable
+// one - adding up genuine finger-clearance between every cluster (not
+// just "doesn't overlap") came to roughly 250-280mm wide once actually
+// totalled up. Rebuilt at 260x150 with every position redone for real
+// spacing, agreed on directly rather than another round of reactive
+// single-mm growth.
 
 /* [Case envelope] */
-case_width      = 180;   // was 170; grown again for clearance between the Game Boy cluster and APPROVE/DENY/panic
+case_width      = 260;   // was 180 - see the scale note above
 case_depth      = 120;
-case_height     = 100;
+case_height     = 150;   // was 100
 
 /* [Control deck] */
 deck_depth        = 55;
 deck_front_height = 10;
-deck_back_height  = 25;  // see note above: was 52, pulled back for face room
+deck_back_height  = 35;  // was 25; face still gets more room than that alone (see face_height)
 
 /* [Rear face] */
 rear_face_depth = 30;
@@ -116,27 +117,27 @@ module shell_silhouette() {
 // ============================================================
 // Front face: display bezel, halo groove, lamps, meters, legend strip
 // ============================================================
-display_w = 49;   // active area, 2.4in 320x240 4:3 - see docs/HARDWARE.md
+display_w = 49;   // active area, 2.4in 320x240 4:3 - see docs/HARDWARE.md; a real part size, not grown
 display_h = 37;
 display_x = case_width / 2;
-display_z = deck_back_height + 45;   // upper-middle of the face
+display_z = deck_back_height + 65;   // upper-middle of the now-115mm face
 
-halo_margin = 7;      // groove sits this far outside the bezel opening
+halo_margin = 10;      // groove sits this far outside the bezel opening
 halo_groove_w = 3;
 halo_groove_depth = 1.5;
 
-lamp_dia = 5;
+lamp_dia = 5;          // a real part size (BOM: chrome 5mm bezel holders), not grown
 lamp_count = 5;
-lamp_pitch = 13;
-lamp_z = deck_back_height + 15;
+lamp_pitch = 16;
+lamp_z = deck_back_height + 25;
 
-meter_dia = 34;
-meter_offset_x = 62;   // either side of the display centreline; clear of the halo groove
+meter_dia = 34;        // a real part size (BOM: Kaisaya 34mm meter), not grown
+meter_offset_x = 78;   // either side of the display centreline; real clearance now, not bare-minimum
 meter_z = display_z;
 
-legend_w = 76;    // was 130: that reached far enough to clip into the meters
+legend_w = 100;
 legend_h = 9;
-legend_z = deck_back_height + 5;
+legend_z = deck_back_height + 10;
 legend_depth = 1.5;
 
 module front_face_cuts() {
@@ -186,32 +187,32 @@ gb_button_cut = 14;
 
 // back row: nearer the rear face, for "set once" controls
 back_row_s = slope_length - 12;
-mech_key_x = [64, 82, 100, 118];   // 18mm pitch, 4mm clear gap around a 14mm cut
-toggle_x   = [134, 146, 158];
+mech_key_x = [95, 117, 139, 161];   // 22mm pitch: a real ~7mm gap around a 15mm keycap
+toggle_x   = [190, 210, 230];       // 20mm pitch
 
 // front row: nearer the front edge, for hands-on controls
-front_row_s = 18;
+front_row_s = 22;
 
 module deck_cuts() {
-    on_deck(20, back_row_s) deck_hole(rotary_dia);
-    on_deck(45, back_row_s) deck_hole(encoder_dia);
+    on_deck(30, back_row_s) deck_hole(rotary_dia);
+    on_deck(65, back_row_s) deck_hole(encoder_dia);
     for (x = mech_key_x) on_deck(x, back_row_s) deck_square_hole(mech_key_cut);
     for (x = toggle_x)   on_deck(x, back_row_s) deck_hole(toggle_dia);
 
-    on_deck(25, front_row_s) deck_square_hole(joystick_cut);
+    on_deck(35, front_row_s) deck_square_hole(joystick_cut);
 
     // Game Boy buttons: A upper-right / B lower-left of each other,
     // START/SELECT a smaller pair alongside - same relative layout as
-    // firmware/deck/panel/sim.py's drawn mockup. Spaced so a 14mm cut
-    // never gets closer than an ~16mm centre distance to its neighbour.
-    on_deck(65, front_row_s + 10) deck_square_hole(gb_button_cut); // A
-    on_deck(50, front_row_s - 6)  deck_square_hole(gb_button_cut); // B
-    on_deck(78, front_row_s - 4)  deck_square_hole(gb_button_cut); // SELECT
-    on_deck(94, front_row_s - 4)  deck_square_hole(gb_button_cut); // START
+    // firmware/deck/panel/sim.py's drawn mockup. Real spacing now: a
+    // 14mm cut never gets closer than a ~20mm centre distance.
+    on_deck(120, front_row_s + 10) deck_square_hole(gb_button_cut); // A
+    on_deck(100, front_row_s - 10) deck_square_hole(gb_button_cut); // B
+    on_deck(135, front_row_s - 6)  deck_square_hole(gb_button_cut); // SELECT
+    on_deck(155, front_row_s - 6)  deck_square_hole(gb_button_cut); // START
 
-    on_deck(118, front_row_s) deck_hole(approve_deny_dia);
-    on_deck(142, front_row_s) deck_hole(approve_deny_dia);
-    on_deck(166, front_row_s) deck_hole(panic_dia);
+    on_deck(195, front_row_s) deck_hole(approve_deny_dia);
+    on_deck(222, front_row_s) deck_hole(approve_deny_dia);
+    on_deck(244, front_row_s) deck_hole(panic_dia);
 }
 
 // ============================================================
@@ -225,20 +226,20 @@ sd_slot_w = 15; sd_slot_h = 3;
 back_panel_z = (deck_back_height + case_height) / 2; // mid-height of the rear face's back side
 
 module back_panel_cuts() {
-    translate([40, case_depth - CUT / 2, back_panel_z])
+    translate([50, case_depth - CUT / 2, back_panel_z])
         rotate([-90, 0, 0])
             linear_extrude(height = CUT)
                 square([usbc_w, usbc_h], center = true);
 
-    translate([70, case_depth - CUT / 2, back_panel_z])
+    translate([110, case_depth - CUT / 2, back_panel_z])
         rotate([-90, 0, 0])
             cylinder(d = barrel_dia, h = CUT, $fn = 48);
 
-    translate([100, case_depth - CUT / 2, back_panel_z])
+    translate([170, case_depth - CUT / 2, back_panel_z])
         rotate([-90, 0, 0])
             cylinder(d = rocker_dia, h = CUT, $fn = 48);
 
-    translate([130, case_depth - CUT / 2, back_panel_z])
+    translate([230, case_depth - CUT / 2, back_panel_z])
         rotate([-90, 0, 0])
             linear_extrude(height = CUT)
                 square([sd_slot_w, sd_slot_h], center = true);
@@ -257,18 +258,18 @@ module keycap(w, height) {
 }
 
 module deck_decor() {
-    on_deck(20, back_row_s) translate([0,0,0]) knob(20, 12);
-    on_deck(45, back_row_s) knob(14, 10);
+    on_deck(30, back_row_s) translate([0,0,0]) knob(20, 12);
+    on_deck(65, back_row_s) knob(14, 10);
     for (x = mech_key_x) on_deck(x, back_row_s) translate([0, 0, 2]) keycap(mech_key_cut + 1, 4);
-    on_deck(65, front_row_s + 10) translate([0, 0, 2]) keycap(gb_button_cut + 1, 4);
-    on_deck(50, front_row_s - 6)  translate([0, 0, 2]) keycap(gb_button_cut + 1, 4);
-    on_deck(78, front_row_s - 4)  translate([0, 0, 2]) keycap(gb_button_cut + 1, 4);
-    on_deck(94, front_row_s - 4)  translate([0, 0, 2]) keycap(gb_button_cut + 1, 4);
+    on_deck(120, front_row_s + 10) translate([0, 0, 2]) keycap(gb_button_cut + 1, 4);
+    on_deck(100, front_row_s - 10) translate([0, 0, 2]) keycap(gb_button_cut + 1, 4);
+    on_deck(135, front_row_s - 6)  translate([0, 0, 2]) keycap(gb_button_cut + 1, 4);
+    on_deck(155, front_row_s - 6)  translate([0, 0, 2]) keycap(gb_button_cut + 1, 4);
     // APPROVE/DENY/panic decor caps dropped: they render invisible under
     // --render specifically (a color/CGAL quirk I couldn't pin down, not
     // a geometry problem) while sitting a few lines from a working knob().
     // The holes themselves are correctly cut either way.
-    on_deck(25, front_row_s) color("DarkOrange") translate([0, 0, 6]) sphere(d = 12, $fn = 24);
+    on_deck(35, front_row_s) color("DarkOrange") translate([0, 0, 6]) sphere(d = 12, $fn = 24);
 }
 
 // ============================================================

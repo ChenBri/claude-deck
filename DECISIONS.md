@@ -73,7 +73,7 @@ Full reasoning in [docs/SAFETY.md](docs/SAFETY.md).
 | # | Decision | Choice |
 |---|---|---|
 | 39 | Form | Retro terminal. Vertical face with a recessed CRT bezel, sloped control deck. |
-| 40 | Size | 160 x 120 x 100 mm. Upper face 95mm, deck 55mm deep. |
+| 40 | Size | 260 x 120 x 150 mm. Deck 55mm deep, rear face ~115mm tall. Amended 2026-09-22: the original 160 x 120 x 100mm was never checked against actual component footprints. Once case/case.scad laid out real part sizes (2.4in display, two 34mm meters, 5 lamps, rotary + encoder + 4 mech keys + 3 toggles + joystick + 4 Game Boy buttons + APPROVE/DENY + panic) with genuine finger-clearance rather than bare-minimum spacing, the real number came to roughly 250-280mm wide, not 160mm. Depth and height didn't need to grow nearly as much - this was a width problem specifically, from laying many controls out side by side. |
 | 41 | Colour | Matte black with orange accents |
 | 42 | Process | FDM PETG via a print service. MJF nylon reprint later if wanted. |
 | 43 | CAD | OpenSCAD, case as parametric code in this repo |
