@@ -80,9 +80,10 @@ _GB_BUTTON_BINDINGS = {
 }
 _EFFORT_BINDINGS = {
     pygame.K_F8: "LOW",
-    pygame.K_F9: "MED",
+    pygame.K_F9: "MEDIUM",
     pygame.K_F10: "HIGH",
-    pygame.K_F11: "MAX",
+    pygame.K_F11: "XHIGH",
+    pygame.K_F12: "MAX",
 }
 VOLUME_STEP = 0.02  # per poll (~30fps), held -/= ramps the knob over ~1.7s end to end
 
@@ -107,7 +108,7 @@ class SimPanel(Panel):
         self._button_leds = {name: 0.0 for name in BUTTON_LEDS}
         self._toggles = {"MUTE": False, "NIGHT": False, "AUTO_ACCEPT": False}
         self._selector = "ALL"  # matches Deck's own default so the drawn rotary isn't a lie at boot
-        self._effort = "MED"
+        self._effort = "MEDIUM"
         self._volume = 1.0
         self._panic_latched = False
         self._closed = False
@@ -160,9 +161,9 @@ class SimPanel(Panel):
         boxes[("gb_button", "START")] = pygame.Rect(gb_x + 135, gb_y + 56, 18, 18)
 
         effort_y = gb_y + 80
-        for i, name in enumerate(("LOW", "MED", "HIGH", "MAX")):
-            boxes[("effort", name)] = pygame.Rect(side_x + i * 36, effort_y, 26, 26)
-        boxes[("volume", "volume")] = pygame.Rect(side_x + 170, effort_y - 5, 36, 36)
+        for i, name in enumerate(("LOW", "MEDIUM", "HIGH", "XHIGH", "MAX")):
+            boxes[("effort", name)] = pygame.Rect(side_x + i * 32, effort_y, 26, 26)
+        boxes[("volume", "volume")] = pygame.Rect(side_x + 195, effort_y - 5, 36, 36)
         return boxes
 
     # -- Panel interface ----------------------------------------------------
@@ -421,7 +422,7 @@ class SimPanel(Panel):
             gfx.draw_text(self._native, name, (rect.x - 4, rect.bottom + 2), size=10, color=(180, 180, 180))
 
     def _draw_effort(self) -> None:
-        for pos in ("LOW", "MED", "HIGH", "MAX"):
+        for pos in ("LOW", "MEDIUM", "HIGH", "XHIGH", "MAX"):
             rect = self._hitboxes[("effort", pos)]
             active = self._effort == pos
             color = (190, 120, 220) if active else (50, 50, 52)

@@ -59,12 +59,16 @@ export const macosActions: HostActions = {
   },
 
   async effortSelect(level) {
-    // Option+1..4, same "placeholder, tune it locally" status as planMode()
-    // above - there's no confirmed way yet to change Claude Code's
-    // reasoning effort from an external keystroke.
-    const digitByLevel: Record<string, string> = { LOW: "1", MED: "2", HIGH: "3", MAX: "4" };
-    const digit = digitByLevel[level];
-    if (digit) await keystroke(digit, "option down");
+    // Real Claude Code slash command (confirmed against the docs, not a
+    // placeholder like planMode() above): /effort low|medium|high|xhigh|max,
+    // typed mid-session. LOW/MEDIUM/HIGH/XHIGH/MAX map straight onto it.
+    const argByLevel: Record<string, string> = {
+      LOW: "low", MEDIUM: "medium", HIGH: "high", XHIGH: "xhigh", MAX: "max",
+    };
+    const arg = argByLevel[level];
+    if (!arg) return;
+    await keystroke(`/effort ${arg}`);
+    await osascript(`tell application "System Events" to key code 36`); // Enter
   },
 
   async pushToTalk() {

@@ -41,3 +41,12 @@ test("effort_select ignores an unknown level rather than passing it through", as
   await guard.handle({ kind: "effort_select", value: "BOGUS" });
   assert.deepEqual(calls, []);
 });
+
+test("effort_select accepts all five real /effort levels", async () => {
+  const calls: string[] = [];
+  const guard = makeGuard({ effortSelect: async (level: string) => void calls.push(level) });
+  for (const level of ["LOW", "MEDIUM", "HIGH", "XHIGH", "MAX"]) {
+    await guard.handle({ kind: "effort_select", value: level });
+  }
+  assert.deepEqual(calls, ["LOW", "MEDIUM", "HIGH", "XHIGH", "MAX"]);
+});

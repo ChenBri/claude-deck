@@ -234,7 +234,7 @@ joystick_cut = 26;
 approve_deny_dia = 19.2;
 panic_dia    = 22;
 gb_button_cut = 14;
-effort_dial_dia = 10;   // same SR16-family rotary switch as the session selector, 4 of its 6 positions wired
+effort_dial_dia = 10;   // same SR16-family rotary switch as the session selector, 5 of its 6 positions wired
 volume_pot_dia  = 7;    // standalone panel-mount potentiometer, not the joystick's KY-023 pots
 
 // back row: nearer the rear face, for "set once" controls
@@ -316,7 +316,7 @@ module keycap(w, height) {
 module deck_decor() {
     on_deck(30, back_row_s) translate([0,0,0]) knob(20, 12);
     on_deck(65, back_row_s) knob(14, 10);
-    on_deck(effort_dial_x, back_row_s) knob(20, 12);   // effort dial: reasoning effort, low/med/high/max
+    on_deck(effort_dial_x, back_row_s) knob(20, 12);   // effort dial: /effort low|medium|high|xhigh|max
     on_deck(volume_pot_x, back_row_s) knob(16, 10);    // volume knob
     for (x = mech_key_x) on_deck(x, back_row_s) translate([0, 0, 2]) keycap(mech_key_cut + 1, 4);
     on_deck(120, front_row_s + 10) translate([0, 0, 2]) keycap(gb_button_cut + 1, 4);

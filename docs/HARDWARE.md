@@ -114,10 +114,11 @@ arrive), and may need the deck a little larger, same as the joystick did.
 ## Effort dial
 
 A second SR16-family rotary switch (DECISIONS.md #59), same part as the
-session selector, only 4 of its positions wired: LOW/MED/HIGH/MAX, on
+session selector, 5 of its 6 positions wired: LOW/MEDIUM/HIGH/XHIGH/MAX, on
 MCP23017 #2's remaining spares, active low with pull-ups. Sends a labelled
-action to the daemon; see `daemon/src/actions/` for the (placeholder,
-unconfirmed) host action it triggers.
+action to the daemon, which types Claude Code's own `/effort <level>` slash
+command into the terminal - a real, confirmed mechanism (see
+`daemon/src/actions/`), not a guessed hotkey.
 
 ## Volume knob
 

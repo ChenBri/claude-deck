@@ -275,7 +275,7 @@ soldering station.
 | E1 | 24mm illuminated arcade button, 5V LED | 2 | 3.00 | 6.00 | APPROVE green, DENY red. |
 | E2 | 22mm mushroom head pushbutton | 1 | 4.50 | 4.50 | Momentary, not latching. |
 | E3 | Hinged safety flip cover, red | 1 | 3.50 | 3.50 | Diameter must match E2. |
-| E4 | 6-position rotary switch, 1 pole | 2 | 2.50 | 5.00 | One is the session selector, one is the effort dial (only 4 of its 6 positions wired: LOW/MED/HIGH/MAX). |
+| E4 | 6-position rotary switch, 1 pole | 2 | 2.50 | 5.00 | One is the session selector, one is the effort dial (5 of its 6 positions wired: LOW/MEDIUM/HIGH/XHIGH/MAX, Claude Code's real `/effort` levels). |
 | E5 | Pointer knob for E4 | 2 | 1.50 | 3.00 | |
 | E6 | EC11 rotary encoder with push | 2 | 1.20 | 2.40 | Second is a spare. |
 | E7 | Knurled knob for E6 | 1 | 1.20 | 1.20 | |

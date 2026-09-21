@@ -6,9 +6,10 @@ export interface HostActions {
   newSession(): Promise<void>;
   planMode(): Promise<void>;
   pushToTalk(): Promise<void>;
-  /** level is "LOW" | "MED" | "HIGH" | "MAX", straight off the effort
-   * dial. Same status as planMode(): a placeholder hotkey, not a
-   * confirmed way to actually change Claude Code's reasoning effort -
-   * tune to whatever that turns out to be locally. */
+  /** level is "LOW" | "MEDIUM" | "HIGH" | "XHIGH" | "MAX", straight off
+   * the effort dial. Unlike planMode(), this is a real, confirmed
+   * mechanism: types Claude Code's own `/effort <level>` slash command
+   * mid-session (see code.claude.com/docs/en/slash-commands), not a
+   * guessed hotkey. */
   effortSelect(level: string): Promise<void>;
 }

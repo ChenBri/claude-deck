@@ -92,7 +92,7 @@ export class Guard {
 
   private async handleEffortSelect(req: ActionRequest): Promise<void> {
     const level = String(req.value ?? "");
-    if (!["LOW", "MED", "HIGH", "MAX"].includes(level)) {
+    if (!["LOW", "MEDIUM", "HIGH", "XHIGH", "MAX"].includes(level)) {
       this.audit.record(this.entry("effort_select", "", null, "rejected", `unknown level ${level}`));
       return;
     }
