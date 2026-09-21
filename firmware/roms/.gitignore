@@ -1,0 +1,4 @@
+# Track this folder and its own docs, ignore every ROM dropped into it.
+*
+!.gitignore
+!README.md

@@ -11,6 +11,7 @@ from deck.ui.scenes.boot import BootScene
 from deck.ui.scenes.compacting import CompactingScene
 from deck.ui.scenes.done import DoneScene
 from deck.ui.scenes.error import ErrorScene
+from deck.ui.scenes.gameboy import GameBoyScene
 from deck.ui.scenes.idle import IdleScene
 from deck.ui.scenes.interrupted import InterruptedScene
 from deck.ui.scenes.offline import OfflineScene
@@ -41,6 +42,7 @@ _STATE_SCENES: dict[State, type[Scene]] = {
 GAMES: dict[str, type[Scene]] = {
     "snake": SnakeScene,
     "tetris": TetrisScene,
+    "gameboy": GameBoyScene,
 }
 
 
@@ -80,27 +82,39 @@ class SceneManager:
         scene.draw(canvas, ctx)
 
 
-def new_canvas() -> pygame.Surface:
-    return pygame.Surface((CANVAS_WIDTH, CANVAS_HEIGHT))
+def new_canvas(width: int = CANVAS_WIDTH, height: int = CANVAS_HEIGHT) -> pygame.Surface:
+    return pygame.Surface((width, height))
 
 
 def compose_output(canvas: pygame.Surface) -> pygame.Surface:
-    """Scale the logical canvas 2x nearest-neighbour and lay a light CRT pass
-    (scanlines + a soft additive bloom) on top. Shared by SimPanel and
-    RealPanel so the look is identical on the desktop and on the real display.
+    """Scale the logical canvas onto the physical OUTPUT_WIDTH x OUTPUT_HEIGHT
+    panel, nearest-neighbour, and lay a light CRT pass (scanlines + a soft
+    additive bloom) on top. Shared by SimPanel and RealPanel so the look is
+    identical on the desktop and on the real display.
 
-    Tuned deliberately weak: at this resolution (160x120 logical, small UI
-    text like the ticker and settings menu), a wide/strong bloom radius
-    smears glyph strokes into an unreadable glow well before it looks like
-    a CRT. "Slight bloom" per docs/DECISIONS.md #28 means legible-but-warm,
-    not blurred.
+    The scale is derived from whatever size `canvas` happens to be, not
+    hardcoded to CANVAS_WIDTH/HEIGHT: every scene shares the 160x120 logical
+    canvas and gets an exact 2x fill, but the Game Boy app hands in its own
+    160x144 (native GB resolution, see ui/scenes/gameboy.py) and gets the
+    largest scale that still fits, letterboxed and centred.
+
+    Bloom is tuned deliberately weak: at this resolution, small UI text like
+    the ticker and settings menu, a wide/strong bloom radius smears glyph
+    strokes into an unreadable glow well before it looks like a CRT. "Slight
+    bloom" per docs/DECISIONS.md #28 means legible-but-warm, not blurred.
     """
-    scaled = pygame.transform.scale(canvas, (OUTPUT_WIDTH, OUTPUT_HEIGHT))
+    cw, ch = canvas.get_size()
+    scale = min(OUTPUT_WIDTH / cw, OUTPUT_HEIGHT / ch)
+    sw, sh = round(cw * scale), round(ch * scale)
+    ox, oy = (OUTPUT_WIDTH - sw) // 2, (OUTPUT_HEIGHT - sh) // 2
 
-    bloom_small = pygame.transform.smoothscale(canvas, (CANVAS_WIDTH // 2, CANVAS_HEIGHT // 2))
-    bloom = pygame.transform.smoothscale(bloom_small, (OUTPUT_WIDTH, OUTPUT_HEIGHT))
+    scaled = pygame.Surface((OUTPUT_WIDTH, OUTPUT_HEIGHT))
+    scaled.blit(pygame.transform.scale(canvas, (sw, sh)), (ox, oy))
+
+    bloom_small = pygame.transform.smoothscale(canvas, (max(cw // 2, 1), max(ch // 2, 1)))
+    bloom = pygame.transform.smoothscale(bloom_small, (sw, sh))
     bloom.set_alpha(22)
-    scaled.blit(bloom, (0, 0), special_flags=pygame.BLEND_RGB_ADD)
+    scaled.blit(bloom, (ox, oy), special_flags=pygame.BLEND_RGB_ADD)
 
     scanlines = _scanline_overlay()
     scaled.blit(scanlines, (0, 0))

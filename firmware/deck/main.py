@@ -14,7 +14,7 @@ from deck import link as link_mod
 from deck.apps import APPS
 from deck.audio import chiptune
 from deck.menu import Menu, _get
-from deck.panel.base import PIXEL_COUNT, Panel
+from deck.panel.base import GB_CANVAS_HEIGHT, GB_CANVAS_WIDTH, PIXEL_COUNT, Panel
 from deck.state import LAMP, Deck, State
 from deck.ui.pixels import pixels_for_state
 from deck.ui.render import GAMES, SceneManager, new_canvas
@@ -48,6 +48,7 @@ class App:
         self.menu = menu
         self.scene_manager = SceneManager()
         self.canvas = new_canvas()
+        self.gb_canvas = new_canvas(GB_CANVAS_WIDTH, GB_CANVAS_HEIGHT)
         self.idle_info: dict = {}
         # None: plain IDLE dashboard (or a live session's own scene). "home":
         # the app launcher. "settings", or a key from ui.render.GAMES: that
@@ -55,6 +56,7 @@ class App:
         self.current_app: str | None = None
         self.home_index = 0
         self.night_on = False
+        self._gb_buttons_held: set[str] = set()
         self._encoder_down_at: float | None = None
         self._boot_started = time.monotonic()
         self._last_prune = time.monotonic()
@@ -115,6 +117,15 @@ class App:
         if self.link is not None:
             self.link.send_action("mech_key", name=ev.name)
 
+    def _on_gb_button(self, ev, frame_inputs: dict) -> None:
+        # Game Boy app input only, never forwarded to the daemon: ev.value is
+        # True while held, False on release, so the Game Boy scene sees the
+        # same continuous press/release state a real MCP23017 poll would give.
+        if ev.value:
+            self._gb_buttons_held.add(ev.name)
+        else:
+            self._gb_buttons_held.discard(ev.name)
+
     def _on_toggle(self, ev, frame_inputs: dict) -> None:
         if ev.name == "MUTE":
             chiptune.set_muted(ev.value)
@@ -161,10 +172,11 @@ class App:
 
     def _on_encoder(self, ev, frame_inputs: dict) -> None:
         now = time.monotonic()
-        if ev.name == "cw":
-            self.menu.rotate(1)
-        elif ev.name == "ccw":
-            self.menu.rotate(-1)
+        if ev.name in ("cw", "ccw"):
+            if self.current_app == "settings":
+                self.menu.rotate(1 if ev.name == "cw" else -1)
+            else:
+                frame_inputs["encoder_edge"] = ev.name  # e.g. the Game Boy rom picker
         elif ev.name == "push_down":
             self._encoder_down_at = now
         elif ev.name == "push_up":
@@ -232,7 +244,7 @@ class App:
             dt = now - last_now
             last_now = now
 
-            frame_inputs: dict = {}
+            frame_inputs: dict = {"gb_buttons": frozenset(self._gb_buttons_held)}
             self._handle_events(self.panel.poll_inputs(), frame_inputs)
             self._on_joystick_navigation(frame_inputs)
             self.deck.tick(now)
@@ -246,9 +258,12 @@ class App:
 
             if self.current_app == "settings":
                 draw_menu(self.canvas, self.menu)
+                canvas = self.canvas
             elif self.current_app == "home":
                 draw_home(self.canvas, self.home_index)
+                canvas = self.canvas
             else:
+                canvas = self.gb_canvas if self.current_app == "gameboy" else self.canvas
                 session = self.deck.active_session()
                 ctx = Context(
                     now=now,
@@ -262,10 +277,10 @@ class App:
                     inputs=frame_inputs,
                 )
                 game = self.current_app if self.current_app in GAMES else None
-                self.scene_manager.draw(self.canvas, ctx, booting=booting, game=game)
+                self.scene_manager.draw(canvas, ctx, booting=booting, game=game)
 
             self._update_indicators(now)
-            self.panel.present(self.canvas)
+            self.panel.present(canvas)
 
     def _update_indicators(self, now: float) -> None:
         state = self.deck.current_state(now)

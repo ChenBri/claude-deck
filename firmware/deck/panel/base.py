@@ -14,17 +14,24 @@ BUTTON_LEDS = ("APPROVE", "DENY")
 MECH_KEYS = ("CLD", "NEW", "PLAN", "MIC")
 TOGGLES = ("MUTE", "NIGHT", "AUTO_ACCEPT")
 ROTARY_POSITIONS = ("1", "2", "3", "4", "5", "ALL")
+GB_BUTTONS = ("A", "B", "START", "SELECT")  # Game Boy app only, see ui/scenes/gameboy.py
 
 # Logical canvas the scene compositor draws into; the panel scales it to the
 # physical 320x240 display (2x, nearest-neighbour).
 CANVAS_WIDTH = 160
 CANVAS_HEIGHT = 120
+
+# The Game Boy app draws into its own canvas instead: native GB resolution,
+# scaled to fit the same physical panel letterboxed rather than 2x-filled.
+GB_CANVAS_WIDTH = 160
+GB_CANVAS_HEIGHT = 144
+
 PIXEL_COUNT = 30  # WS2812B: halo + underglow, per docs/HARDWARE.md
 
 
 @dataclass
 class InputEvent:
-    kind: str  # "button" | "toggle" | "rotary" | "encoder" | "joystick" | "mech_key" | "panic"
+    kind: str  # "button" | "toggle" | "rotary" | "encoder" | "joystick" | "mech_key" | "gb_button" | "panic"
     name: str
     value: object = None
 

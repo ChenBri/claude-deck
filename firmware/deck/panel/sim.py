@@ -13,6 +13,7 @@ import pygame
 
 from deck.panel.base import (
     BUTTON_LEDS,
+    GB_BUTTONS,
     LAMPS,
     MECH_KEYS,
     METERS,
@@ -62,6 +63,12 @@ _TOGGLE_BINDINGS = {
 _ROTARY_BINDINGS = {
     pygame.K_1: "1", pygame.K_2: "2", pygame.K_3: "3",
     pygame.K_4: "4", pygame.K_5: "5", pygame.K_0: "ALL",
+}
+_GB_BUTTON_BINDINGS = {
+    pygame.K_z: "A",
+    pygame.K_c: "B",
+    pygame.K_BACKSPACE: "START",
+    pygame.K_RSHIFT: "SELECT",
 }
 
 
@@ -126,6 +133,8 @@ class SimPanel(Panel):
         for i, name in enumerate(MECH_KEYS):
             boxes[("mech_key", name)] = pygame.Rect(side_x + 60 + i * 40, button_y + 5, 30, 30)
         boxes[("joystick", "joystick")] = pygame.Rect(side_x, toggle_y, 70, 70)
+        for i, name in enumerate(GB_BUTTONS):
+            boxes[("gb_button", name)] = pygame.Rect(side_x + 90 + i * 40, toggle_y + 5, 30, 30)
         return boxes
 
     # -- Panel interface ----------------------------------------------------
@@ -155,6 +164,7 @@ class SimPanel(Panel):
         self._draw_encoder()
         self._draw_mech_keys()
         self._draw_joystick()
+        self._draw_gb_buttons()
         zoomed = pygame.transform.scale(self._native, self._display.get_size())
         self._display.blit(zoomed, (0, 0))
         pygame.display.flip()
@@ -178,6 +188,8 @@ class SimPanel(Panel):
                 events.extend(self._handle_keydown(e.key))
             elif e.type == pygame.KEYUP and e.key == pygame.K_RETURN:
                 events.append(InputEvent("encoder", "push_up"))
+            elif e.type == pygame.KEYUP and e.key in _GB_BUTTON_BINDINGS:
+                events.append(InputEvent("gb_button", _GB_BUTTON_BINDINGS[e.key], False))
 
         for pos in mouse_downs:
             events.extend(self._handle_click(pos))
@@ -201,6 +213,8 @@ class SimPanel(Panel):
             out.append(InputEvent("joystick", "push_edge", True))
         elif key in _MECH_KEY_BINDINGS:
             out.append(InputEvent("mech_key", _MECH_KEY_BINDINGS[key]))
+        elif key in _GB_BUTTON_BINDINGS:
+            out.append(InputEvent("gb_button", _GB_BUTTON_BINDINGS[key], True))
         elif key in _TOGGLE_BINDINGS:
             name = _TOGGLE_BINDINGS[key]
             self._toggles[name] = not self._toggles[name]
@@ -347,3 +361,15 @@ class SimPanel(Panel):
         knob = (rect.centerx + ax * 18, rect.centery + ay * 18)
         pygame.draw.circle(self._native, (224, 122, 42), knob, 10)
         gfx.draw_text(self._native, "JOY", (rect.x + 4, rect.bottom + 2), size=11, color=(180, 180, 180))
+
+    def _draw_gb_buttons(self) -> None:
+        # Keyboard-only, like the joystick above: these hitboxes are drawn
+        # for reference but not wired into _handle_click, since a mouse click
+        # can't express "held" the way KEYDOWN/KEYUP can.
+        pressed = pygame.key.get_pressed()
+        for key, name in _GB_BUTTON_BINDINGS.items():
+            rect = self._hitboxes[("gb_button", name)]
+            held = pressed[key]
+            pygame.draw.circle(self._native, (224, 122, 42) if held else (60, 60, 64), rect.center, rect.width // 2)
+            pygame.draw.circle(self._native, (140, 140, 144), rect.center, rect.width // 2, 2)
+            gfx.draw_text(self._native, name, (rect.x - 4, rect.bottom + 2), size=10, color=(180, 180, 180))
