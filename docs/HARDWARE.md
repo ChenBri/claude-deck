@@ -179,33 +179,56 @@ filter and the movement.
 
 ## Power budget
 
-| Load | Typical | Peak |
+**Confirmed, not a guess:** checked a real listing for the actual display
+(Heyman Store, 11.6in 1366x768/1920x1080 HDMI/Type-C driver board kit,
+₪145.48 for the 1366x768 variant, docs/BOM.md B1) - the board wants **12V
+2A, DC 5.5mm barrel**, same connector standard already used elsewhere in
+this project, just not the 5V this whole design otherwise runs on. That
+changes which rail is "primary": the display needs 12V directly, and
+everything else (Pi, PCA9685, MCP23017s, NeoPixels, amp) still wants 5V,
+so the plan is now **one 12V input, with a small buck converter stepping
+it down to 5V for the logic side** - a single wall wart and barrel jack,
+not two power cords into the case.
+
+| Load (5V side, through the buck converter) | Typical | Peak |
 |---|---|---|
 | Pi Zero 2 W | 350mA | 600mA |
-| Display + HDMI driver board | 400mA | 900mA |
 | NeoPixels, 30 total, capped at 40% brightness | 250mA | 700mA |
 | Speaker on transients | 80mA | 500mA |
 | Lamps and legend backlight, 7 channels | 90mA | 110mA |
 | Meters and their backlights | 40mA | 60mA |
-| **Total** | **1.21A** | **2.87A** |
+| **5V subtotal** | **810mA (4.05W)** | **1.97A (9.85W)** |
 
-**Unverified: the display row assumes 5V.** Was 80/110mA for the small SPI
-TFT; that number is gone along with the panel. Many generic HDMI/eDP driver
-boards for an 11.6in panel this size want **12V**, not the 5V this whole
-design otherwise runs on - some do offer a 5V option via jumper, but this
-needs checking against whatever specific board actually gets bought, not
-assumed. If it does turn out to be 12V-only, that is a second power rail
-(its own wall wart, or a 5V-to-12V boost converter), not something the
-existing 5V barrel jack and PCA9685 wiring can supply directly.
+At an estimated 88% buck efficiency (a typical cheap module, not a
+datasheet number for a specific one yet), that 5V load pulls roughly
+**0.38A typical / 0.93A peak from the 12V rail.**
 
-A 5V 3A supply no longer carries this with real margin (2.87A peak is close
-to a 3A ceiling before the display row's own uncertainty). Plan on a 5V 4A
-supply for the logic side once the display's own power draw is confirmed,
-independent of whatever the panel itself needs.
+| Load (12V side) | Typical | Peak |
+|---|---|---|
+| 5V logic, via the buck converter | 0.38A | 0.93A |
+| Display + driver board | ~0.3A (estimated; an LED-backlit panel this size doesn't really draw its full rated 2A continuously - that rating is the manufacturer's recommended supply headroom, not confirmed continuous draw) | up to 2A (the board's own rated max) |
+| **12V total** | **~0.7A (8.4W)** | **~2.9A (35W)** |
 
-**Wire the power correctly.** 5V from the barrel jack goes to the Pi through the
-PWR IN micro-USB port. The USB data port only ever connects to the computer.
-Never feed 5V into the GPIO header while the data port is attached to a host.
+Plan on a **12V 3A supply** (36W) for real margin over that estimated peak,
+the same proportional headroom the old 5V 3A recommendation had over its
+own computed peak. The buck converter module itself is a new, cheap BOM
+line (docs/BOM.md); everything downstream of it (Pi's own micro-USB power
+in, PCA9685, MCP23017s) is unchanged, it just now receives 5V from the
+converter instead of straight off the barrel jack.
+
+One nice side effect: the KCD1 rocker switch's built-in LED (docs/BOM.md's
+"Rocker switch LED note") is speced for 12V and used to need a resistor mod
+to not look dim on this design's old 5V rail. Wired on the raw 12V input
+side of the switch, ahead of the buck converter, it just works at full
+brightness now - no mod needed.
+
+**Wire the power correctly.** 12V from the barrel jack feeds the display board
+and the buck converter directly; the buck converter's 5V output goes to the
+Pi through the PWR IN micro-USB port exactly as before. Never feed the raw
+12V rail into the Pi or its GPIO header - only the buck converter's 5V
+output goes there. The USB data port only ever connects to the computer.
+Never feed 5V (or 12V) into the GPIO header while the data port is attached
+to a host.
 
 ## USB gadget mode
 

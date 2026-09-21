@@ -100,17 +100,20 @@ three are behind the Max Combo wall below; the fasteners are cheaper and faster
 from any Tel Aviv hardware shop than shipped. The 3mm white LEDs line is dropped:
 the 100-piece 5mm assortment includes white and backlights the legend strip fine.
 
-**Rocker switch LED note.** The KCD1's internal LED is sized for 12V and will be
-dim or dark on the 5V rail. Either live with it (the LINK lamp already shows
-power) or swap the internal series resistor for ~220Ω, a two-minute mod.
+**Rocker switch LED note, resolved.** The KCD1's internal LED is sized for
+12V. Originally flagged as dim/dark on this design's 5V rail; now that the
+main input is 12V (the display forced that, see below), wiring the switch
+on the raw 12V side ahead of the buck converter means it just works at full
+brightness, no resistor mod needed.
 
-**Display pulled from the verified cart, not dropped.** The 2.4in SPI TFT
-that was ₪20.83 above is gone along with the decision to use it (DECISIONS.md
-#20): the real display is now an 11.6in 1366x768 HDMI panel + driver board,
-a different part in a different price bracket, not sourced or priced against
-a real listing yet. Budget roughly $30-45 (~₪95-145) until a specific board
-is checked out - see section B below and docs/HARDWARE.md's note on the
-driver board's supply voltage, which is also still open.
+**Display pulled from the verified cart, then re-verified against a real
+listing.** The 2.4in SPI TFT that was ₪20.83 above is gone along with the
+decision to use it (DECISIONS.md #20): the real display is an 11.6in
+1366x768 HDMI/Type-C panel + driver board, ₪145.48, checked against a real
+AliExpress listing (Heyman Store) on 2026-09-22 - see section B. That
+listing also confirmed the driver board wants **12V, not 5V**, which is why
+section A's power supply and the whole power budget in docs/HARDWARE.md
+changed to a 12V-primary design with a buck converter for the logic side.
 
 **Game Boy buttons upgraded to real switches.** First pass spec'd cheap 6x6mm
 tactile pushbuttons; revised after actually thinking about how it'd feel
@@ -229,16 +232,17 @@ soldering station.
 | A1 | Raspberry Pi Zero 2 W | 1 | 24.00 | 24.00 | Seller with high ratings and real feedback photos. |
 | A2 | microSD 32GB A1 (SanDisk or Samsung) | 1 | 6.00 | 6.00 | A1 rating required for random IO. |
 | A3 | 2x20 male GPIO header, 2.54mm | 1 | 1.00 | 1.00 | Ships unpopulated. |
-| A4 | 5V 3A PSU, 5.5x2.1 barrel output | 1 | 7.00 | 7.00 | 3A minimum, see power budget in HARDWARE.md. |
+| A4 | 12V 3A PSU, 5.5x2.1 barrel output | 1 | 8.00 | 8.00 | Was 5V 3A: the display's driver board wants 12V (confirmed against a real listing, see section B), so that's the main rail now. 3A minimum, see power budget in HARDWARE.md. |
 | A5 | USB-A to micro-USB data cable, 0.5m | 1 | 2.00 | 2.00 | Data cable, not charge-only. |
-| | | | | **40.00** | |
+| A6 | 12V to 5V buck converter module, 3A | 1 | 1.50 | 1.50 | Steps the main 12V rail down for the Pi/PCA9685/MCP23017s/amp, same as before - only the display taps 12V directly. |
+| | | | | **42.50** | |
 
 ## B. Display
 
 | # | Part | Qty | Unit | Total | Notes |
 |---|---|---|---|---|---|
-| B1 | 11.6in 1366x768 HDMI LCD panel + driver board | 1 | 35.00 | 35.00 | Not sourced against a real listing yet - a placeholder within the real $30-45 range for this class of kit, not a checked-out price like most of this document. Confirm the driver board's input voltage before ordering (docs/HARDWARE.md): many want 12V, this build is 5V otherwise. |
-| | | | | **35.00** | |
+| B1 | 11.6in 1366x768 HDMI/Type-C LCD panel + driver board | 1 | 40.00 | 40.00 | Sourced 2026-09-22: Heyman Store on AliExpress, ₪145.48 for the 1366x768 variant (the 1920x1080 variant is ₪201.20, a real ~$17 premium for four times the pixels to push - not worth it on an 11.6in panel). Confirmed **12V 2A, DC 5.5mm** - not 5V, see the power budget rework in docs/HARDWARE.md. Thin data on this specific listing (8 sold, one adjacent review notes limited viewing angle/brightness, typical for this class of budget universal driver board) - worth a last look at the actual listing before checkout, not a guarantee. |
+| | | | | **40.00** | |
 
 ## C. Light and IO expansion
 
@@ -369,8 +373,8 @@ Ordered later, once the perfboard build is proven and the layout is final.
 
 | Group | USD |
 |---|---|
-| A Core computer | 40.00 |
-| B Display | 35.00 |
+| A Core computer | 42.50 |
+| B Display | 40.00 |
 | C Light and IO expansion | 29.30 |
 | D Analog meters | 17.00 |
 | E Controls | 43.10 |
@@ -379,11 +383,11 @@ Ordered later, once the perfboard build is proven and the layout is final.
 | H Fasteners | 14.00 |
 | I Prototyping | 11.00 |
 | J Tools | 131.00 |
-| **AliExpress order** | **359.40** |
+| **AliExpress order** | **366.90** |
 | L Local fabrication | 66.00 |
-| **Build total** | **425.40** |
+| **Build total** | **432.90** |
 | Shipping across parcels | ~20.00 |
-| **All in** | **~445** |
+| **All in** | **~453** |
 | M PCB revision, later | 22.00 |
 
 A second deck would cost about **$200**, since the tools and the spares are
