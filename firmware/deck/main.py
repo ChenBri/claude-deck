@@ -12,12 +12,15 @@ import time
 
 from deck import link as link_mod
 from deck.audio import chiptune
-from deck.menu import GAME_ACTIONS, Menu
-from deck.panel.base import Panel
+from deck.menu import GAME_ACTIONS, Menu, _get
+from deck.panel.base import PIXEL_COUNT, Panel
 from deck.state import LAMP, Deck, State
+from deck.ui.pixels import pixels_for_state
 from deck.ui.render import SceneManager, new_canvas
 from deck.ui.scenes.base import Context
 from deck.ui.scenes.menu import draw_menu
+
+DENYLIST_CATEGORIES = ("database", "destructive_fs_git", "infrastructure", "secrets")
 
 BOOT_SECONDS = 3.0  # trimmed way down from the real ~25s Pi boot for desktop dev
 LONG_PRESS_SECONDS = 1.5
@@ -67,6 +70,18 @@ class App:
     def start(self) -> None:
         if self.link is not None:
             self.link.start()
+            self._sync_denylist_settings()
+
+    def _sync_denylist_settings(self) -> None:
+        """Best-effort push of the Pi's current denylist categories to the
+        daemon, so a freshly (re)started daemon picks up whatever the
+        encoder menu last set rather than falling back to its own defaults."""
+        if self.link is None:
+            return
+        denylist = self.menu.settings.get("denylist", {})
+        for category in DENYLIST_CATEGORIES:
+            if category in denylist:
+                self.link.send_action("denylist_toggle", category=category, value=bool(denylist[category]))
 
     def stop(self) -> None:
         if self.link is not None:
@@ -156,13 +171,21 @@ class App:
         if self.active_game is not None:
             frame_inputs["encoder_push_edge"] = True
             return
-        if self.menu.open:
-            item = self.menu.current_item()
-            if item.key in GAME_ACTIONS:
-                self.active_game = GAME_ACTIONS[item.key]
-                self.menu.open = False
-                return
+
+        if not self.menu.open:
+            self.menu.activate()  # opens it
+            return
+
+        item = self.menu.current_item()
+        if item.key in GAME_ACTIONS:
+            self.active_game = GAME_ACTIONS[item.key]
+            self.menu.open = False
+            return
+
         self.menu.activate()
+        if item.key.startswith("denylist.") and self.link is not None:
+            category = item.key.split(".", 1)[1]
+            self.link.send_action("denylist_toggle", category=category, value=_get(self.menu.settings, item.key))
 
     def _shutdown(self) -> None:
         # Real hardware: play the goodbye animation, then `sudo shutdown -h now`.
@@ -221,6 +244,8 @@ class App:
 
         self.panel.set_button_led("APPROVE", brightness if self.deck.approve_button_live(now) else 0.0)
         self.panel.set_button_led("DENY", brightness if state == State.BLOCKED_PERMISSION else 0.0)
+
+        self.panel.set_pixels(pixels_for_state(state, now, brightness, PIXEL_COUNT))
 
 
 def main() -> None:
