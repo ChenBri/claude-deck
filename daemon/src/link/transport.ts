@@ -1,6 +1,10 @@
 /** HTTP to the Pi over the USB link (docs/HARDWARE.md: 10.55.0.1 the Pi,
  * 10.55.0.2 the host). Two directions: push classified events and idle-info
- * out to the Pi, and receive button/toggle actions back from it. */
+ * out to the Pi, and receive button/toggle actions back from it.
+ *
+ * All four addresses are overridable so the daemon and firmware/deck/link.py
+ * can both run on one dev machine before any hardware exists - see
+ * README.md's "running the full stack locally" section. */
 
 import http, { IncomingMessage, ServerResponse } from "node:http";
 import { ClassifiedEvent } from "../classify";
@@ -8,8 +12,8 @@ import { ActionRequest, Guard } from "../guard";
 
 const PI_HOST = process.env.DECK_PI_HOST ?? "10.55.0.1";
 const PI_PORT = Number(process.env.DECK_PI_PORT ?? 7328);
-const LISTEN_HOST = process.env.DECK_LISTEN_HOST ?? "10.55.0.2";
-const LISTEN_PORT = Number(process.env.DECK_LISTEN_PORT ?? 7329);
+const LISTEN_HOST = process.env.DECK_DAEMON_LISTEN_HOST ?? "10.55.0.2";
+const LISTEN_PORT = Number(process.env.DECK_DAEMON_LISTEN_PORT ?? 7329);
 const SEND_TIMEOUT_MS = 1000;
 
 function postJson(host: string, port: number, path: string, body: unknown): void {

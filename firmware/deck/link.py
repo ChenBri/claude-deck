@@ -11,6 +11,7 @@ the LINK lamp dark and takes the deck to OFFLINE via Deck.link_alive.
 from __future__ import annotations
 
 import json
+import os
 import threading
 import time
 import urllib.error
@@ -20,10 +21,14 @@ from typing import Callable
 
 from deck.state import SessionRegistry
 
-LISTEN_HOST = "10.55.0.1"  # the Pi's address on the point-to-point link
-LISTEN_PORT = 7328
-DAEMON_HOST = "10.55.0.2"  # the host PC's address on the same link
-DAEMON_PORT = 7329
+# Real hardware: 10.55.0.1 (Pi) <-> 10.55.0.2 (host), per docs/HARDWARE.md.
+# Overridable so the daemon and this firmware can both run on one dev
+# machine (e.g. both on 127.0.0.1, different ports) before any hardware
+# exists - see README.md's "running the full stack locally" section.
+LISTEN_HOST = os.environ.get("DECK_PI_LISTEN_HOST", "10.55.0.1")
+LISTEN_PORT = int(os.environ.get("DECK_PI_LISTEN_PORT", "7328"))
+DAEMON_HOST = os.environ.get("DECK_DAEMON_HOST", "10.55.0.2")
+DAEMON_PORT = int(os.environ.get("DECK_DAEMON_PORT", "7329"))
 HEARTBEAT_TIMEOUT = 5.0
 ACTION_TIMEOUT = 1.0
 

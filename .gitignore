@@ -13,6 +13,12 @@ firmware/sessions/
 # recorded hook corpora (may contain project-specific paths/content)
 sessions/
 
+# local env overrides (host/port config today, but never assume that stays
+# true - nothing that sets real values here should ever be committed)
+.env
+.env.*
+*.local.env
+
 # editor/OS cruft
 .vscode/
 .DS_Store
