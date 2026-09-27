@@ -59,8 +59,12 @@ install -m 0644 "$REPO/deploy/udev/99-claude-deck.rules" /etc/udev/rules.d/
 udevadm control --reload
 udevadm trigger
 
-# The encoder's long press powers the deck off; this is the one thing root does for it.
-echo "$DECK_USER ALL=(root) NOPASSWD: /usr/bin/systemctl poweroff" > /etc/sudoers.d/claude-deck
+# The only root actions the deck user gets, with these exact arguments: the
+# encoder's long press powering off, and Settings > wifi radio.
+cat > /etc/sudoers.d/claude-deck <<EOF
+$DECK_USER ALL=(root) NOPASSWD: /usr/bin/systemctl poweroff
+$DECK_USER ALL=(root) NOPASSWD: /usr/sbin/rfkill block wifi, /usr/sbin/rfkill unblock wifi
+EOF
 chmod 0440 /etc/sudoers.d/claude-deck
 visudo -cf /etc/sudoers.d/claude-deck
 

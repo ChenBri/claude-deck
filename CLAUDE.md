@@ -47,8 +47,10 @@ asking:
 3. **The denylist is load-bearing.** Database, destructive fs and git,
    infrastructure, secrets. Dangerous calls are un-approvable from the box on
    every machine.
-4. **No route to the internet.** USB point-to-point only, WiFi behind a physical
-   toggle. Anything needing the network comes from the daemon.
+4. **No route to the internet.** USB point-to-point only. WiFi is blocked at
+   every boot and only comes on through Settings > wifi radio, with a red WIFI
+   tag on the rail for as long as it's on. Anything needing the network comes
+   from the daemon.
 5. **Scrub before it leaves the PC.** The deck renders to a screen and writes to a
    card, so it must never hold anything worth stealing.
 

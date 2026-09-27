@@ -119,7 +119,12 @@ def _centered_at(surf, text: str, cx: int, y: int, size: int, color) -> None:
     draw_text(surf, text, (cx - w // 2, y), size=size, color=color)
 
 
-def draw_right(surf, state: State, now: float, sessions: int, context_pct: float, five_hour_pct: float) -> None:
+WARN = (214, 64, 48)
+
+
+def draw_right(
+    surf, state: State, now: float, sessions: int, context_pct: float, five_hour_pct: float, wifi_on: bool = False
+) -> None:
     surf.fill(RAIL_BG)
     color = pixels_for_state(state, now, 1.0, 1)[0]
     if max(color) < 60:  # IDLE's strip colour is near-black by design; the rail still wants a visible dot
@@ -127,8 +132,15 @@ def draw_right(surf, state: State, now: float, sessions: int, context_pct: float
     cx = surf.get_width() // 2
     pygame.draw.circle(surf, color, (cx, 9), 5)
     _centered(surf, STATE_LABELS.get(state, state.value)[:5], 17, 7, TEXT)
-    if sessions:
+    # WiFi on is the one way the deck has a route out, so it's never hidden:
+    # a red frame round the rail, and the tag shares the line with the
+    # session count, taking turns every 2s.
+    if wifi_on and (not sessions or int(now / 2) % 2 == 0):
+        _centered(surf, "WIFI", 26, 7, WARN)
+    elif sessions:
         _centered(surf, f"x{sessions}", 26, 7, DIM)
     _rule(surf, 35)
     _bar(surf, 3, "C", context_pct)
     _bar(surf, surf.get_width() - 11, "5H", five_hour_pct)
+    if wifi_on:
+        pygame.draw.rect(surf, WARN, surf.get_rect(), 1)

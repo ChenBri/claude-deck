@@ -32,7 +32,10 @@ guess about the board or image to confirm on first boot, not a known fact.
    host-only port). Connect WiFi, add your SSH public key to the login user's
    `~/.ssh/authorized_keys` (SSH becomes key-only and USB-link-only), clone
    this repo, and run `sudo deploy/setup.sh`. WiFi is blocked from the next
-   boot on, so do anything that needs the network first.
+   boot on, so do anything that needs the network first. The WiFi network you
+   connected stays saved (as long as it was saved before `--readonly`), so
+   Settings > wifi radio can bring it back later, for the RNDIS fallback in
+   docs/HARDWARE.md or to pull an update.
 
 4. **Overlays.** `setup.sh` ends with a checklist. For every MISSING line,
    enable the overlay in `sudo rsetup` -> Overlays: I2C4 on pins 27/28, SPI3

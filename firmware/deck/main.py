@@ -20,6 +20,7 @@ from deck.calibration import CalibrationWizard
 from deck.hid import HidKeyboard
 from deck.hwtest import HardwareTest
 from deck.menu import Menu, _get
+from deck.radio import Radio
 from deck.panel.base import GB_CANVAS_HEIGHT, GB_CANVAS_WIDTH, METERS, PIXEL_COUNT, RAIL_HEIGHT, RAIL_WIDTH, Panel
 from deck.screen import screen_level, wall_clock
 from deck.state import LAMP, Deck, State
@@ -61,12 +62,21 @@ def build_panel(name: str, settings: dict) -> Panel:
 
 class App:
     def __init__(
-        self, panel: Panel, deck: Deck, menu: Menu, use_link: bool = True, hid: HidKeyboard | None = None
+        self,
+        panel: Panel,
+        deck: Deck,
+        menu: Menu,
+        use_link: bool = True,
+        hid: HidKeyboard | None = None,
+        radio: Radio | None = None,
     ) -> None:
         self.panel = panel
         # Real panel only: each press also goes out as its F13-F20 key, which
         # the daemon pairs with the HTTP action below before acting (SAFETY.md).
         self.hid = hid
+        # Real panel only; the simulator just keeps the setting (and the rail tag).
+        self.radio = radio
+        self.wifi_on = False
         self.deck = deck
         self.menu = menu
         self.scene_manager = SceneManager()
@@ -101,6 +111,7 @@ class App:
             )
 
         chiptune.init()
+        self._apply_wifi()  # WiFi is blocked at boot; a saved "on" re-opens it here
         chiptune.set_theme(str(menu.settings.get("sound_theme", chiptune.DEFAULT_THEME)))
         deck.idle_after_seconds = float(menu.settings.get("idle_after_seconds", deck.idle_after_seconds))
 
@@ -294,6 +305,8 @@ class App:
                 self.current_app = "calibrate"
                 return
             self.menu.activate()
+            if item.key == "wifi":
+                self._apply_wifi()
             if item.key == "sound_theme":
                 chiptune.set_theme(str(_get(self.menu.settings, item.key)))
                 chiptune.play("finished")  # preview
@@ -333,6 +346,18 @@ class App:
                 self.current_app = "settings"  # calibrate: cancel, nothing saved
             else:
                 self.current_app = None if self.current_app == "home" else "home"
+
+    def _apply_wifi(self) -> None:
+        wanted = bool(self.menu.settings.get("wifi", False))
+        if self.radio is None:
+            self.wifi_on = wanted
+            return
+        if self.radio.set_wifi(wanted):
+            self.wifi_on = wanted
+        else:
+            # rfkill refused: say what's actually true, on screen and in the menu
+            self.menu.settings["wifi"] = self.wifi_on
+            self.menu.save()
 
     def _shutdown(self) -> None:
         # Leaves the loop; main() then powers the real deck off, or just
@@ -416,6 +441,7 @@ class App:
             len(self.deck.registry.sessions),
             session.context_pct if session else 0.0,
             float(self.idle_info.get("five_hour_pct", 0.0)),
+            self.wifi_on,
         )
 
     def _play_cues(self, now: float) -> None:
@@ -485,8 +511,9 @@ def main() -> None:
     menu = Menu()
     panel = build_panel(args.panel, menu.settings)
     hid = HidKeyboard() if args.panel == "real" else None
+    radio = Radio() if args.panel == "real" else None
     deck = Deck(selector="ALL", idle_after_seconds=float(menu.settings.get("idle_after_seconds", 300)))
-    app = App(panel, deck, menu, use_link=not args.no_link, hid=hid)
+    app = App(panel, deck, menu, use_link=not args.no_link, hid=hid, radio=radio)
     app.start()
     try:
         app.run()
