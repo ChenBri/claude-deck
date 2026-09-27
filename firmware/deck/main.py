@@ -16,6 +16,7 @@ from deck.apps import APPS
 from deck.audio import chiptune
 from deck.audio.cues import event_for_transition
 from deck.calibration import CalibrationWizard
+from deck.hid import HidKeyboard
 from deck.hwtest import HardwareTest
 from deck.menu import Menu, _get
 from deck.panel.base import GB_CANVAS_HEIGHT, GB_CANVAS_WIDTH, METERS, PIXEL_COUNT, RAIL_HEIGHT, RAIL_WIDTH, Panel
@@ -45,7 +46,7 @@ MAINTENANCE_APPS = ("hwtest", "calibrate")
 APP_STATES = (State.IDLE, State.OFFLINE)
 
 
-def build_panel(name: str) -> Panel:
+def build_panel(name: str, settings: dict) -> Panel:
     if name == "sim":
         from deck.panel.sim import SimPanel
 
@@ -53,13 +54,18 @@ def build_panel(name: str) -> Panel:
     if name == "real":
         from deck.panel.real import RealPanel
 
-        return RealPanel()
+        return RealPanel(settings)
     raise ValueError(f"unknown panel backend {name!r}")
 
 
 class App:
-    def __init__(self, panel: Panel, deck: Deck, menu: Menu, use_link: bool = True) -> None:
+    def __init__(
+        self, panel: Panel, deck: Deck, menu: Menu, use_link: bool = True, hid: HidKeyboard | None = None
+    ) -> None:
         self.panel = panel
+        # Real panel only: each press also goes out as its F13-F20 key, which
+        # the daemon pairs with the HTTP action below before acting (SAFETY.md).
+        self.hid = hid
         self.deck = deck
         self.menu = menu
         self.scene_manager = SceneManager()
@@ -154,7 +160,11 @@ class App:
 
     def _on_mech_key(self, ev, frame_inputs: dict) -> None:
         frame_inputs.setdefault("mech_keys", set()).add(ev.name)
-        if self.link is not None and self.current_app != "hwtest":
+        if self.current_app == "hwtest" or self.current_app in GAMES:
+            return  # tested, or a game control (Tetris rotates and drops with these): not for Claude
+        if self.hid is not None:
+            self.hid.tap(ev.name)
+        if self.link is not None:
             # PLAN needs to know which session's permission_mode the daemon
             # last saw, to compute how many Shift+Tab presses reach plan mode
             # (see daemon/src/guard.ts). Harmless for CLD/NEW/MIC, which ignore it.
@@ -214,12 +224,16 @@ class App:
             return
         if ev.name == "APPROVE" and not self.deck.approve_button_live():
             return  # stale, denylisted, or expired: dead button, per docs/SAFETY.md
+        if self.hid is not None:
+            self.hid.tap(ev.name)
         if self.link is not None:
             self.link.send_action(
                 ev.name.lower(), session_id=session.session_id, request_id=session.pending.request_id
             )
 
     def _on_panic(self, ev, frame_inputs: dict) -> None:
+        if ev.value and self.hid is not None:
+            self.hid.tap("PANIC")
         if ev.value:
             self.deck.panic()
         else:
@@ -446,6 +460,7 @@ class App:
             else:
                 self.panel.set_lamp(name, brightness if lamp_name == name else 0.0)
 
+        self.panel.set_backlight(brightness)
         self.panel.set_button_led("APPROVE", brightness if self.deck.approve_button_live(now) else 0.0)
         self.panel.set_button_led("DENY", brightness if state == State.BLOCKED_PERMISSION else 0.0)
 
@@ -466,10 +481,11 @@ def main() -> None:
     parser.add_argument("--no-link", action="store_true", help="skip starting the daemon link")
     args = parser.parse_args()
 
-    panel = build_panel(args.panel)
     menu = Menu()
+    panel = build_panel(args.panel, menu.settings)
+    hid = HidKeyboard() if args.panel == "real" else None
     deck = Deck(selector="ALL", idle_after_seconds=float(menu.settings.get("idle_after_seconds", 300)))
-    app = App(panel, deck, menu, use_link=not args.no_link)
+    app = App(panel, deck, menu, use_link=not args.no_link, hid=hid)
     app.start()
     try:
         app.run()

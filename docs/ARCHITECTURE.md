@@ -57,13 +57,16 @@ firmware/deck/
   main.py             event loop
   state.py            state machine, priority, latching, timeouts
   link.py             talks to the daemon, heartbeat drives the LINK lamp
+  hid.py              USB HID gadget writer, F13-F20 only (SAFETY.md rule 1)
   menu.py             encoder-driven settings menu, writes /var/deck/settings.yaml
   hwtest.py           bench bring-up: live input readout, output sweep (Settings)
   calibration.py      per-meter 5-point needle curve and its wizard (Settings)
   screen.py           NIGHT dimming, quiet-hours blanking, daemon-sourced wall clock
   panel/
     base.py           abstract Panel: lamps, meters, pixels, inputs, screen surface
-    real.py           GPIO, SPI, I2C, PCA9685, MCP23017, WS2812-over-SPI
+    real.py           wires the hw/ drivers to docs/HARDWARE.md's pins and channels
+    hw/               PCA9685 (open-drain), MCP23017, ADS1115, WS2812-over-SPI,
+                      gpiod edges; input decoding kept pure and tested with fakes
     sim.py            pygame window drawing the whole panel on your desktop
   ui/
     render.py         scene compositor, dirty-rect blitting, CRT post effect

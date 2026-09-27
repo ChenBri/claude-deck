@@ -34,6 +34,9 @@ DEFAULT_SETTINGS = {
     "wifi": False,
     "night_brightness": 0.2,
     "sound_theme": DEFAULT_THEME,
+    # real panel only, hand-edited: see deck/panel/hw/inputs.py
+    "joystick": {"center_x": 0.5, "center_y": 0.5, "deadzone": 0.12, "invert_x": False, "invert_y": False},
+    "encoder_invert": False,
     "ambient_after_seconds": 60,
     "ambient_card_seconds": 20,
     "ambient_mascot_seconds": 60,

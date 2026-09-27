@@ -1,0 +1,6 @@
+# On the deck only, on top of requirements.txt: the real panel's bus and GPIO access.
+# Not installable (or needed) on the desktop, where the simulator runs.
+-r requirements.txt
+smbus2>=0.4  # I2C4: PCA9685, both MCP23017s, ADS1115
+spidev>=3.6  # SPI3 MOSI, the WS2812B strip
+gpiod>=2.1  # libgpiod v2 bindings: buttons, mushroom, encoder edges

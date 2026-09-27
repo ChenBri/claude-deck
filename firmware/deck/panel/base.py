@@ -61,6 +61,10 @@ class Panel(ABC):
         """name in BUTTON_LEDS, level 0..1. 0 means dead: live only while a
         prompt is pending; NIGHT mode scales the "on" level down from there."""
 
+    def set_backlight(self, level: float) -> None:
+        """Legend strip and meter face backlights, 0..1. Only the real panel
+        has them; the simulator has nothing to draw."""
+
     @abstractmethod
     def present(self, canvas, rails=None, screen_level: float = 1.0) -> None:
         """Push one composited frame to the device: lamps, meters, pixels, and
