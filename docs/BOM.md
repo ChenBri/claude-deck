@@ -27,6 +27,90 @@ before ordering, both have moved in recent years.
 **Spares.** A few cheap, critical parts are ordered in twos. A dead display or a
 cooked level shifter three weeks into the build otherwise stops everything.
 
+## Arrivals
+
+Every line that was ordered, grouped by parcel source. Received holds the date
+it landed, blank means still in transit. Anything that arrives wrong or dead
+gets a note instead of a date.
+
+**Received: 1 of 51.**
+
+### KSP
+
+| Item | BOM | Qty | Received |
+|---|---|---|---|
+| SanDisk Ultra A1 32GB microSD | A2 | 1 | 2026-09-27 |
+
+### Digi-Key
+
+| Item | BOM | Qty | Received |
+|---|---|---|---|
+| SN74AHCT125N level shifter | C7 | 2 | |
+| MCP23017-E/SP GPIO expander | C2 | 2 | |
+| LM358P op-amp | C11 | 2 | |
+| PEC11R-4215F-S0024 encoder | E6 | 2 | |
+| 3296W-1-103LF 10k trimpot | C10 | 2 | |
+
+### AliExpress, board and power
+
+| Item | BOM | Qty | Received |
+|---|---|---|---|
+| Radxa ZERO 3W 2GB | A1 | 1 | |
+| 2x20 GPIO header | A3 | 1 | |
+| 12V 3A PSU | A4 | 1 | |
+| USB-A to micro-USB cable | A5 | 1 | |
+| 12V to 5V buck converter | A6 | 1 | |
+| 11.6in HDMI panel + driver board | B1 | 1 | |
+
+### AliExpress, parts cart
+
+| Item | BOM | Qty | Received |
+|---|---|---|---|
+| Kaisaya VU panel meter | D1 | 2 | |
+| WS2812B strip, 1m | C6 | 1 | |
+| MAX98357A amp, 5-pack | F1 | 1 | |
+| Speaker 4Ω 3W | F2 | 1 | |
+| PCA9685 PWM board | C1 | 1 | |
+| PTEN pushbutton, green APPROVE | E1 | 1 | |
+| PTEN pushbutton, red DENY | E1 | 1 | |
+| XB2-542 mushroom e-stop | E2 | 1 | |
+| SR16 rotary switch | E4 | 2 | |
+| Aluminium pointer knob | E5 | 4 | |
+| RV24YN20S potentiometer set | E11 | 1 | |
+| MTS-102 toggle, 10-pack | E10 | 1 | |
+| Gateron G Pro Brown, 10-pack | E8 | 1 | |
+| DSA orange keycaps, 20-pack | E9 | 1 | |
+| Chrome LED bezels, 10-pack | C4 | 1 | |
+| Breadboard 830 | I1 | 2 | |
+| Perfboard 8x12cm | I2 | 1 | |
+| Resistor kit | C9 | 1 | |
+| Electrolytic cap kit | C9 | 1 | |
+| LED assortment, 5mm | C3 | 1 | |
+| Dupont jumper kit | G7 | 1 | |
+| 2.54mm connector kit | G4 | 1 | |
+| Silicone wire 22AWG | G5 | 1 | |
+| Heat shrink assortment | G6 | 1 | |
+| USB-C panel pigtail | G1 | 1 | |
+| DC panel jack | G2 | 1 | |
+| KCD1 rocker switch | G3 | 1 | |
+| KY-023 joystick | - | 1 | |
+| ADS1115 ADC | - | 1 | |
+
+### AliExpress, tools cart
+
+| Item | BOM | Qty | Received |
+|---|---|---|---|
+| FNIRSI HS-02A soldering kit | J1 | 1 | |
+| HX-T100 solder 0.6mm | J2 | 1 | |
+| ANENG 620A multimeter | J4 | 1 | |
+| SN-58B crimper | J7 | 1 | |
+| Plier set, 4-piece | J3 | 1 | |
+| Helping hands | J5 | 1 | |
+| Desoldering braid | J6 | 1 | |
+| Desoldering pump | J6 | 1 | |
+| Silicone soldering mat | J10 | 1 | |
+| Hot glue gun | J8 | 1 | |
+
 ## Cart in progress, verified prices
 
 Prices below are read from the cart, not from the search tile. See the pricing
