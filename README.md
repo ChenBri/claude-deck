@@ -4,10 +4,10 @@ A hand-built desk instrument that shows what Claude Code is doing, and lets you
 answer it without touching the keyboard.
 
 Radxa ZERO 3W behind a 3D printed retro terminal shell. Five labelled
-lamps behind a backlit engraved legend strip, a 2.4" pixel-art screen with an
-animated mascot, two analog needles, a NeoPixel halo and underglow, lit arcade
-buttons, a mushroom interrupt under a flip cover, two knobs, four mech keys and
-three toggles.
+lamps behind a backlit engraved legend strip, an 11.6" pixel-art screen with an
+animated mascot, two analog needles, a NeoPixel halo and underglow, lit metal
+approve/deny buttons, a latching mushroom interrupt, two knobs, four mech keys
+and three toggles.
 
 It is driven by Claude Code hooks. It never touches the internet.
 
@@ -19,7 +19,9 @@ Claude Code  --hooks-->  daemon (your PC)  --USB link-->  claude-deck (Radxa ZER
 
 ## Status
 
-Design complete. Software phase in progress, hardware not yet ordered.
+Design complete, parts ordered and arriving (tracked in
+[docs/BOM.md](docs/BOM.md#arrivals)). The software runs end to end in the
+simulator; the real panel driver and board setup are next.
 
 - [DECISIONS.md](DECISIONS.md) every choice made and why
 - [docs/BOM.md](docs/BOM.md) parts, prices, suppliers
@@ -36,8 +38,9 @@ daemon/     TypeScript. Runs on Windows and macOS. Talks to Claude Code hooks.
 hooks/      Hook scripts and the settings.json snippet.
 case/       OpenSCAD source for the enclosure.
 panel/      Inkscape SVG for the laser-cut engraved legend strip.
-tools/      Hook event recorder and replayer.
 docs/       Everything above.
+
+The hook event recorder and replayer live in firmware/tools/.
 ```
 
 ## The simulator
@@ -57,8 +60,12 @@ Replay a recorded session into it at speed:
 python firmware/tools/replay.py sessions/2026-09-20.jsonl --speed 10
 ```
 
-Home screen has six apps: Settings, Snake, Tetris, 2048, Pong and Game Boy.
-The four built-in games (Snake/Tetris/2048/Pong) share a high score table -
+When nothing needs you the screen goes ambient: data cards (clock, weather,
+today's usage, git, the last 5 hours) alternate with the mascot going about
+its day. Push the encoder for the home screen, which has seven apps: Settings,
+Snake, Tetris, 2048, Pong (1 or 2 players), Breakout and Game Boy. Settings
+also holds the hardware test and the meter calibration wizard for bring-up.
+The five built-in games share a high score table -
 push the encoder to pause/retry, and a qualifying game-over drops into a
 retro three-letter initials entry (joystick up/down cycles the letter,
 left/right moves between slots, push confirms), same idea as arcade cabinets.
