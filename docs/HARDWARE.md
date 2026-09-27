@@ -115,6 +115,21 @@ Channel current limit is 25mA sinking, 10mA sourcing. Lamps are wired as sinks
 from 5V with series resistors. All twelve channels breathe and dim in software,
 which is what makes NIGHT mode and the blocked-state pulse possible.
 
+**The PCA9685 runs in open-drain mode (MODE2 OUTDRV = 0), not the default
+totem-pole.** Its logic supply has to be 3.3V: the breakout's I2C pull-ups go
+to that same VCC, and the Radxa's pins are 3.63V absolute max. In totem-pole
+mode an output's "high" is therefore 3.3V, which breaks both kinds of load on
+this board. A lamp sinking from 5V still sees about 1.7V across it when its
+channel is "off", enough for red and yellow LEDs to glow permanently; and the
+meters would only ever see a 3.3V source. In open-drain mode an off channel is
+high-impedance, so every LED load (lamps, legend and meter backlights, the
+button rings) sinks cleanly from 5V, and each meter gets a 1k pull-up to 5V so
+its drive is a true 0-5V swing again (see "Meter drive circuit" below). The
+cost is that a meter channel's duty is inverted: sinking pulls the needle
+down, so the driver writes `1 - level` for channels 9 and 10. No new parts:
+the two 1k pull-ups come out of the resistor kit already ordered. DECISIONS.md
+#68.
+
 ## I2C bus, addresses
 
 On I2C4 (pins 27/28, see "Pin map" above - chosen for its built-in pull-ups).
@@ -189,6 +204,22 @@ speaker. See DECISIONS.md #57.
 | B | 6 | Toggle AUTO-ACCEPT |
 | B | 7 | spare |
 
+## MCP23017 #2, all inputs with pull-ups
+
+| Port | Pin | Input |
+|---|---|---|
+| B | 0 | Joystick push (KY-023 SW) |
+| B | 1 | Game Boy A |
+| B | 2 | Game Boy B |
+| B | 3 | Game Boy START |
+| B | 4 | Game Boy SELECT |
+| B | 5 | Effort dial LOW |
+| B | 6 | Effort dial MEDIUM |
+| B | 7 | Effort dial HIGH |
+| A | 0 | Effort dial XHIGH |
+| A | 1 | Effort dial MAX |
+| A | 2-7 | spare |
+
 ## Meters, as ordered
 
 Kaisaya 500µA / 630Ω analog panel meter, 34mm face, white dial, warm backlight.
@@ -206,12 +237,19 @@ Two ordered.
 ## Meter drive circuit, per meter
 
 ```
-PCA9685 ch --[ 2.2k ]--+--[ 10k trimpot ]--> meter +
-                       |
-                     [100uF]
-                       |
-                      GND                    meter - --> GND
+5V --[ 1k ]--+--[ 2.2k ]--+--[ 10k trimpot ]--> meter +
+             |            |
+       PCA9685 ch      [100uF]
+   (open-drain, sinks)    |
+                         GND                    meter - --> GND
 ```
+
+The channel only ever pulls the 1k node low, so the needle reads high when the
+channel is off and the driver inverts the duty (see the open-drain note under
+"PCA9685 channels"). Sink current is 5V / 1k = 5mA plus the capacitor's
+discharge through the 2.2k, well inside the 25mA sink limit. Series resistance
+for full scale is still 10kΩ total: 1k + 2.2k + the 630Ω coil leaves the
+trimpot at about 6.2k.
 
 PWM at ~1.6kHz filtered to DC. Cutoff lands near 0.7Hz, which is slow enough to
 be smooth and fast enough that the needle still visibly twitches with activity.
