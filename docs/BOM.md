@@ -74,87 +74,98 @@ cooked level shifter three weeks into the build otherwise stops everything.
 
 ## Arrivals
 
-Every line that was ordered, grouped by parcel source. Received holds the date
-it landed, blank means still in transit. Anything that arrives wrong or dead
-gets a note instead of a date.
+Every line that was actually ordered, from the order confirmations (checked
+2026-09-27), grouped by parcel source. Paid is the order total, shipping
+included, which is why some differ from the cart estimates further down.
+Received holds the date it landed, blank means still in transit. Anything that
+arrives wrong or dead gets a note instead of a date.
 
-**Received: 1 of 51.**
+**Received: 1 of 53.** Paid in total: AliExpress ₪1414.34, Digi-Key
+₪54.54, KSP ₪49.00.
+
+Differences from the plan below: the display came from a different seller
+than the one its 12V spec was checked against (see B1), there's a spare buck
+converter, and spares of the strip, ADS1115, header and DC jack, plus flux
+pens the BOM never listed.
 
 ### KSP
 
-| Item | BOM | Qty | Received |
-|---|---|---|---|
-| SanDisk Ultra A1 32GB microSD | A2 | 1 | 2026-09-27 |
+| Item | BOM | Seller | Qty | Paid | Received |
+|---|---|---|---|---|---|
+| SanDisk Ultra A1 32GB microSD | A2 | KSP | 1 | ₪49.00 | 2026-09-27 |
 
 ### Digi-Key
 
-| Item | BOM | Qty | Received |
-|---|---|---|---|
-| SN74AHCT125N level shifter | C7 | 2 | |
-| MCP23017-E/SP GPIO expander | C2 | 2 | |
-| LM358P op-amp | C11 | 2 | |
-| PEC11R-4215F-S0024 encoder | E6 | 2 | |
-| 3296W-1-103LF 10k trimpot | C10 | 2 | |
+| Item | BOM | Qty | Paid | Received |
+|---|---|---|---|---|
+| SN74AHCT125N level shifter | C7 | 2 | ₪6.24 | |
+| MCP23017-E/SP GPIO expander | C2 | 2 | ₪11.10 | |
+| LM358P op-amp | C11 | 2 | ₪2.16 | |
+| PEC11R-4215F-S0024 encoder | E6 | 2 | ₪19.36 | |
+| 3296W-1-103LF 10k trimpot | C10 | 2 | ₪15.68 | |
 
 ### AliExpress, board and power
 
-| Item | BOM | Qty | Received |
-|---|---|---|---|
-| Radxa ZERO 3W 2GB | A1 | 1 | |
-| 2x20 GPIO header | A3 | 1 | |
-| 12V 3A PSU | A4 | 1 | |
-| USB-A to micro-USB cable | A5 | 1 | |
-| 12V to 5V buck converter | A6 | 1 | |
-| 11.6in HDMI panel + driver board | B1 | 1 | |
+| Item | BOM | Seller | Qty | Paid | Received |
+|---|---|---|---|---|---|
+| Radxa ZERO 3W, 2GB, no GPIO | A1 | RADXA Computer (Shenzhen) | 1 | ₪195.73 |  |
+| 2x20 GPIO header | A3 | May's wholesale store | 2 | ₪9.22 |  |
+| 12V 3A PSU, EU plug | A4 | VBS LED Lighting Store | 1 | ₪21.21 |  |
+| Micro-USB cable, 0.5m | A5 | toocki Direct Official | 1 | ₪6.79 |  |
+| LM2596 buck converter, with voltmeter | A6 | Realpoy Electronic Components | 1 | ₪6.81 |  |
+| LM2596 buck converter, plain (spare, ordered Sep 27) | A6 | Qi Qi Bao Store | 1 | ₪2.84 |  |
+| 11.6in 1366x768 panel + driver board | B1 | Shop5059077 Store | 1 | ₪167.34 |  |
 
-### AliExpress, parts cart
+### AliExpress, parts
 
-| Item | BOM | Qty | Received |
-|---|---|---|---|
-| Kaisaya VU panel meter | D1 | 2 | |
-| WS2812B strip, 1m | C6 | 1 | |
-| MAX98357A amp, 5-pack | F1 | 1 | |
-| Speaker 4Ω 3W | F2 | 1 | |
-| PCA9685 PWM board | C1 | 1 | |
-| PTEN pushbutton, green APPROVE | E1 | 1 | |
-| PTEN pushbutton, red DENY | E1 | 1 | |
-| XB2-542 mushroom e-stop | E2 | 1 | |
-| SR16 rotary switch | E4 | 2 | |
-| Aluminium pointer knob | E5 | 4 | |
-| RV24YN20S potentiometer set | E11 | 1 | |
-| MTS-102 toggle, 10-pack | E10 | 1 | |
-| Gateron G Pro Brown, 10-pack | E8 | 1 | |
-| DSA orange keycaps, 20-pack | E9 | 1 | |
-| Chrome LED bezels, 10-pack | C4 | 1 | |
-| Breadboard 830 | I1 | 2 | |
-| Perfboard 8x12cm | I2 | 1 | |
-| Resistor kit | C9 | 1 | |
-| Electrolytic cap kit | C9 | 1 | |
-| LED assortment, 5mm | C3 | 1 | |
-| Dupont jumper kit | G7 | 1 | |
-| 2.54mm connector kit | G4 | 1 | |
-| Silicone wire 22AWG | G5 | 1 | |
-| Heat shrink assortment | G6 | 1 | |
-| USB-C panel pigtail | G1 | 1 | |
-| DC panel jack | G2 | 1 | |
-| KCD1 rocker switch | G3 | 1 | |
-| KY-023 joystick | - | 1 | |
-| ADS1115 ADC | - | 1 | |
+| Item | BOM | Seller | Qty | Paid | Received |
+|---|---|---|---|---|---|
+| Kaisaya VU meter, 500uA 630ohm, white | D1 | KaisayaHIFI audio Store | 2 | ₪38.99 |  |
+| WS2812B strip, 1m, 60/m, black PCB (one spare) | C6 | MeetNeon Store | 2 | ₪30.34 |  |
+| MAX98357A amp, 5-pack | F1 | IC Core City Store | 1 | ₪18.91 |  |
+| Speaker 4ohm 3W, 40mm | F2 | Test Board Store | 1 | ₪11.19 |  |
+| PCA9685 PWM board | C1 | Win win. Store | 1 | ₪10.31 |  |
+| PTEN pushbutton, green APPROVE | E1 | PTEN Store | 1 | ₪9.25 |  |
+| PTEN pushbutton, red DENY | E1 | PTEN Store | 1 | ₪9.65 |  |
+| XB2-542 mushroom e-stop, 1NO1NC | E2 | Boutique electric Store | 1 | ₪15.01 |  |
+| SR16 rotary switch, 1 pole 6 position | E4 | DQLZV Official Store | 2 | ₪11.08 |  |
+| Aluminium pointer knob, 20x15mm | E5 | ATOPELEC_ALI1 Store | 4 | ₪16.57 |  |
+| RV24YN20S potentiometer set, 10K | E11 | Microelectronics Technology | 1 | ₪7.97 |  |
+| MTS-102 toggle, 10-pack | E10 | DIY MALL Store | 1 | ₪9.30 |  |
+| Gateron G Pro Brown 3.0, 10-pack | E8 | ONEFIRE Store | 1 | ₪12.11 |  |
+| DSA blank keycaps, orange, 20-pack | E9 | LLY Earphone Accessories | 1 | ₪15.18 |  |
+| Chrome LED bezels, 5mm, 10-pack | C4 | Seablue 1618 Store | 1 | ₪7.32 |  |
+| Breadboard 830 | I1 | CHANZON Global Store | 2 | ₪32.82 |  |
+| Perfboard 8x12cm | I2 | Estardyn Choice Store | 3 | ₪16.59 |  |
+| Resistor kit, 820pcs | C9 | LXQY Store | 1 | ₪17.48 |  |
+| Electrolytic cap kit, 12 values x 10 | C9 | DSSRQI Official Store | 1 | ₪10.41 |  |
+| LED assortment, 5mm box | C3 | HuiShengDongye Store | 1 | ₪7.69 |  |
+| Dupont jumper kit, 3x40pin, 20cm | G7 | CHANZON Official Store | 1 | ₪28.80 |  |
+| 2.54mm connector kit, 310pcs | G4 | TENSTAR Choice Store | 1 | ₪11.13 |  |
+| Silicone wire, 22AWG, 5x5m | G5 | Beteno Connect Store | 1 | ₪32.18 |  |
+| Heat shrink, 560pcs with box | G6 | CY1122 Store | 1 | ₪21.04 |  |
+| USB-C panel pigtail to micro-USB, A3 | G1 | CHENJ 3C Digital Store | 1 | ₪10.05 |  |
+| DC panel jack, 5.5x2.1 (one spare) | G2 | GT Online Store | 2 | ₪13.90 |  |
+| KCD1 rocker, 3-pin red illuminated | G3 | TLZWLA Official Store | 1 | ₪3.64 |  |
+| KY-023 joystick | - | Shop1104077326 Store | 1 | ₪5.18 |  |
+| ADS1115 ADC (one spare) | - | JYJD Module Store | 2 | ₪9.52 |  |
 
-### AliExpress, tools cart
+### AliExpress, tools
 
-| Item | BOM | Qty | Received |
-|---|---|---|---|
-| FNIRSI HS-02A soldering kit | J1 | 1 | |
-| HX-T100 solder 0.6mm | J2 | 1 | |
-| ANENG 620A multimeter | J4 | 1 | |
-| SN-58B crimper | J7 | 1 | |
-| Plier set, 4-piece | J3 | 1 | |
-| Helping hands | J5 | 1 | |
-| Desoldering braid | J6 | 1 | |
-| Desoldering pump | J6 | 1 | |
-| Silicone soldering mat | J10 | 1 | |
-| Hot glue gun | J8 | 1 | |
+| Item | BOM | Seller | Qty | Paid | Received |
+|---|---|---|---|---|---|
+| FNIRSI HS-02A soldering kit, 6 tips, 100W, EU | J1 | FNIRSI Official Store | 1 | ₪275.81 |  |
+| MECHANIC HX-T100 solder, 63%, 0.6mm, 55g | J2 | MECHANIC Brand+ Store | 1 | ₪17.88 |  |
+| Flux pen, 2 pieces (not in the BOM) | J2 | EPEVER Solar Store | 1 | ₪12.87 |  |
+| ANENG 620A multimeter | J4 | ThinkingLeader Store | 1 | ₪62.19 |  |
+| SN-58B ratcheting crimper | J7 | ThinkingLeader Tools Store | 1 | ₪47.24 |  |
+| Plier set, 4-piece | J3 | Wen-Long Store | 1 | ₪77.78 |  |
+| Toolour helping hands, TO-SN3SB | J5 | Toolour Store | 1 | ₪32.74 |  |
+| Desoldering braid, 2.5mm x 1.5m | J6 | China Topbrand Store | 1 | ₪3.43 |  |
+| Desoldering pump | J6 | Foshan Zhongqi Hengyuan Tech | 1 | ₪12.41 |  |
+| Silicone soldering mat, S100 | J10 | Dikkamon Store | 1 | ₪11.75 |  |
+| Hot glue gun, 20W, EU | J8 | Shop1103832293 Store | 1 | ₪6.69 |  |
+
 
 ## Cart in progress, verified prices
 
@@ -371,7 +382,7 @@ soldering station.
 
 | # | Part | Qty | Unit | Total | Notes |
 |---|---|---|---|---|---|
-| B1 | 11.6in 1366x768 HDMI/Type-C LCD panel + driver board | 1 | 40.00 | 40.00 | Sourced 2026-09-22: Heyman Store on AliExpress, ₪145.48 for the 1366x768 variant (the 1920x1080 variant is ₪201.20, a real ~$17 premium for four times the pixels to push - not worth it on an 11.6in panel). Confirmed **12V 2A, DC 5.5mm** - not 5V, see the power budget rework in docs/HARDWARE.md. Thin data on this specific listing (8 sold, one adjacent review notes limited viewing angle/brightness, typical for this class of budget universal driver board) - worth a last look at the actual listing before checkout, not a guarantee. |
+| B1 | 11.6in 1366x768 HDMI/Type-C LCD panel + driver board | 1 | 40.00 | 40.00 | Sourced 2026-09-22: Heyman Store on AliExpress, ₪145.48 for the 1366x768 variant (the 1920x1080 variant is ₪201.20, a real ~$17 premium for four times the pixels to push - not worth it on an 11.6in panel). Confirmed **12V 2A, DC 5.5mm** - not 5V, see the power budget rework in docs/HARDWARE.md. Thin data on this specific listing (8 sold, one adjacent review notes limited viewing angle/brightness, typical for this class of budget universal driver board) - worth a last look at the actual listing before checkout, not a guarantee. **Actually ordered from a different seller** (Shop5059077 Store, 1366x768 full set, ₪152.06): same class of kit, but its power input isn't confirmed. Check the driver board's rating before connecting the 12V supply. |
 | | | | | **40.00** | |
 
 ## C. Light and IO expansion
