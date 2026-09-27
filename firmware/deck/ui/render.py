@@ -15,10 +15,12 @@ from deck.ui.scenes.gameboy import GameBoyScene
 from deck.ui.scenes.idle import IdleScene
 from deck.ui.scenes.interrupted import InterruptedScene
 from deck.ui.scenes.offline import OfflineScene
+from deck.ui.scenes.pong import PongScene
 from deck.ui.scenes.ready import ReadyScene
 from deck.ui.scenes.snake import SnakeScene
 from deck.ui.scenes.subagents import SubagentsScene
 from deck.ui.scenes.tetris import TetrisScene
+from deck.ui.scenes.twenty48 import Twenty48Scene
 from deck.ui.scenes.working import WorkingScene
 
 
@@ -48,6 +50,8 @@ _STATE_SCENES: dict[State, type[Scene]] = {
 GAMES: dict[str, type[Scene]] = {
     "snake": SnakeScene,
     "tetris": TetrisScene,
+    "2048": Twenty48Scene,
+    "pong": PongScene,
     "gameboy": GameBoyScene,
 }
 

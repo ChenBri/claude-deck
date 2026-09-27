@@ -20,5 +20,7 @@ APPS: list[AppDef] = [
     AppDef("settings", "Settings", "@"),
     AppDef("snake", "Snake", "S"),
     AppDef("tetris", "Tetris", "T"),
+    AppDef("2048", "2048", "2"),
+    AppDef("pong", "Pong", "P"),
     AppDef("gameboy", "Game Boy", "G"),
 ]

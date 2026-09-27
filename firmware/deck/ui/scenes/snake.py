@@ -5,7 +5,10 @@ import random
 import pygame
 
 from deck.ui.gfx import clear, draw_text
+from deck.ui.name_entry import HighScoreFlow, draw_best
 from deck.ui.scenes.base import Context, Scene
+
+GAME_ID = "snake"
 
 CELL = 8
 COLS = 20
@@ -22,6 +25,7 @@ class SnakeScene(Scene):
     def __init__(self, autoplay: bool = False) -> None:
         self.autoplay = autoplay
         self._rng = random.Random()
+        self._hsf = HighScoreFlow(GAME_ID)
         self._reset()
         self._last_step = 0.0
         self._paused = False
@@ -32,6 +36,8 @@ class SnakeScene(Scene):
         self.direction = (1, 0)
         self.food = self._spawn_food()
         self.game_over = False
+        self.score = 0
+        self._hsf.reset()
 
     def _spawn_food(self):
         free = [(x, y) for x in range(COLS) for y in range(ROWS) if (x, y) not in getattr(self, "body", [])]
@@ -60,6 +66,10 @@ class SnakeScene(Scene):
         return best or self.direction
 
     def _handle_input(self, ctx: Context) -> None:
+        if self._hsf.active:
+            self._hsf.handle_input(ctx.inputs, self.score)
+            return
+
         if ctx.inputs.get("encoder_push_edge", False):
             if self.game_over:
                 self._reset()
@@ -85,10 +95,12 @@ class SnakeScene(Scene):
                 self._reset()
                 return
             self.game_over = True
+            self._hsf.on_game_over(self.score)
             return
         self.direction = direction
         self.body.insert(0, head)
         if head == self.food:
+            self.score += 1
             self.food = self._spawn_food()
         else:
             self.body.pop()
@@ -106,12 +118,17 @@ class SnakeScene(Scene):
         for i, (x, y) in enumerate(self.body):
             color = (255, 178, 92) if i == 0 else (224, 122, 42)
             pygame.draw.rect(canvas, color, (x * CELL, y * CELL, CELL - 1, CELL - 1))
+        if not self.autoplay:
+            draw_text(canvas, str(self.score), (4, 2), size=8, color=(160, 160, 160))
 
-        if self.game_over:
+        if self._hsf.active:
+            self._hsf.draw(canvas, self.score, ctx.now)
+        elif self.game_over:
             cx, cy = canvas.get_width() // 2, canvas.get_height() // 2
-            pygame.draw.rect(canvas, (10, 8, 8), (cx - 34, cy - 10, 68, 32))
-            draw_text(canvas, "game over", (cx - 24, cy - 6), size=10)
-            draw_text(canvas, "push: retry", (cx - 28, cy + 8), size=7, color=(160, 160, 160))
+            pygame.draw.rect(canvas, (10, 8, 8), (cx - 34, cy - 26, 68, 48))
+            draw_text(canvas, "game over", (cx - 24, cy - 22), size=10)
+            draw_text(canvas, "push: retry", (cx - 28, cy - 8), size=7, color=(160, 160, 160))
+            draw_best(canvas, GAME_ID, (cx - 28, cy + 4))
         elif self._paused:
             cx, cy = canvas.get_width() // 2, canvas.get_height() // 2
             pygame.draw.rect(canvas, (10, 8, 8), (cx - 24, cy - 6, 48, 16))

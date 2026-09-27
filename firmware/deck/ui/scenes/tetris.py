@@ -5,7 +5,11 @@ import random
 import pygame
 
 from deck.ui.gfx import clear, draw_text
+from deck.ui.name_entry import HighScoreFlow, draw_best
 from deck.ui.scenes.base import Context, Scene
+
+GAME_ID = "tetris"
+_LINE_SCORE = {1: 40, 2: 100, 3: 300, 4: 1200}
 
 CELL = 8
 COLS = 10
@@ -38,6 +42,7 @@ class TetrisScene(Scene):
 
     def __init__(self) -> None:
         self._rng = random.Random()
+        self._hsf = HighScoreFlow(GAME_ID)
         self._reset()
 
     def _reset(self) -> None:
@@ -45,6 +50,8 @@ class TetrisScene(Scene):
         self.game_over = False
         self._paused = False
         self._last_fall = 0.0
+        self.score = 0
+        self._hsf.reset()
         self._spawn()
 
     def _spawn(self) -> None:
@@ -53,6 +60,7 @@ class TetrisScene(Scene):
         self.pos = (COLS // 2 - 2, 0)
         if self._collides(self.cells, self.pos):
             self.game_over = True
+            self._hsf.on_game_over(self.score)
 
     def _collides(self, cells, pos) -> bool:
         px, py = pos
@@ -77,6 +85,7 @@ class TetrisScene(Scene):
         full_rows = [y for y in range(ROWS) if all((x, y) in self.grid for x in range(COLS))]
         if not full_rows:
             return
+        self.score += _LINE_SCORE.get(len(full_rows), 1200)
         remaining = {(x, y): k for (x, y), k in self.grid.items() if y not in full_rows}
         shift = {y: sum(1 for fy in full_rows if fy > y) for y in range(ROWS)}
         self.grid = {(x, y + shift[y]): k for (x, y), k in remaining.items()}
@@ -85,6 +94,10 @@ class TetrisScene(Scene):
         self._last_fall = ctx.now
 
     def _handle_input(self, ctx: Context) -> None:
+        if self._hsf.active:
+            self._hsf.handle_input(ctx.inputs, self.score)
+            return
+
         if ctx.inputs.get("encoder_push_edge", False):
             if self.game_over:
                 self._reset()
@@ -146,12 +159,16 @@ class TetrisScene(Scene):
                 pygame.draw.rect(canvas, _COLORS[self.kind], (ox + (px + x) * CELL, gy * CELL, CELL - 1, CELL - 1))
 
         pygame.draw.rect(canvas, (90, 90, 96), (ox - 1, 0, COLS * CELL + 2, ROWS * CELL), 1)
+        draw_text(canvas, str(self.score), (ox + COLS * CELL + 6, 4), size=8, color=(160, 160, 160))
 
-        if self.game_over:
+        if self._hsf.active:
+            self._hsf.draw(canvas, self.score, ctx.now)
+        elif self.game_over:
             cy = canvas.get_height() // 2
-            pygame.draw.rect(canvas, (10, 8, 8), (ox, cy - 6, COLS * CELL, 30))
-            draw_text(canvas, "game over", (ox + 8, cy), size=9)
-            draw_text(canvas, "push: retry", (ox + 2, cy + 12), size=7, color=(160, 160, 160))
+            pygame.draw.rect(canvas, (10, 8, 8), (ox, cy - 16, COLS * CELL, 46))
+            draw_text(canvas, "game over", (ox + 8, cy - 12), size=9)
+            draw_text(canvas, "push: retry", (ox + 2, cy), size=7, color=(160, 160, 160))
+            draw_best(canvas, GAME_ID, (ox + 2, cy + 12))
         elif self._paused:
             cy = canvas.get_height() // 2
             pygame.draw.rect(canvas, (10, 8, 8), (ox, cy - 4, COLS * CELL, 16))
