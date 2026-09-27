@@ -11,17 +11,16 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class AppDef:
-    id: str
+    id: str  # also keys its launcher icon, see ui/sprites.py app_icon
     label: str
-    icon: str  # one glyph, since there's no room for real icon art yet
 
 
 APPS: list[AppDef] = [
-    AppDef("settings", "Settings", "@"),
-    AppDef("snake", "Snake", "S"),
-    AppDef("tetris", "Tetris", "T"),
-    AppDef("2048", "2048", "2"),
-    AppDef("pong", "Pong", "P"),
-    AppDef("breakout", "Breakout", "B"),
-    AppDef("gameboy", "Game Boy", "G"),
+    AppDef("settings", "Settings"),
+    AppDef("snake", "Snake"),
+    AppDef("tetris", "Tetris"),
+    AppDef("2048", "2048"),
+    AppDef("pong", "Pong"),
+    AppDef("breakout", "Breakout"),
+    AppDef("gameboy", "Game Boy"),
 ]

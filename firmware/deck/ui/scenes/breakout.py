@@ -96,11 +96,7 @@ class BreakoutScene(Scene):
         if self._paused or self.game_over:
             return
 
-        edge = ctx.inputs.get("encoder_edge")
-        if edge == "cw":
-            self.paddle_x += ENCODER_STEP
-        elif edge == "ccw":
-            self.paddle_x -= ENCODER_STEP
+        self.paddle_x += ctx.inputs.get("encoder_steps", 0) * ENCODER_STEP
         jx, _ = ctx.inputs.get("joystick", (0, 0))
         self.paddle_x += jx * PADDLE_SPEED * min(ctx.dt, MAX_DT)
         self.paddle_x = max(PADDLE_W / 2, min(W - PADDLE_W / 2, self.paddle_x))

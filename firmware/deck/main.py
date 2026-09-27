@@ -236,6 +236,9 @@ class App:
                 self.calibrate.rotate(1 if ev.name == "cw" else -1)
             else:
                 frame_inputs["encoder_edge"] = ev.name  # e.g. the Game Boy rom picker
+                # every detent this frame, not just the last: a fast turn sends several
+                step = 1 if ev.name == "cw" else -1
+                frame_inputs["encoder_steps"] = frame_inputs.get("encoder_steps", 0) + step
         elif ev.name == "push_down":
             self._encoder_down_at = now
         elif ev.name == "push_up":

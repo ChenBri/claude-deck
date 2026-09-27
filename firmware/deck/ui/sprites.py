@@ -27,6 +27,7 @@ PALETTE = {
     "P": (168, 92, 60),     # terracotta pot
     "D": (60, 120, 70),     # dark leaf green
     "M": (236, 228, 200),   # moon
+    "S": (150, 150, 160),   # steel grey
 }
 
 SCALE = 4  # each grid cell -> SCALE x SCALE pixels in the sprite sheet
@@ -52,11 +53,13 @@ _BODY = [
 ]
 
 
-def _grid_to_surface(rows: list[str], overrides: dict[tuple[int, int], str] | None = None) -> pygame.Surface:
+def _grid_to_surface(
+    rows: list[str], overrides: dict[tuple[int, int], str] | None = None, scale: int = SCALE
+) -> pygame.Surface:
     overrides = overrides or {}
     h = len(rows)
-    w = len(rows[0])
-    surf = pygame.Surface((w * SCALE, h * SCALE), pygame.SRCALPHA)
+    w = max(len(row) for row in rows)
+    surf = pygame.Surface((w * scale, h * scale), pygame.SRCALPHA)
     for y, row in enumerate(rows):
         for x, ch in enumerate(row):
             ch = overrides.get((x, y), ch)
@@ -65,7 +68,7 @@ def _grid_to_surface(rows: list[str], overrides: dict[tuple[int, int], str] | No
             color = PALETTE.get(ch)
             if color is None:
                 continue
-            surf.fill(color, (x * SCALE, y * SCALE, SCALE, SCALE))
+            surf.fill(color, (x * scale, y * scale, scale, scale))
     return surf
 
 
@@ -209,3 +212,118 @@ def moon() -> pygame.Surface:
         "MMM..",
         ".MMM.",
     ])
+
+
+# App launcher icons (ui/scenes/home.py), 12x12 cells. Drawn at a scale
+# chosen by the launcher: large for the focused app, small for neighbours.
+
+def _doubled(blocks: list[str]) -> list[str]:
+    """Each character becomes a 2x2 cell block, for chunky tetromino art."""
+    rows = []
+    for row in blocks:
+        wide = "".join(ch * 2 for ch in row)
+        rows += [wide, wide]
+    return rows
+
+
+_APP_ICONS: dict[str, list[str]] = {
+    "settings": [
+        "....SSSS....",
+        ".SS.SSSS.SS.",
+        ".SSSSSSSSSS.",
+        "..SSS..SSS..",
+        "SSSS....SSSS",
+        "SSS......SSS",
+        "SSS......SSS",
+        "SSSS....SSSS",
+        "..SSS..SSS..",
+        ".SSSSSSSSSS.",
+        ".SS.SSSS.SS.",
+        "....SSSS....",
+    ],
+    "snake": [
+        "..........N.",
+        ".........RR.",
+        ".........RR.",
+        "............",
+        ".GGGGGG.....",
+        ".G....G.....",
+        ".G....GGGGD.",
+        ".G..........",
+        ".G..........",
+        ".GGGGGGGG...",
+        "............",
+        "............",
+    ],
+    "tetris": _doubled([
+        "......",
+        "YYY...",
+        ".Y...U",
+        ".....U",
+        "RR..UU",
+        "RRGGGG",
+    ]),
+    "2048": [
+        "CCCCC.LLLLL.",
+        "CCCCC.LLLLL.",
+        "CCCCC.LLLLL.",
+        "CCCCC.LLLLL.",
+        "CCCCC.LLLLL.",
+        "............",
+        "OOOOO.RRRRR.",
+        "OOOOO.RRRRR.",
+        "OOOOO.RRRRR.",
+        "OOOOO.RRRRR.",
+        "OOOOO.RRRRR.",
+        "............",
+    ],
+    "pong": [
+        "......S.....",
+        ".W..........",
+        ".W....S.....",
+        ".W..........",
+        ".W....S.....",
+        "........W...",
+        "......S.....",
+        "..........W.",
+        "......S...W.",
+        "..........W.",
+        "......S...W.",
+        "............",
+    ],
+    "breakout": [
+        "RR.RR.RR.RR.",
+        "OO.OO.OO.OO.",
+        "YY.YY.YY.YY.",
+        "GG.GG....GG.",
+        "............",
+        "............",
+        ".......W....",
+        "............",
+        "............",
+        "............",
+        "...LLLLL....",
+        "............",
+    ],
+    "gameboy": [
+        ".BBBBBBBBBB.",
+        ".BCCCCCCCCB.",
+        ".BCDDDDDDCB.",
+        ".BCDGGGGDCB.",
+        ".BCDGGGGDCB.",
+        ".BCDDDDDDCB.",
+        ".BCCCCCCCCB.",
+        ".BCKCCCCCRB.",
+        ".BKKKCCCRCB.",
+        ".BCKCCCCCCB.",
+        ".BCCCCCCCCB.",
+        ".BBBBBBBBBB.",
+    ],
+}
+
+
+def app_icon(app_id: str, scale: int = SCALE) -> pygame.Surface:
+    """Unknown ids get a plain tile rather than nothing, so a new app added
+    to deck.apps before its art exists still shows up in the launcher."""
+    rows = _APP_ICONS.get(app_id) or ["S" * 12] * 12
+    return _grid_to_surface(rows, scale=scale)
