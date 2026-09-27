@@ -60,7 +60,7 @@ def weather_kind(weather: str) -> str | None:
     return None
 
 
-def _weather_icon(surf, kind: str, cx: int, cy: int) -> None:
+def weather_icon(surf, kind: str, cx: int, cy: int) -> None:
     sun, cloud, drop = (240, 210, 90), (200, 200, 210), (120, 160, 230)
     if kind in ("sun", "cloud"):
         if kind == "sun":
@@ -97,7 +97,7 @@ def draw_left(surf, clock: WallClock, weather: str | None) -> None:
         _rule(surf, 82)
         kind = weather_kind(weather)
         if kind:
-            _weather_icon(surf, kind, surf.get_width() // 2, 93)
+            weather_icon(surf, kind, surf.get_width() // 2, 93)
         temp = weather.split()[0].replace("C", "")
         _centered(surf, temp[:5], 106, 8, TEXT)
 

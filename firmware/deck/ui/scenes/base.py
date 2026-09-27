@@ -18,8 +18,9 @@ class Context:
     tool_name: str = ""
     tool_target: str = ""  # already sanitized upstream by the daemon
     tool_rate: float = 0.0  # tool calls/sec, drives WORKING animation speed
-    idle_info: dict = field(default_factory=dict)  # clock, date, name, weather, git, totals
+    idle_info: dict = field(default_factory=dict)  # clock, date, name, weather, git, today, five_hour_*
     inputs: dict = field(default_factory=dict)  # latest joystick/mech-key state for games
+    settings: dict = field(default_factory=dict)  # deck.menu settings, e.g. ambient timings
 
 
 class Scene(ABC):

@@ -13,7 +13,7 @@ import { DailyStats } from "./stats";
 import { AuditLog } from "./store";
 import { getGitStatus } from "./enrich/git";
 import { getWeather } from "./enrich/weather";
-import { fiveHourUsagePct } from "./enrich/usage";
+import { scanUsage } from "./enrich/usage";
 
 const IDLE_INFO_INTERVAL_MS = 20_000;
 // Must stay well under firmware/deck/link.py's HEARTBEAT_TIMEOUT (5s), or
@@ -55,6 +55,7 @@ async function main(): Promise<void> {
   const userName = process.env.DECK_USER_NAME ?? process.env.USER ?? process.env.USERNAME ?? "";
   setInterval(async () => {
     const now = new Date();
+    const usage = scanUsage(now.getTime());
     sendIdleInfo({
       clock: now.toTimeString().slice(0, 5),
       // local date, not toISOString(): that's UTC and reads as yesterday for the first hours after midnight east of Greenwich
@@ -63,7 +64,9 @@ async function main(): Promise<void> {
       weather: await getWeather(),
       git: await getGitStatus(lastCwd),
       totals: stats.summary(),
-      five_hour_pct: fiveHourUsagePct(),
+      five_hour_pct: usage.fiveHourPct,
+      five_hour_series: usage.fiveHourSeries,
+      today: { ...stats.counts(), output_tokens: usage.todayOutputTokens, turns: usage.todayTurns },
     });
   }, IDLE_INFO_INTERVAL_MS);
 

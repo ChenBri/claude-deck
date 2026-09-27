@@ -8,7 +8,7 @@ import assert from "node:assert/strict";
 // pointing it at a fresh directory before each test is enough - no
 // import-order trickery, and no risk of one test's fixtures leaking into
 // fiveHourUsagePct()'s all-projects scan in another test.
-import { contextPct, fiveHourUsagePct } from "../src/enrich/usage.ts";
+import { contextPct, fiveHourUsagePct, scanUsage } from "../src/enrich/usage.ts";
 
 let root: string;
 
@@ -79,4 +79,33 @@ test("fiveHourUsagePct sums recent tokens across every project, ignoring stale o
   const pct = fiveHourUsagePct();
   // 250,000 recent input tokens (weight 1x) against the default 25M budget
   assert.equal(pct, 250_000 / 25_000_000);
+});
+
+test("scanUsage splits the 5-hour window into oldest-first buckets that sum to the meter", () => {
+  const nowMs = Date.parse("2026-09-27T12:00:00Z");
+  writeTranscript("C--series", "s-series", [
+    { timestamp: "2026-09-27T07:10:00Z", message: { usage: { input_tokens: 1_000_000 } } }, // first bucket
+    { timestamp: "2026-09-27T11:50:00Z", message: { usage: { input_tokens: 2_000_000 } } }, // last bucket
+    { timestamp: "2026-09-27T06:00:00Z", message: { usage: { input_tokens: 9_000_000 } } }, // outside the window
+  ]);
+  const scan = scanUsage(nowMs);
+  assert.equal(scan.fiveHourSeries.length, 10);
+  assert.ok(scan.fiveHourSeries[0] > 0 && scan.fiveHourSeries[9] > scan.fiveHourSeries[0]);
+  assert.equal(scan.fiveHourSeries.slice(1, 9).every((v) => v === 0), true);
+  const sum = scan.fiveHourSeries.reduce((a, b) => a + b, 0);
+  assert.ok(Math.abs(sum - scan.fiveHourPct) < 1e-9);
+});
+
+test("scanUsage counts today's output tokens and turns from local midnight", () => {
+  const now = new Date();
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  writeTranscript("C--today", "s-today", [
+    { timestamp: now.toISOString(), message: { usage: { input_tokens: 10, output_tokens: 300 } } },
+    { timestamp: now.toISOString(), message: { usage: { input_tokens: 10, output_tokens: 200 } } },
+    { timestamp: yesterday.toISOString(), message: { usage: { output_tokens: 9_999 } } },
+  ]);
+  const scan = scanUsage(now.getTime() + 1000);
+  assert.equal(scan.todayOutputTokens, 500);
+  assert.equal(scan.todayTurns, 2);
 });

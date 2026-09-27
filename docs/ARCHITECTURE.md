@@ -68,6 +68,7 @@ firmware/deck/
   ui/
     render.py         scene compositor, dirty-rect blitting, CRT post effect
     rails.py          clock/weather and state/meter rails in the letterbox bars
+    cards.py          ambient data cards: clock, weather, today, git, 5-hour chart
     sprites.py        code-defined pixel grids -> PNG sprite sheets
     scenes/
       ready.py        sits, blinks, stretches
@@ -76,7 +77,8 @@ firmware/deck/
       blocked.py      turns, looks at you, holds a question sign
       done.py         victory hop and confetti
       compacting.py   sweeps papers into a box
-      idle.py         clock, date, your name, weather, git status, today's totals
+      ambient.py      calm-state rotation: data cards and mascot life (IDLE, quiet READY/DONE)
+      life.py         what the mascot gets up to, by time of day
       snake.py        joystick steers, encoder push pauses
       tetris.py       joystick moves, mech keys rotate and drop
       breakout.py     encoder detents move the paddle, joystick too
@@ -119,7 +121,7 @@ project stays testable in CI forever.
 | `COMPACTING` | PreCompact | WORKING | sweeping papers |
 | `DONE` | Stop after work | DONE | victory hop, confetti, auto-clears |
 | `ERROR` | PostToolUse failure, SessionEnd error | BLOCKED | storm cloud |
-| `IDLE` | no session for N minutes | none | dashboard, then snake |
+| `IDLE` | no session for N minutes | none | ambient mode: data cards and mascot life |
 | `OFFLINE` | daemon heartbeat lost | LINK dark | connection lost card |
 
 Aggregation priority when the selector is on ALL:

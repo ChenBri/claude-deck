@@ -5,6 +5,7 @@ import pygame
 
 from deck.panel.base import CANVAS_HEIGHT, CANVAS_WIDTH
 from deck.state import State
+from deck.ui.scenes.ambient import DEFAULT_AFTER_SECONDS, AmbientScene, ambient_due
 from deck.ui.scenes.base import Context, Scene
 from deck.ui.scenes.blocked import BlockedInputScene, BlockedPermissionScene
 from deck.ui.scenes.boot import BootScene
@@ -13,7 +14,6 @@ from deck.ui.scenes.compacting import CompactingScene
 from deck.ui.scenes.done import DoneScene
 from deck.ui.scenes.error import ErrorScene
 from deck.ui.scenes.gameboy import GameBoyScene
-from deck.ui.scenes.idle import IdleScene
 from deck.ui.scenes.interrupted import InterruptedScene
 from deck.ui.scenes.offline import OfflineScene
 from deck.ui.scenes.pong import PongScene
@@ -44,7 +44,7 @@ _STATE_SCENES: dict[State, type[Scene]] = {
     State.COMPACTING: CompactingScene,
     State.DONE: DoneScene,
     State.ERROR: ErrorScene,
-    State.IDLE: IdleScene,
+    State.IDLE: AmbientScene,
     State.OFFLINE: OfflineScene,
     State.INTERRUPTED: InterruptedScene,
 }
@@ -83,7 +83,12 @@ class SceneManager:
         if game is not None:
             scene = self._get(GAMES[game])
         else:
-            scene_cls = _STATE_SCENES.get(ctx.deck.current_state(ctx.now), ReadyScene)
+            state = ctx.deck.current_state(ctx.now)
+            after = float(ctx.settings.get("ambient_after_seconds", DEFAULT_AFTER_SECONDS))
+            if ambient_due(state, ctx.session, ctx.now, after):
+                scene_cls = AmbientScene
+            else:
+                scene_cls = _STATE_SCENES.get(state, ReadyScene)
             scene = self._get(scene_cls)
 
         if scene is not self._active:

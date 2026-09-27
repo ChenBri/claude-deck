@@ -10,6 +10,7 @@ export class DailyStats {
   private toolCalls = 0;
   private approvals = 0;
   private denials = 0;
+  private sessions = new Set<string>();
 
   private rollIfNeeded(): void {
     const d = today();
@@ -18,6 +19,7 @@ export class DailyStats {
       this.toolCalls = 0;
       this.approvals = 0;
       this.denials = 0;
+      this.sessions.clear();
     }
   }
 
@@ -26,10 +28,25 @@ export class DailyStats {
     this.toolCalls += 1;
   }
 
+  recordSession(sessionId: string): void {
+    this.rollIfNeeded();
+    this.sessions.add(sessionId);
+  }
+
   recordApproval(approved: boolean): void {
     this.rollIfNeeded();
     if (approved) this.approvals += 1;
     else this.denials += 1;
+  }
+
+  counts(): { tool_calls: number; approved: number; denied: number; sessions: number } {
+    this.rollIfNeeded();
+    return {
+      tool_calls: this.toolCalls,
+      approved: this.approvals,
+      denied: this.denials,
+      sessions: this.sessions.size,
+    };
   }
 
   summary(): string {

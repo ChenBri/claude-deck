@@ -371,6 +371,7 @@ class App:
                     tool_rate=session.tool_call_rate(now) if session else 0.0,
                     idle_info=self.idle_info,
                     inputs=frame_inputs,
+                    settings=self.menu.settings,
                 )
                 game = self.current_app if self.current_app in GAMES else None
                 self.scene_manager.draw(canvas, ctx, booting=booting, game=game)

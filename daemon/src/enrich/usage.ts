@@ -9,6 +9,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 
 const FIVE_HOUR_MS = 5 * 60 * 60 * 1000;
+const SERIES_BUCKETS = 10; // 30 minutes each across the 5-hour window
 
 // A function, not a frozen constant: read at call time so tests (and an env
 // var set after this module first loads) both see DECK_CLAUDE_PROJECTS_DIR.
@@ -114,12 +115,29 @@ export function contextPct(sessionId: string, cwd: string): number | null {
   }
 }
 
-/** An estimate, not a fact (see the module docstring): total tokens across
- * every project's transcripts in the trailing 5 hours, against a budget
- * that's a guess until you've calibrated it against your own plan. */
-export function fiveHourUsagePct(): number {
+export interface UsageScan {
+  /** The FIVE_HOUR meter: weighted usage in the trailing 5 hours against the budget, clamped 0..1. */
+  fiveHourPct: number;
+  /** Same window in SERIES_BUCKETS slices, oldest first, each as a share of the budget (unclamped). */
+  fiveHourSeries: number[];
+  /** Since local midnight, for the ambient usage card: raw output tokens and assistant turns. */
+  todayOutputTokens: number;
+  todayTurns: number;
+}
+
+/** One pass over every project's transcripts for all the usage numbers, so
+ * the idle payload doesn't read the whole projects tree once per number.
+ * The 5-hour figures are an estimate, not a fact (see the module
+ * docstring), against a budget that's a guess until you've calibrated it
+ * against your own plan. */
+export function scanUsage(nowMs: number = Date.now()): UsageScan {
+  const series = new Array<number>(SERIES_BUCKETS).fill(0);
+  const result: UsageScan = { fiveHourPct: 0, fiveHourSeries: series, todayOutputTokens: 0, todayTurns: 0 };
   try {
-    const cutoff = Date.now() - FIVE_HOUR_MS;
+    const cutoff = nowMs - FIVE_HOUR_MS;
+    const midnight = new Date(nowMs).setHours(0, 0, 0, 0);
+    const oldestNeeded = Math.min(cutoff, midnight);
+    const bucketMs = FIVE_HOUR_MS / SERIES_BUCKETS;
     const dir = projectsDir();
     let total = 0;
     for (const projectDir of readdirSync(dir)) {
@@ -127,15 +145,31 @@ export function fiveHourUsagePct(): number {
       if (!statSync(fullDir).isDirectory()) continue;
       for (const file of readdirSync(fullDir)) {
         if (!file.endsWith(".jsonl")) continue;
-        for (const entry of readEntries(join(fullDir, file))) {
+        const path = join(fullDir, file);
+        // Untouched since before either window opened: nothing in it can count.
+        if (statSync(path).mtimeMs < oldestNeeded) continue;
+        for (const entry of readEntries(path)) {
           if (!entry.timestamp || !entry.message?.usage) continue;
-          if (new Date(entry.timestamp).getTime() < cutoff) continue;
-          total += usagePressure(entry.message.usage);
+          const ts = new Date(entry.timestamp).getTime();
+          if (ts >= midnight) {
+            result.todayOutputTokens += entry.message.usage.output_tokens ?? 0;
+            result.todayTurns += 1;
+          }
+          if (ts < cutoff || ts > nowMs) continue;
+          const pressure = usagePressure(entry.message.usage);
+          total += pressure;
+          series[Math.min(SERIES_BUCKETS - 1, Math.floor((ts - cutoff) / bucketMs))] += pressure;
         }
       }
     }
-    return Math.min(1, total / FIVE_HOUR_TOKEN_BUDGET);
+    result.fiveHourPct = Math.min(1, total / FIVE_HOUR_TOKEN_BUDGET);
+    result.fiveHourSeries = series.map((v) => v / FIVE_HOUR_TOKEN_BUDGET);
   } catch {
-    return 0;
+    // unreadable projects dir: every number stays at zero
   }
+  return result;
+}
+
+export function fiveHourUsagePct(): number {
+  return scanUsage().fiveHourPct;
 }

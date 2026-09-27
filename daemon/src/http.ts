@@ -69,6 +69,7 @@ export function startHookIngest(deps: HookIngestDeps): http.Server {
     }
 
     deps.sessions.applyClassified(classified);
+    deps.stats.recordSession(classified.sessionId);
     if (classified.event === "PreToolUse") deps.stats.recordToolCall();
     sendEvent(classified);
   });
