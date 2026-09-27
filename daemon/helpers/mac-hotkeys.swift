@@ -1,8 +1,8 @@
 // Global F13-F20 hotkeys for the daemon on macOS (docs/SAFETY.md rule 1).
 //
 // UNTESTED: written on Windows without a Mac to run it on. Before relying
-// on it, run it by hand and press F13 (fn+F13 on a laptop keyboard without
-// one, or a deck): it should print READY F13..F20 and then KEY F13.
+// on it, run it by hand and press F13 on a full-size Apple keyboard (or
+// from the deck): it should print READY F13..F20 and then KEY F13.
 //
 // Carbon's RegisterEventHotKey claims each key system-wide and, unlike an
 // event tap, needs no Accessibility permission. Same stdout protocol as
