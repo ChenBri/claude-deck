@@ -8,7 +8,7 @@
 
 import http, { IncomingMessage, ServerResponse } from "node:http";
 import { ClassifiedEvent } from "../classify";
-import { ActionRequest, Guard } from "../guard";
+import type { ActionRequest } from "../guard";
 
 const PI_HOST = process.env.DECK_PI_HOST ?? "10.55.0.1";
 const PI_PORT = Number(process.env.DECK_PI_PORT ?? 7328);
@@ -51,7 +51,9 @@ function readBody(req: IncomingMessage): Promise<string> {
   });
 }
 
-export function startActionListener(guard: Guard): http.Server {
+/** `onAction` is link/pairing.ts's HidPairing.onAction: nothing from the
+ * deck reaches the guard without passing the HID pairing first. */
+export function startActionListener(onAction: (req: ActionRequest) => void): http.Server {
   const server = http.createServer(async (req: IncomingMessage, res: ServerResponse) => {
     if (req.method !== "POST" || req.url !== "/action") {
       res.writeHead(404).end();
@@ -61,7 +63,7 @@ export function startActionListener(guard: Guard): http.Server {
     res.writeHead(204).end();
     try {
       const action = JSON.parse(body || "{}") as ActionRequest;
-      await guard.handle(action);
+      onAction(action);
     } catch (err) {
       console.error("action listener: bad request", err);
     }

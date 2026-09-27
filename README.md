@@ -97,6 +97,8 @@ cd daemon
 npm install
 npm run build
 $env:DECK_PI_HOST = "127.0.0.1"; $env:DECK_PI_PORT = "17328"
+# the simulator has no HID gadget, so its presses can't come with an F13-F20 key
+$env:DECK_REQUIRE_HID = "0"
 $env:DECK_DAEMON_LISTEN_HOST = "127.0.0.1"; $env:DECK_DAEMON_LISTEN_PORT = "17329"
 npm start
 ```

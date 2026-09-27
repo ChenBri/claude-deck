@@ -45,6 +45,18 @@ Any mismatch discards the press and the deck plays the rejection tone. A stray
 press cannot approve something you have not seen, because the deck can only
 approve the thing it is currently displaying.
 
+**Every press arrives twice, and both halves must agree.** The physical press
+goes out as its F13-F20 key over HID, which proves a hand on the real device;
+the deck also sends an HTTP action naming the session and request. The daemon
+runs approve, deny and the mech keys only when the key and the action pair up
+within one second (`daemon/src/link/pairing.ts`). Something on the USB network
+link alone cannot approve anything, and a key alone carries no request to act
+on. An unpaired half is dropped and written to the audit log. The one
+exception is PANIC, which runs on whichever half arrives first: it only ever
+stops things, so it must never fail for want of a pairing. The desktop
+simulator has no HID gadget, and runs unpaired only when the daemon is started
+with `DECK_REQUIRE_HID=0`.
+
 ### 3. The deck shows what it is approving
 
 Before the buttons light, the screen displays the tool and a sanitized target.

@@ -1,20 +1,22 @@
-/** F13-F20 global hotkey registration (docs/SAFETY.md rule 1): the real
- * trigger for APPROVE/DENY/PANIC/mech-keys once the deck's USB HID gadget
- * exists. No hardware has arrived yet (docs/BUILD.md phase 0), and Node has
- * no built-in global hotkey API, so this is a stub for whichever native
- * listener gets chosen (e.g. a keyboard-hook addon) once there's a real HID
- * device to test it against.
+/** F13-F20 global hotkeys (docs/SAFETY.md rule 1): the physical half of
+ * every deck press. A small per-OS helper process registers the keys
+ * system-wide and prints a line per press; this module runs it, parses its
+ * output and restarts it if it dies. Keys only prove a press happened -
+ * link/pairing.ts matches each one with the HTTP action that names what
+ * it's for before anything runs.
  *
- * Until then, the simulator's button presses reach guard.ts through
- * link/transport.ts's /action endpoint instead (see firmware/deck/main.py's
- * _on_button comment) - functionally equivalent, just not through a real
- * OS-level hotkey.
+ * Windows: helpers/win-hotkeys.ps1 (RegisterHotKey). Tested.
+ * macOS: helpers/mac-hotkeys.swift (Carbon RegisterEventHotKey). Untested.
  */
+
+import { spawn, type ChildProcess } from "node:child_process";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+import { createInterface } from "node:readline";
 
 export type HotkeyName = "APPROVE" | "DENY" | "PANIC" | "CLD" | "NEW" | "PLAN" | "MIC";
 
-// F13 .. F20, in the order docs/HARDWARE.md's pin map implies: the three
-// real-GPIO buttons first, then the MCP23017 mech keys.
+// Must match firmware/deck/hid.py HOTKEYS (a firmware test checks this).
 export const HOTKEY_MAP: Record<HotkeyName, string> = {
   APPROVE: "F13",
   DENY: "F14",
@@ -26,9 +28,68 @@ export const HOTKEY_MAP: Record<HotkeyName, string> = {
   // F20 spare
 };
 
-export function registerHotkeys(_onHotkey: (name: HotkeyName) => void): void {
-  console.warn(
-    "hotkeys.ts: no HID hardware yet, global F13-F20 hotkeys are not registered. " +
-      "Button presses arrive via the simulator's /action HTTP path instead.",
-  );
+const BY_KEY = new Map(Object.entries(HOTKEY_MAP).map(([name, key]) => [key, name as HotkeyName]));
+const RESTART_DELAY_MS = 2000;
+
+// dist/link/hotkeys.js -> daemon/helpers
+const HELPERS_DIR = join(__dirname, "..", "..", "helpers");
+
+/** A helper output line -> the hotkey it reports, or null for anything else. */
+export function parseHelperLine(line: string): HotkeyName | null {
+  const match = /^KEY (F\d+)$/.exec(line.trim());
+  return match ? BY_KEY.get(match[1]) ?? null : null;
+}
+
+function helperCommand(): [string, string[]] | null {
+  if (process.platform === "win32") {
+    return [
+      "powershell.exe",
+      ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", join(HELPERS_DIR, "win-hotkeys.ps1")],
+    ];
+  }
+  if (process.platform === "darwin") {
+    const built = join(HELPERS_DIR, "mac-hotkeys");
+    return existsSync(built) ? [built, []] : ["swift", [join(HELPERS_DIR, "mac-hotkeys.swift")]];
+  }
+  return null;
+}
+
+export interface HotkeyListener {
+  stop(): void;
+}
+
+export function registerHotkeys(onHotkey: (name: HotkeyName) => void): HotkeyListener {
+  const command = helperCommand();
+  if (command === null) {
+    console.warn(`hotkeys: no helper for ${process.platform}; deck presses can't be paired and won't act.`);
+    return { stop: () => {} };
+  }
+
+  let child: ChildProcess | null = null;
+  let stopped = false;
+
+  const start = () => {
+    const [cmd, args] = command;
+    child = spawn(cmd, args, { stdio: ["ignore", "pipe", "pipe"], windowsHide: true });
+    createInterface({ input: child.stdout! }).on("line", (line) => {
+      const name = parseHelperLine(line);
+      if (name !== null) onHotkey(name);
+      else if (line.startsWith("FAILED")) console.error(`hotkeys: ${line} (another app may already own it)`);
+    });
+    child.stderr!.on("data", (d) => console.error(`hotkeys helper: ${String(d).trim()}`));
+    child.on("exit", (code) => {
+      if (stopped) return;
+      console.error(`hotkeys: helper exited (${code}), restarting in ${RESTART_DELAY_MS}ms`);
+      setTimeout(start, RESTART_DELAY_MS).unref();
+    });
+    child.on("error", (err) => console.error("hotkeys: helper failed to start:", err.message));
+  };
+  start();
+
+  return {
+    stop: () => {
+      stopped = true;
+      child?.kill();
+    },
+  };
 }

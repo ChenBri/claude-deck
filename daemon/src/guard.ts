@@ -92,6 +92,12 @@ export class Guard {
     this.audit.record(this.entry(kind, sessionId, requestId, approve ? "approved" : "denied", null, tool, target));
   }
 
+  /** Audit-log an action that never reached handle(), e.g. a press whose
+   * HID key and HTTP action didn't pair up (link/pairing.ts). */
+  reject(req: ActionRequest, reason: string): void {
+    this.audit.record(this.entry(req.kind, req.session_id ?? "", req.request_id ?? null, "rejected", reason));
+  }
+
   private handleDenylistToggle(req: ActionRequest): void {
     const category = req.category ?? "";
     if (!isDenylistCategory(category)) {
