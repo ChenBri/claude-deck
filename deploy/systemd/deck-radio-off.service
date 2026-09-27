@@ -1,0 +1,11 @@
+[Unit]
+Description=claude-deck: WiFi and Bluetooth off at boot (no route out)
+After=systemd-rfkill.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/rfkill block wifi
+ExecStart=/usr/sbin/rfkill block bluetooth
+
+[Install]
+WantedBy=multi-user.target

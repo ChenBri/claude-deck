@@ -1,0 +1,24 @@
+[Unit]
+Description=claude-deck firmware
+After=deck-gadget.service systemd-networkd.service
+Wants=deck-gadget.service
+
+[Service]
+User=deck
+Group=deck
+# deckhw owns /dev/i2c-*, /dev/spidev*, /dev/gpiochip*, /dev/hidg* (99-claude-deck.rules)
+SupplementaryGroups=deckhw video render audio input
+WorkingDirectory=/var/deck/app/firmware
+Environment=DECK_VAR=/var/deck
+Environment=DECK_PI_LISTEN_HOST=10.55.0.1
+Environment=DECK_DAEMON_HOST=10.55.0.2
+# Straight onto the HDMI framebuffer; needs no desktop session holding DRM master.
+Environment=SDL_VIDEODRIVER=kmsdrm
+Environment=SDL_AUDIODRIVER=alsa
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/var/deck/venv/bin/python -m deck.main --panel real
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

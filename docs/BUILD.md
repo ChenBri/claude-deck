@@ -32,6 +32,8 @@ parts rather than guessed dimensions.
 1. Solder the 40-pin header. First soldering, forgiving part, 40 chances to get
    better at it. Slowly.
 2. Flash the OS, set up USB gadget mode, confirm the link from both machines.
+   Step by step in [deploy/README.md](../deploy/README.md); `deploy/setup.sh`
+   does the provisioning.
 3. Blink one LED.
 4. Get the display running and put the simulator's renderer on it unchanged.
 5. Overlay filesystem and the third partition.

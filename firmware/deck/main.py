@@ -8,6 +8,7 @@ starting a DaemonLink.
 from __future__ import annotations
 
 import argparse
+import subprocess
 import time
 
 from deck import calibration
@@ -334,8 +335,8 @@ class App:
                 self.current_app = None if self.current_app == "home" else "home"
 
     def _shutdown(self) -> None:
-        # Real hardware: play the goodbye animation, then `sudo shutdown -h now`.
-        # Desktop dev: just close the window.
+        # Leaves the loop; main() then powers the real deck off, or just
+        # closes the window on the desktop.
         self.panel_should_quit = True
 
     # -- main loop --------------------------------------------------------------
@@ -491,6 +492,9 @@ def main() -> None:
         app.run()
     finally:
         app.stop()
+    if args.panel == "real" and getattr(app, "panel_should_quit", False):
+        # The one root action the deck user has, see deploy/setup.sh's sudoers entry.
+        subprocess.run(["sudo", "-n", "/usr/bin/systemctl", "poweroff"], check=False)
 
 
 if __name__ == "__main__":

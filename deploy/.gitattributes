@@ -1,0 +1,7 @@
+# Everything here runs on the deck (Linux) and deploy.ps1 copies it from a
+# Windows working copy: a CRLF shebang or unit file breaks there.
+*.sh text eol=lf
+*.service text eol=lf
+*.network text eol=lf
+*.rules text eol=lf
+*.md text eol=lf

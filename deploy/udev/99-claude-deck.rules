@@ -1,0 +1,6 @@
+# The firmware runs as the unprivileged `deck` user, not root. These give its
+# `deckhw` group exactly the devices the panel uses and nothing more.
+SUBSYSTEM=="i2c-dev", KERNEL=="i2c-4", GROUP="deckhw", MODE="0660"
+SUBSYSTEM=="spidev", KERNEL=="spidev3.0", GROUP="deckhw", MODE="0660"
+SUBSYSTEM=="gpio", KERNEL=="gpiochip3", GROUP="deckhw", MODE="0660"
+KERNEL=="hidg0", GROUP="deckhw", MODE="0660"

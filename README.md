@@ -38,6 +38,7 @@ daemon/     TypeScript. Runs on Windows and macOS. Talks to Claude Code hooks.
 hooks/      Hook scripts and the settings.json snippet.
 case/       OpenSCAD source for the enclosure.
 panel/      Inkscape SVG for the laser-cut engraved legend strip.
+deploy/     Provisioning the deck: USB gadget, services, read-only root.
 docs/       Everything above.
 
 The hook event recorder and replayer live in firmware/tools/.

@@ -1,0 +1,12 @@
+[Unit]
+Description=claude-deck USB gadget (network + F13-F20 keyboard)
+After=sys-kernel-config.mount
+Before=deck.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/var/deck/app/deploy/usb-gadget.sh
+
+[Install]
+WantedBy=multi-user.target

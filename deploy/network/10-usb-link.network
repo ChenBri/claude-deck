@@ -1,0 +1,22 @@
+# The deck's side of the USB link (docs/HARDWARE.md, "USB gadget mode").
+# Matches both gadget network functions; the host only ever activates one.
+#
+# The DHCP server hands out exactly one address, 10.55.0.2, with no router,
+# no DNS and no NTP: the host gets a link to the deck and nothing else, and
+# the deck gets no route anywhere (CLAUDE.md non-negotiable 4).
+[Match]
+Name=usb*
+
+[Network]
+Address=10.55.0.1/24
+DHCPServer=yes
+LinkLocalAddressing=no
+IPv6AcceptRA=no
+
+[DHCPServer]
+PoolOffset=2
+PoolSize=1
+EmitRouter=no
+EmitDNS=no
+EmitNTP=no
+EmitTimezone=no
