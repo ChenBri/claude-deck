@@ -18,8 +18,10 @@ from deck.audio.cues import event_for_transition
 from deck.calibration import CalibrationWizard
 from deck.hwtest import HardwareTest
 from deck.menu import Menu, _get
-from deck.panel.base import GB_CANVAS_HEIGHT, GB_CANVAS_WIDTH, METERS, PIXEL_COUNT, Panel
+from deck.panel.base import GB_CANVAS_HEIGHT, GB_CANVAS_WIDTH, METERS, PIXEL_COUNT, RAIL_HEIGHT, RAIL_WIDTH, Panel
+from deck.screen import screen_level, wall_clock
 from deck.state import LAMP, Deck, State
+from deck.ui import rails
 from deck.ui.pixels import pixels_for_state
 from deck.ui.render import GAMES, SceneManager, new_canvas
 from deck.ui.scenes.base import Context
@@ -63,6 +65,9 @@ class App:
         self.scene_manager = SceneManager()
         self.canvas = new_canvas()
         self.gb_canvas = new_canvas(GB_CANVAS_WIDTH, GB_CANVAS_HEIGHT)
+        self.rails = (new_canvas(RAIL_WIDTH, RAIL_HEIGHT), new_canvas(RAIL_WIDTH, RAIL_HEIGHT))
+        self._last_input_at = time.monotonic()
+        self._last_volume: float | None = None
         self.idle_info: dict = {}
         # None: plain IDLE dashboard (or a live session's own scene). "home":
         # the app launcher. "settings", one of MAINTENANCE_APPS, or a key
@@ -118,8 +123,21 @@ class App:
 
     # -- input handling -------------------------------------------------------
 
+    def _is_touch(self, ev) -> bool:
+        """True for a real hand on the panel. The joystick axis and the volume
+        knob report every poll, so only movement counts for those."""
+        if ev.kind == "joystick" and ev.name == "axis":
+            return tuple(ev.value) != (0, 0)
+        if ev.kind == "volume":
+            moved = self._last_volume is not None and abs(ev.value - self._last_volume) > 0.02
+            self._last_volume = ev.value
+            return moved
+        return True
+
     def _handle_events(self, events, frame_inputs: dict) -> None:
         for ev in events:
+            if self._is_touch(ev):
+                self._last_input_at = time.monotonic()
             if self.current_app == "hwtest" and self.hwtest.observe(ev, time.monotonic()):
                 chiptune.play("tick")
             handler = getattr(self, f"_on_{ev.kind}", None)
@@ -358,7 +376,28 @@ class App:
                 self.scene_manager.draw(canvas, ctx, booting=booting, game=game)
 
             self._update_indicators(now)
-            self.panel.present(canvas)
+            state = self.deck.current_state(now)
+            clock = wall_clock(self.idle_info)
+            if booting:
+                for rail in self.rails:
+                    rail.fill(rails.RAIL_BG)
+            else:
+                self._draw_rails(now, state, clock)
+            level = screen_level(state, clock.hour, self.night_on, now - self._last_input_at, self.menu.settings)
+            self.panel.present(canvas, self.rails, level)
+
+    def _draw_rails(self, now: float, state: State, clock) -> None:
+        left, right = self.rails
+        rails.draw_left(left, clock, self.idle_info.get("weather"))
+        session = self.deck.active_session()
+        rails.draw_right(
+            right,
+            state,
+            now,
+            len(self.deck.registry.sessions),
+            session.context_pct if session else 0.0,
+            float(self.idle_info.get("five_hour_pct", 0.0)),
+        )
 
     def _play_cues(self, now: float) -> None:
         state = self.deck.current_state(now)

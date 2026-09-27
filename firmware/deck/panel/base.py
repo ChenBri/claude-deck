@@ -23,6 +23,11 @@ EFFORT_POSITIONS = ("LOW", "MEDIUM", "HIGH", "XHIGH", "MAX")  # reasoning-effort
 CANVAS_WIDTH = 160
 CANVAS_HEIGHT = 120
 
+# Info rails either side of the letterboxed canvas, see ui/rails.py. Same
+# height as the canvas so they share its pixel scale on the panel.
+RAIL_WIDTH = 26
+RAIL_HEIGHT = CANVAS_HEIGHT
+
 # The Game Boy app draws into its own canvas instead: native GB resolution,
 # scaled to fit the same physical panel letterboxed rather than 2x-filled.
 GB_CANVAS_WIDTH = 160
@@ -57,10 +62,12 @@ class Panel(ABC):
         prompt is pending; NIGHT mode scales the "on" level down from there."""
 
     @abstractmethod
-    def present(self, canvas) -> None:
+    def present(self, canvas, rails=None, screen_level: float = 1.0) -> None:
         """Push one composited frame to the device: lamps, meters, pixels, and
         `canvas` (a CANVAS_WIDTH x CANVAS_HEIGHT surface owned by the renderer,
-        scaled and CRT-processed via ui.render.compose_output)."""
+        scaled and CRT-processed via ui.render.compose_output). `rails` is an
+        optional (left, right) pair of RAIL_WIDTH x RAIL_HEIGHT surfaces;
+        screen_level 0..1 dims the whole screen, 0 is blank."""
 
     @abstractmethod
     def poll_inputs(self) -> list[InputEvent]:

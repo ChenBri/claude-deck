@@ -57,7 +57,8 @@ async function main(): Promise<void> {
     const now = new Date();
     sendIdleInfo({
       clock: now.toTimeString().slice(0, 5),
-      date: now.toISOString().slice(0, 10),
+      // local date, not toISOString(): that's UTC and reads as yesterday for the first hours after midnight east of Greenwich
+      date: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`,
       name: userName,
       weather: await getWeather(),
       git: await getGitStatus(lastCwd),

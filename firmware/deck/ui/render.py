@@ -33,6 +33,7 @@ from deck.ui.scenes.working import WorkingScene
 # assumes an exact integer multiple of CANVAS_WIDTH/HEIGHT.
 OUTPUT_WIDTH = 1366
 OUTPUT_HEIGHT = 768
+BLOOM_STRENGTH = 22  # out of 255 added back on top, i.e. about 9%
 
 _STATE_SCENES: dict[State, type[Scene]] = {
     State.READY: ReadyScene,
@@ -98,7 +99,7 @@ def new_canvas(width: int = CANVAS_WIDTH, height: int = CANVAS_HEIGHT) -> pygame
     return pygame.Surface((width, height))
 
 
-def compose_output(canvas: pygame.Surface) -> pygame.Surface:
+def compose_output(canvas: pygame.Surface, rails=None, screen_level: float = 1.0) -> pygame.Surface:
     """Scale the logical canvas onto the physical OUTPUT_WIDTH x OUTPUT_HEIGHT
     panel, nearest-neighbour, and lay a light CRT pass (scanlines + a soft
     additive bloom) on top. Shared by SimPanel and RealPanel so the look is
@@ -118,22 +119,46 @@ def compose_output(canvas: pygame.Surface) -> pygame.Surface:
     strokes into an unreadable glow well before it looks like a CRT. "Slight
     bloom" per docs/DECISIONS.md #28 means legible-but-warm, not blurred.
     """
+    scaled = pygame.Surface((OUTPUT_WIDTH, OUTPUT_HEIGHT))
+    if screen_level <= 0.0:
+        return scaled  # quiet hours: a black frame, skip the work
+
     cw, ch = canvas.get_size()
     scale = min(OUTPUT_WIDTH / cw, OUTPUT_HEIGHT / ch)
     sw, sh = round(cw * scale), round(ch * scale)
     ox, oy = (OUTPUT_WIDTH - sw) // 2, (OUTPUT_HEIGHT - sh) // 2
+    _blit_crt(scaled, canvas, pygame.Rect(ox, oy, sw, sh))
 
-    scaled = pygame.Surface((OUTPUT_WIDTH, OUTPUT_HEIGHT))
-    scaled.blit(pygame.transform.scale(canvas, (sw, sh)), (ox, oy))
+    # Rails keep their own fixed scale (fit to the panel height) so they look
+    # the same next to the 160x120 canvas and the Game Boy's 160x144, and are
+    # centred in whatever bar is left; skipped if a bar is too narrow.
+    if rails is not None:
+        left, right = rails
+        rw, rh = left.get_size()
+        rail_scale = OUTPUT_HEIGHT / rh
+        rsw, rsh = round(rw * rail_scale), OUTPUT_HEIGHT
+        if rsw <= ox:
+            _blit_crt(scaled, left, pygame.Rect((ox - rsw) // 2, 0, rsw, rsh))
+            _blit_crt(scaled, right, pygame.Rect(ox + sw + (OUTPUT_WIDTH - ox - sw - rsw) // 2, 0, rsw, rsh))
 
-    bloom_small = pygame.transform.smoothscale(canvas, (max(cw // 2, 1), max(ch // 2, 1)))
-    bloom = pygame.transform.smoothscale(bloom_small, (sw, sh))
-    bloom.set_alpha(22)
-    scaled.blit(bloom, (ox, oy), special_flags=pygame.BLEND_RGB_ADD)
-
-    scanlines = _scanline_overlay()
-    scaled.blit(scanlines, (0, 0))
+    scaled.blit(_scanline_overlay(), (0, 0))
+    if screen_level < 1.0:
+        k = round(255 * screen_level)
+        scaled.fill((k, k, k), special_flags=pygame.BLEND_MULT)
     return scaled
+
+
+def _blit_crt(target: pygame.Surface, source: pygame.Surface, rect: pygame.Rect) -> None:
+    """Nearest-neighbour scale `source` into `rect` plus the soft bloom."""
+    target.blit(pygame.transform.scale(source, rect.size), rect.topleft)
+    w, h = source.get_size()
+    bloom_small = pygame.transform.smoothscale(source, (max(w // 2, 1), max(h // 2, 1)))
+    bloom = pygame.transform.smoothscale(bloom_small, rect.size)
+    # Scale the bloom down before adding it: set_alpha is ignored by
+    # BLEND_RGB_ADD blits, which used to add the full image and double
+    # every colour on screen.
+    bloom.fill((BLOOM_STRENGTH,) * 3, special_flags=pygame.BLEND_RGB_MULT)
+    target.blit(bloom, rect.topleft, special_flags=pygame.BLEND_RGB_ADD)
 
 
 _scanline_cache: pygame.Surface | None = None

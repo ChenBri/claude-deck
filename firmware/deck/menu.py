@@ -34,6 +34,10 @@ DEFAULT_SETTINGS = {
     "wifi": False,
     "night_brightness": 0.2,
     "sound_theme": DEFAULT_THEME,
+    "night_screen": 0.4,
+    "quiet_hours": True,
+    "quiet_start": 1,
+    "quiet_end": 8,
     "meter_cal": {m: default_curve() for m in METERS},
 }
 
@@ -58,6 +62,10 @@ ITEMS = [
     MenuItem("denylist.secrets", "block: secrets", "bool"),
     MenuItem("wifi", "wifi radio", "bool"),
     MenuItem("night_brightness", "night brightness", "float", step=0.05, minimum=0.0, maximum=1.0),
+    MenuItem("night_screen", "night screen", "float", step=0.05, minimum=0.05, maximum=1.0),
+    MenuItem("quiet_hours", "quiet hours", "bool"),
+    MenuItem("quiet_start", "quiet from (h)", "int", step=1, minimum=0, maximum=23),
+    MenuItem("quiet_end", "quiet until (h)", "int", step=1, minimum=0, maximum=23),
     MenuItem("sound_theme", "sounds", "choice", choices=tuple(THEMES)),
     MenuItem("HWTEST", "hardware test", "action"),
     MenuItem("CALIBRATE", "calibrate meters", "action"),

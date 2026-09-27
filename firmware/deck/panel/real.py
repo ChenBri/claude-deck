@@ -48,12 +48,12 @@ class RealPanel(Panel):
     def set_button_led(self, name: str, level: float) -> None:
         raise NotImplementedError
 
-    def present(self, canvas) -> None:
+    def present(self, canvas, rails=None, screen_level: float = 1.0) -> None:
         # Real display path: compose_output(canvas) -> present via pygame's
         # KMSDRM/fbcon SDL video driver onto the HDMI framebuffer. No manual
         # per-row transfer to a controller chip needed, unlike the old SPI
         # TFT plan - HDMI just wants a normal pygame display surface.
-        compose_output(canvas)
+        compose_output(canvas, rails, screen_level)
         raise NotImplementedError
 
     def poll_inputs(self) -> list[InputEvent]:

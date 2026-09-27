@@ -180,9 +180,9 @@ class SimPanel(Panel):
     def set_button_led(self, name: str, level: float) -> None:
         self._button_leds[name] = max(0.0, min(1.0, level))
 
-    def present(self, canvas: pygame.Surface) -> None:
+    def present(self, canvas: pygame.Surface, rails=None, screen_level: float = 1.0) -> None:
         self._native.fill((26, 22, 20))
-        self._draw_bezel_and_screen(canvas)
+        self._draw_bezel_and_screen(canvas, rails, screen_level)
         self._draw_lamps()
         self._draw_meters()
         self._draw_pixels()
@@ -307,11 +307,11 @@ class SimPanel(Panel):
 
     # -- drawing --------------------------------------------------------------
 
-    def _draw_bezel_and_screen(self, canvas: pygame.Surface) -> None:
+    def _draw_bezel_and_screen(self, canvas: pygame.Surface, rails=None, screen_level: float = 1.0) -> None:
         bx, by = BEZEL_POS
         bezel = pygame.Rect(bx - 6, by - 6, PREVIEW_WIDTH + 12, PREVIEW_HEIGHT + 12)
         pygame.draw.rect(self._native, (10, 8, 8), bezel, border_radius=8)
-        output = compose_output(canvas)
+        output = compose_output(canvas, rails, screen_level)
         preview = pygame.transform.smoothscale(output, (PREVIEW_WIDTH, PREVIEW_HEIGHT))
         self._native.blit(preview, BEZEL_POS)
 
