@@ -50,3 +50,47 @@ test("effort_select accepts all five real /effort levels", async () => {
   }
   assert.deepEqual(calls, ["LOW", "MEDIUM", "HIGH", "XHIGH", "MAX"]);
 });
+
+function makeGuardWithSessions(actions: Partial<HostActions>) {
+  const sessions = new SessionRegistry();
+  const noopActions: HostActions = {
+    approve: async () => {},
+    deny: async () => {},
+    interrupt: async () => {},
+    focusOrLaunchClaude: async () => {},
+    newSession: async () => {},
+    planMode: async () => {},
+    pushToTalk: async () => {},
+    effortSelect: async () => {},
+    ...actions,
+  };
+  const noopAudit = { record: () => {}, close: () => {} } as unknown as AuditLog;
+  const guard = new Guard(sessions, noopActions, noopAudit, new DailyStats(), new DenylistSettingsStore(), "test-host");
+  return { guard, sessions };
+}
+
+test("plan_mode sends the right Shift+Tab count for each known permission_mode", async () => {
+  const cases: [string, number][] = [["auto", 3], ["default", 2], ["acceptEdits", 1]];
+  for (const [mode, expected] of cases) {
+    const calls: number[] = [];
+    const { guard, sessions } = makeGuardWithSessions({ planMode: async (presses: number) => void calls.push(presses) });
+    sessions.applyClassified({ sessionId: "s1", event: "UserPromptSubmit", meta: { permission_mode: mode } });
+    await guard.handle({ kind: "mech_key", name: "PLAN", session_id: "s1" });
+    assert.deepEqual(calls, [expected], `mode ${mode}`);
+  }
+});
+
+test("plan_mode sends nothing when already in plan mode", async () => {
+  const calls: number[] = [];
+  const { guard, sessions } = makeGuardWithSessions({ planMode: async (presses: number) => void calls.push(presses) });
+  sessions.applyClassified({ sessionId: "s1", event: "UserPromptSubmit", meta: { permission_mode: "plan" } });
+  await guard.handle({ kind: "mech_key", name: "PLAN", session_id: "s1" });
+  assert.deepEqual(calls, []);
+});
+
+test("plan_mode never guesses a keystroke when the mode is unknown", async () => {
+  const calls: number[] = [];
+  const { guard } = makeGuardWithSessions({ planMode: async (presses: number) => void calls.push(presses) });
+  await guard.handle({ kind: "mech_key", name: "PLAN", session_id: "never-seen" });
+  assert.deepEqual(calls, []);
+});

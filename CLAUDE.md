@@ -2,7 +2,7 @@
 
 A hand-built desk instrument that shows Claude Code status on lamps, an animated
 pixel screen and two analog needles, and lets you answer permission prompts
-without touching the keyboard. Raspberry Pi Zero 2 W in a 3D printed retro
+without touching the keyboard. Radxa ZERO 3W in a 3D printed retro
 terminal shell.
 
 **This repo is public.** Never commit anything employer-specific, any real
@@ -24,7 +24,7 @@ anything describing a real security posture. Keep examples generic.
 ## Layout
 
 ```
-firmware/   Python. Runs on the Pi, and on a desktop as a full panel simulator.
+firmware/   Python. Runs on the deck, and on a desktop as a full panel simulator.
 daemon/     TypeScript. Cross-platform, Windows and macOS. Ingests Claude Code hooks.
 hooks/      Hook scripts and the settings.json snippet.
 case/       OpenSCAD source for the enclosure.
@@ -47,14 +47,14 @@ asking:
    every machine.
 4. **No route to the internet.** USB point-to-point only, WiFi behind a physical
    toggle. Anything needing the network comes from the daemon.
-5. **Scrub before it leaves the PC.** The Pi renders to a screen and writes to a
+5. **Scrub before it leaves the PC.** The deck renders to a screen and writes to a
    card, so it must never hold anything worth stealing.
 
 ## Hardware constraints that bite
 
 - I2S audio claims GPIO18/19/21, which kills SPI1 and PCM. NeoPixels therefore
   run on GPIO12 (PWM0) via `rpi_ws281x` as root in a systemd service.
-- The Pi is 3.3V, WS2812B wants 5V data. The 74AHCT125 is not optional.
+- The board is 3.3V, WS2812B wants 5V data. The 74AHCT125 is not optional.
 - No analog output. The needles are PWM through an RC filter, trimpot calibrated.
 - Root filesystem is read-only with a RAM overlay. Writable data lives on a third
   partition at `/var/deck`.

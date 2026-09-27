@@ -1,5 +1,5 @@
 /** F13-F20 global hotkey registration (docs/SAFETY.md rule 1): the real
- * trigger for APPROVE/DENY/PANIC/mech-keys once the Pi's USB HID gadget
+ * trigger for APPROVE/DENY/PANIC/mech-keys once the deck's USB HID gadget
  * exists. No hardware has arrived yet (docs/BUILD.md phase 0), and Node has
  * no built-in global hotkey API, so this is a stub for whichever native
  * listener gets chosen (e.g. a keyboard-hook addon) once there's a real HID

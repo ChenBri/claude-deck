@@ -9,7 +9,7 @@ hooks/emit.js  -- POST 127.0.0.1:7327 -->  daemon  (TypeScript, Win + macOS)
                                               |  scrub, classify, aggregate
                                               |  HTTP over USB ethernet 10.55.0.1
                                               v
-                                    firmware (Python, Pi Zero 2 W)
+                                    firmware (Python, Radxa ZERO 3W)
                                               |
                               panel backend: real  |  sim
 ```
@@ -29,7 +29,7 @@ One codebase, one binary per platform, same behaviour. Responsibilities:
   right window and perform the action. Windows via Win32 calls, macOS via
   AppleScript and Accessibility.
 - **Enrich.** Push weather, clock and git status for the idle dashboard, since
-  the Pi has no internet.
+  the deck has no internet.
 - **Audit.** SQLite log of every action the deck took.
 
 ```
@@ -41,7 +41,7 @@ daemon/src/
   sessions.ts       multi-session registry and priority
   guard.ts          approval verification rules
   link/
-    transport.ts    HTTP to the Pi over the USB link
+    transport.ts    HTTP to the deck over the USB link
     hotkeys.ts      F13-F20 global hotkey registration
   actions/
     windows.ts      focus, send keys, launch
@@ -50,7 +50,7 @@ daemon/src/
   store.ts          SQLite audit log
 ```
 
-## Firmware, Python, runs on the Pi
+## Firmware, Python, runs on the deck
 
 ```
 firmware/deck/
@@ -60,7 +60,7 @@ firmware/deck/
   menu.py             encoder-driven settings menu, writes /var/deck/settings.yaml
   panel/
     base.py           abstract Panel: lamps, meters, pixels, inputs, screen surface
-    real.py           GPIO, SPI, I2C, PCA9685, MCP23017, rpi_ws281x
+    real.py           GPIO, SPI, I2C, PCA9685, MCP23017, WS2812-over-SPI
     sim.py            pygame window drawing the whole panel on your desktop
   ui/
     render.py         scene compositor, dirty-rect blitting, CRT post effect
@@ -76,7 +76,7 @@ firmware/deck/
       snake.py        joystick steers, encoder push pauses
       tetris.py       joystick moves, mech keys rotate and drop
       gameboy.py      PyBoy (GB/GBC) core, own 160x144 canvas, letterboxed
-      boot.py         covers the ~25s Pi boot so it never looks broken
+      boot.py         covers the ~25s boot so it never looks broken
   audio/
     chiptune.py       generated blips, one per event, mute switch respected;
                       also owns the mixer for the Game Boy app's streamed audio

@@ -1,9 +1,9 @@
 """Talks to the daemon over the USB point-to-point link.
 
 Two directions, per docs/ARCHITECTURE.md:
-  daemon -> Pi:  classified hook events, pushed as they happen (this side
-                 runs a small HTTP server on the Pi's link address).
-  Pi -> daemon:  button/mech-key events, sent as outbound requests.
+  daemon -> deck:  classified hook events, pushed as they happen (this side
+                   runs a small HTTP server on the deck's link address).
+  deck -> daemon:  button/mech-key events, sent as outbound requests.
 
 A missed heartbeat (no POST from the daemon within HEARTBEAT_TIMEOUT) drives
 the LINK lamp dark and takes the deck to OFFLINE via Deck.link_alive.
@@ -21,7 +21,7 @@ from typing import Callable
 
 from deck.state import SessionRegistry
 
-# Real hardware: 10.55.0.1 (Pi) <-> 10.55.0.2 (host), per docs/HARDWARE.md.
+# Real hardware: 10.55.0.1 (deck) <-> 10.55.0.2 (host), per docs/HARDWARE.md.
 # Overridable so the daemon and this firmware can both run on one dev
 # machine (e.g. both on 127.0.0.1, different ports) before any hardware
 # exists - see README.md's "running the full stack locally" section.

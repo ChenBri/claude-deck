@@ -50,13 +50,13 @@ export const windowsActions: HostActions = {
     await sendKeys("^+t");
   },
 
-  async planMode() {
-    await sendKeys("%p"); // Alt+P, wired to whatever launches plan mode locally
+  async planMode(presses) {
+    if (presses <= 0) return;
+    await sendKeys("+{TAB}".repeat(presses)); // Shift+Tab, the real mode-cycle key
   },
 
   async effortSelect(level) {
-    // Real Claude Code slash command (confirmed against the docs, not a
-    // placeholder like planMode() above): /effort low|medium|high|xhigh|max,
+    // Real Claude Code slash command: /effort low|medium|high|xhigh|max,
     // typed mid-session. LOW/MEDIUM/HIGH/XHIGH/MAX map straight onto it.
     const argByLevel: Record<string, string> = {
       LOW: "low", MEDIUM: "medium", HIGH: "high", XHIGH: "xhigh", MAX: "max",

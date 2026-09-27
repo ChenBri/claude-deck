@@ -17,6 +17,20 @@ export interface ActionRequest {
   value?: unknown;
 }
 
+// Shift+Tab presses needed to reach plan mode from a given permission_mode.
+// Per code.claude.com/docs/en/permission-modes, the CLI cycle is
+// default -> acceptEdits -> plan -> back to default, and from auto the
+// first press always lands on default first. Modes outside the default
+// cycle (dontAsk, bypassPermissions) have no fixed distance to plan, so
+// they're deliberately absent: an unknown or uncyclable mode means "don't
+// guess a keystroke," the same rule that governs the approve button.
+const PLAN_MODE_STEPS: Record<string, number> = {
+  auto: 3,
+  default: 2,
+  acceptEdits: 1,
+  plan: 0,
+};
+
 export class Guard {
   constructor(
     private sessions: SessionRegistry,
@@ -38,7 +52,7 @@ export class Guard {
         this.audit.record(this.entry("panic", "", null, "approved", null));
         return;
       case "mech_key":
-        return this.handleMechKey(req.name ?? "");
+        return this.handleMechKey(req.name ?? "", req.session_id ?? "");
       case "toggle":
         if (req.name === "AUTO_ACCEPT" && req.session_id) {
           this.sessions.setAutoAccept(req.session_id, Boolean(req.value));
@@ -100,19 +114,32 @@ export class Guard {
     this.audit.record(this.entry("effort_select", "", null, "approved", level));
   }
 
-  private async handleMechKey(name: string): Promise<void> {
+  private async handleMechKey(name: string, sessionId: string): Promise<void> {
     switch (name) {
       case "CLD":
         return this.actions.focusOrLaunchClaude();
       case "NEW":
         return this.actions.newSession();
       case "PLAN":
-        return this.actions.planMode();
+        return this.handlePlanMode(sessionId);
       case "MIC":
         return this.actions.pushToTalk();
       default:
         return;
     }
+  }
+
+  private async handlePlanMode(sessionId: string): Promise<void> {
+    const mode = this.sessions.get(sessionId)?.permissionMode ?? null;
+    const presses = mode === null ? null : PLAN_MODE_STEPS[mode] ?? null;
+    if (presses === null) {
+      // rule 4's spirit applied to mode-cycling: no confirmed current mode
+      // means no safe press count, so this is a no-op, not a guess.
+      this.audit.record(this.entry("plan_mode", sessionId, null, "rejected", `no cyclable mode (last seen: ${mode ?? "none"})`));
+      return;
+    }
+    if (presses > 0) await this.actions.planMode(presses);
+    this.audit.record(this.entry("plan_mode", sessionId, null, "approved", `${presses} Shift+Tab from ${mode}`));
   }
 
   private entry(

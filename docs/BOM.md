@@ -4,17 +4,62 @@ Three suppliers, all ordered the same day. Prices in USD unless shown in shekels
 
 | Source | Covers | Why |
 |---|---|---|
-| **Digi-Key** | Pi Zero 2 W, and the genuine ICs (see `digikey-bom.csv`) | $15 for the Pi against ₪234 on AliExpress. In stock today. Removes counterfeit risk on the logic chips. Upload the CSV to their BOM tool. |
-| **piitel.co.il** | SanDisk 32GB Ultra microSD, ₪50 | A real card from an Israeli reseller. AliExpress offers only fake-capacity listings at this size. |
-| **AliExpress** | Everything else: sections C through J | Genuinely the best value for modules, LEDs, mechanical parts and tools. |
+| **Digi-Key** | The genuine ICs only (see `digikey-bom.csv`) | Removes counterfeit risk on the logic chips. Upload the CSV to their BOM tool. |
+| **KSP** | SanDisk Ultra 32GB microSD, A1, ₪49 | A real card from a mainstream Israeli retailer. AliExpress offers only fake-capacity listings at this size. |
+| **AliExpress** | Everything else, now including the brain: sections A through J | Genuinely the best value for modules, LEDs, mechanical parts and tools - and, as of 2026-09-23, the only channel that actually has the board in stock. |
 
-**Sourcing checked 2026-09-20.** There is no Pi Zero 2 W shortage. It was in stock
-at eleven distributors that day: The Pi Hut £14.40, Digi-Key $15.00, Pi-Shop CHF
-17.10, BerryBase €17.90, Kubii €18.00, Botland PLN 72.90 and others. Farnell
-Israel lists the correct $14.89 price but cannot deliver until April 2027 on a
-54-week lead time, which is a Farnell supply situation and not a market one.
-piitel has the right price, ₪85 bare and ₪105 with headers, but both were out of
-stock. The ₪234 on AliExpress is pure markup.
+**The microSD moved from piitel.co.il to KSP, 2026-09-23.** Same SanDisk
+Ultra A1 32GB, ₪49 vs. piitel's ₪50, in stock, real Israeli retailer with
+physical branches.
+
+**Checked moving the ICs from Digi-Key to Farnell Israel the same day, reverted.**
+Farnell was 4 for 5 in stock under the exact part numbers, but the LM358P
+op-amp was on a 7-week backorder, and the only in-stock substitute was
+STMicro's LM358PT - electrically the same part, but TSSOP-8 surface-mount
+(0.65mm lead pitch) instead of TI's DIP-8, on a board that's otherwise
+entirely hand-solderable DIP and passives. Not worth it: `il.farnell.com` is
+a localized storefront over the same international shipping as
+`digikey.co.il`, not a local Israeli warehouse (every part page was tagged
+"UK Stock") - so the switch bought no real domestic-sourcing benefit and cost
+a worse part. Stayed on Digi-Key, all five parts in stock as originally
+specified.
+
+**The brain changed from Raspberry Pi Zero 2 W to Radxa ZERO 3W, 2026-09-23.**
+Checked eleven distributors (Digi-Key, The Pi Hut, Pimoroni, Adafruit, SparkFun,
+BerryBase, Vilros, Kubii, Mouser, plus Israel's own piitel.co.il and 4project.co.il)
+and every one was out of stock on the bare Pi Zero 2 W board, several with no
+restock date at all. This isn't a regional or momentary gap: even piitel, the
+official Raspberry Pi importer for Israel, and 4project (who'd already
+backordered 50 units from their own supplier) had no ETA. CanaKit had real
+stock, but only inside $90-100 starter kits bundling a case, PSU and cables
+this project doesn't need - 5-6x the bare-board price for the same chip.
+
+Radxa ZERO 3W (RK3566, quad-core Cortex-A55 @ 1.6GHz, 2GB RAM, WiFi 6/BT 5.4,
+Micro HDMI, 40-pin header) is in stock on AliExpress today, through a link
+Radxa's own site lists as an approved distributor, which is why it moved into
+section A below instead of getting its own new section. It's a genuine spec
+upgrade over the Pi Zero 2 W (512MB RAM, single-core-equivalent-era A53 @
+1GHz), not a downgrade forced by availability. See DECISIONS.md #1 and
+docs/HARDWARE.md for what changed under the hood: the pin map is fully redone
+(different SoC, different pinout), NeoPixels move from PWM/`rpi_ws281x` to
+SPI3 + a WS2812-over-SPI driver, and power comes in via the GPIO header's 5V
+pins (confirmed on Radxa's own forum) instead of a dedicated PWR IN port, so
+the USB-C OTG port stays data-only to the host exactly as the old PWR IN split
+intended.
+
+**Superseded by the 2026-09-23 check above - kept for the record, not to be
+trusted.** Original note, sourcing checked 2026-09-20: "There is no Pi Zero 2 W
+shortage. It was in stock at eleven distributors that day: The Pi Hut £14.40,
+Digi-Key $15.00, Pi-Shop CHF 17.10, BerryBase €17.90, Kubii €18.00, Botland PLN
+72.90 and others. Farnell Israel lists the correct $14.89 price but cannot
+deliver until April 2027 on a 54-week lead time, which is a Farnell supply
+situation and not a market one. piitel has the right price, ₪85 bare and ₪105
+with headers, but both were out of stock. The ₪234 on AliExpress is pure
+markup." None of that held up three days later - live-checking every one of
+those distributors on 2026-09-23 found the board out of stock everywhere, this
+paragraph's "no shortage" conclusion included. Whatever was checked on
+2026-09-20 either wasn't checked against real live pages, or the situation
+changed fast; either way, don't act on numbers in this paragraph.
 
 Lead time is 2 to 5 weeks. Items ship from different sellers and will arrive
 staggered over that window.
@@ -257,7 +302,7 @@ non-mushroom button, the latching head is kept and the firmware handles it: fire
 the interrupt on the press edge, then hold an INTERRUPTED state until the twist
 releases the contact. The physically latched button becomes a visible indicator
 that a run was killed, which is arguably better than a momentary. The 1NO1NC
-contact block gives the Pi a clean normally-open contact. Decision 24 amended.
+contact block gives the deck a clean normally-open contact. Decision 24 amended.
 
 **The flip-up safety cover is dropped.** The e-stop head is already ~40mm and
 guarded by its own collar, and covers are sized for 22mm flat buttons rather than
@@ -314,13 +359,13 @@ soldering station.
 
 | # | Part | Qty | Unit | Total | Notes |
 |---|---|---|---|---|---|
-| A1 | Raspberry Pi Zero 2 W | 1 | 24.00 | 24.00 | Seller with high ratings and real feedback photos. |
-| A2 | microSD 32GB A1 (SanDisk or Samsung) | 1 | 6.00 | 6.00 | A1 rating required for random IO. |
+| A1 | Radxa ZERO 3W, 2GB RAM, no GPIO bundle | 1 | 25.00 | 25.00 | Verified in stock on AliExpress 2026-09-23 via Radxa's own listed distributor link, ₪92.09. Replaces the Raspberry Pi Zero 2 W - see the sourcing note above and DECISIONS.md #1. "No GPIO" is correct, not a downgrade: the plan was always to solder our own header (A3), same as the Pi Zero's unpopulated pads. |
+| A2 | microSD 32GB A1 (SanDisk or Samsung) | 1 | 6.00 | 6.00 | A1 rating required for random IO. Sourced from KSP, not this list - SanDisk Ultra A1 32GB (SDSQUA4-032G-GN6MN), ₪49, in stock. |
 | A3 | 2x20 male GPIO header, 2.54mm | 1 | 1.00 | 1.00 | Ships unpopulated. |
-| A4 | 12V 3A PSU, 5.5x2.1 barrel output | 1 | 8.00 | 8.00 | Was 5V 3A: the display's driver board wants 12V (confirmed against a real listing, see section B), so that's the main rail now. 3A minimum, see power budget in HARDWARE.md. |
-| A5 | USB-A to micro-USB data cable, 0.5m | 1 | 2.00 | 2.00 | Data cable, not charge-only. |
-| A6 | 12V to 5V buck converter module, 3A | 1 | 1.50 | 1.50 | Steps the main 12V rail down for the Pi/PCA9685/MCP23017s/amp, same as before - only the display taps 12V directly. |
-| | | | | **42.50** | |
+| A4 | 12V 3A PSU, 5.5x2.1 barrel output | 1 | 8.00 | 8.00 | The display's driver board wants 12V (confirmed against a real listing, see section B). 3A minimum, see power budget in HARDWARE.md. |
+| A5 | USB-A to micro-USB data cable, 0.5m | 1 | 2.00 | 2.00 | For flashing/console access only. The Radxa's own data link to the host runs over its USB-C OTG port (docs/HARDWARE.md), not this cable. |
+| A6 | 12V to 5V buck converter module, 3A | 1 | 1.50 | 1.50 | Steps the main 12V rail down for the Radxa/PCA9685/MCP23017s/amp. Feeds the Radxa via its GPIO header's 5V pins (pin 2 or 4), not a barrel/micro-USB power port - the board has none; see docs/HARDWARE.md USB gadget mode. |
+| | | | | **43.50** | |
 
 ## B. Display
 
@@ -334,16 +379,16 @@ soldering station.
 | # | Part | Qty | Unit | Total | Notes |
 |---|---|---|---|---|---|
 | C1 | PCA9685 16-channel PWM board | 1 | 3.50 | 3.50 | Drives all lamps and both meters over I2C. |
-| C2 | MCP23017 I2C GPIO expander | 2 | 2.00 | 4.00 | 16 inputs for rotary switch, keys and toggles. Second is a spare. |
+| C2 | MCP23017 I2C GPIO expander | 2 | 2.00 | 4.00 | 16 inputs for rotary switch, keys and toggles. Second is a spare. Sourced from Digi-Key, not AliExpress - counterfeit risk, see `digikey-bom.csv`. Not a separate cart line. |
 | C3 | 5mm diffused LEDs, assorted colours | 10 | 0.20 | 2.00 | Diffused, not water-clear. |
 | C4 | Chrome LED bezel holders, 5mm | 5 | 0.50 | 2.50 | |
 | C5 | WS2812B ring, 12 LED | 1 | 3.50 | 3.50 | Bezel halo. |
 | C6 | WS2812B strip, 60 LED/m, 1m | 1 | 2.50 | 2.50 | 300mm cut for underglow, rest is spare. |
-| C7 | 74AHCT125 level shifter, DIP | 2 | 0.75 | 1.50 | 3.3V to 5V for NeoPixel data. |
+| C7 | 74AHCT125 level shifter, DIP | 2 | 0.75 | 1.50 | 3.3V to 5V for NeoPixel data. Sourced from Digi-Key, not AliExpress - see C2's note. |
 | C8 | 3mm white LEDs | 4 | 0.25 | 1.00 | Legend strip backlight. |
 | C9 | Resistor and capacitor assortment kit | 1 | 7.00 | 7.00 | |
-| C10 | 10k trimpots | 2 | 0.50 | 1.00 | Meter full-scale calibration. |
-| C11 | LM358 op-amp, DIP | 2 | 0.40 | 0.80 | Meter buffer if the needles read low. |
+| C10 | 10k trimpots | 2 | 0.50 | 1.00 | Meter full-scale calibration. Sourced from Digi-Key, not AliExpress - see C2's note. |
+| C11 | LM358 op-amp, DIP | 2 | 0.40 | 0.80 | Meter buffer if the needles read low. Sourced from Digi-Key, not AliExpress - see C2's note. |
 | | | | | **29.30** | |
 
 ## D. Analog meters
@@ -362,7 +407,7 @@ soldering station.
 | E3 | Hinged safety flip cover, red | 1 | 3.50 | 3.50 | Diameter must match E2. |
 | E4 | 6-position rotary switch, 1 pole | 2 | 2.50 | 5.00 | One is the session selector, one is the effort dial (5 of its 6 positions wired: LOW/MEDIUM/HIGH/XHIGH/MAX, Claude Code's real `/effort` levels). |
 | E5 | Pointer knob for E4 | 2 | 1.50 | 3.00 | |
-| E6 | EC11 rotary encoder with push | 2 | 1.20 | 2.40 | Second is a spare. |
+| E6 | EC11 rotary encoder with push | 2 | 1.20 | 2.40 | Second is a spare. Sourced from Digi-Key (PEC11R-4215F-S0024), not AliExpress - see C2's note. |
 | E7 | Knurled knob for E6 | 1 | 1.20 | 1.20 | |
 | E8 | Mechanical key switches, Gateron | 8 | 0.75 | 6.00 | 4 for CLD/NEW/PLAN/MIC, 4 for Game Boy A/B/START/SELECT. Real switches with travel, not 6x6mm tacts, so the Game Boy buttons feel like something instead of a router reset button. |
 | E9 | Blank keycaps | 8 | 0.90 | 7.00 | Legends: CLD / NEW / PLAN / MIC / A / B / START / SELECT. |
@@ -458,7 +503,7 @@ Ordered later, once the perfboard build is proven and the layout is final.
 
 | Group | USD |
 |---|---|
-| A Core computer | 42.50 |
+| A Core computer | 43.50 |
 | B Display | 40.00 |
 | C Light and IO expansion | 29.30 |
 | D Analog meters | 17.00 |

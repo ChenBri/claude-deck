@@ -12,7 +12,7 @@ and the rules that make it so.
    keystroke could land in a terminal, a browser, a chat.
 3. **Stale prompt.** Approving something that appeared after you last looked.
 4. **Network reach.** Anything on the LAN being able to press the button remotely.
-5. **Data leaking onto the box.** The Pi renders text to a screen and writes
+5. **Data leaking onto the box.** The deck renders text to a screen and writes
    history to a card. Secrets must never get that far.
 
 ## The rules
@@ -99,13 +99,13 @@ the `WIFI` toggle says otherwise, so "is this thing online" is answered by
 looking at the panel rather than trusting a config file.
 
 Weather on the idle dashboard comes from the daemon, which already has internet
-on your PC. The Pi never needs a route out.
+on your PC. The deck never needs a route out.
 
-### 7. Nothing sensitive reaches the Pi
+### 7. Nothing sensitive reaches the deck
 
 Hook payloads are truncated and scrubbed before leaving the daemon. Anything
 shaped like a token, password, private key or connection string is replaced with
-a placeholder. Paths are shortened to the last two segments. The Pi renders
+a placeholder. Paths are shortened to the last two segments. The deck renders
 these to a screen and writes state transitions to its card, so it must never
 hold anything worth stealing.
 

@@ -1,6 +1,6 @@
 /** Server-side mirror of what's currently pending per session: the daemon
  * originates every classified event, so it already knows "what the deck
- * currently has on screen" without needing the Pi to echo it back. */
+ * currently has on screen" without needing the deck to echo it back. */
 
 import { ClassifiedEvent } from "./classify";
 
@@ -20,6 +20,10 @@ export interface SessionRecord {
   pending: PendingRequest | null;
   lastSeen: number;
   autoAccept: boolean;
+  // Last permission_mode seen on any hook event for this session, e.g.
+  // "default" | "acceptEdits" | "plan" | "auto". Null until the first hook
+  // event that carries it arrives. Drives guard.ts's plan-mode Shift+Tab count.
+  permissionMode: string | null;
 }
 
 export class SessionRegistry {
@@ -28,7 +32,7 @@ export class SessionRegistry {
   private getOrCreate(sessionId: string): SessionRecord {
     let session = this.sessions.get(sessionId);
     if (!session) {
-      session = { sessionId, pending: null, lastSeen: Date.now(), autoAccept: false };
+      session = { sessionId, pending: null, lastSeen: Date.now(), autoAccept: false, permissionMode: null };
       this.sessions.set(sessionId, session);
     }
     return session;
@@ -37,6 +41,10 @@ export class SessionRegistry {
   applyClassified(evt: ClassifiedEvent): SessionRecord {
     const session = this.getOrCreate(evt.sessionId);
     session.lastSeen = Date.now();
+
+    if (typeof evt.meta.permission_mode === "string") {
+      session.permissionMode = evt.meta.permission_mode;
+    }
 
     if (evt.event === "Notification" && evt.meta.variant === "permission") {
       session.pending = {

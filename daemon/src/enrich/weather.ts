@@ -1,4 +1,4 @@
-/** Weather for the idle dashboard: the daemon has internet, the Pi never
+/** Weather for the idle dashboard: the daemon has internet, the deck never
  * needs a route out (docs/SAFETY.md rule 6). Uses open-meteo, no API key. */
 
 const LAT = process.env.DECK_LAT;

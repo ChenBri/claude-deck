@@ -12,7 +12,7 @@ BG_COLOR = (18, 14, 12)
 # antialiasing off. A monospace font, antialiased, is dramatically more
 # legible at the same size - this is a font/rendering fix, not a CRT-look
 # change. SysFont tries each name in order and falls back safely if none of
-# them exist on this system (e.g. the real Pi).
+# them exist on this system (e.g. the real deck).
 _FONT_NAMES = "consolas,dejavusansmono,couriernew,monospace"
 
 _fonts: dict[int, pygame.font.Font] = {}

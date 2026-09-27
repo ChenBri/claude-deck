@@ -1,5 +1,5 @@
 /** Bootstrap: host detection for the action backend, then wire hook ingest,
- * the Pi link (both directions), and the audit log together. */
+ * the deck link (both directions), and the audit log together. */
 
 import os from "node:os";
 import { loadHostActions } from "./actions";
@@ -17,7 +17,7 @@ import { fiveHourUsagePct } from "./enrich/usage";
 
 const IDLE_INFO_INTERVAL_MS = 20_000;
 // Must stay well under firmware/deck/link.py's HEARTBEAT_TIMEOUT (5s), or
-// the Pi flags OFFLINE in the gap between heartbeats even with a live daemon.
+// the deck flags OFFLINE in the gap between heartbeats even with a live daemon.
 const HEARTBEAT_INTERVAL_MS = 2_000;
 const SESSION_PRUNE_INTERVAL_MS = 60_000;
 const SESSION_MAX_AGE_MS = 6 * 60 * 60 * 1000;

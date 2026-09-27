@@ -49,9 +49,9 @@ export function isDenylistCategory(value: string): value is DenylistCategory {
   return (CATEGORIES as string[]).includes(value);
 }
 
-/** Live, mutable denylist settings, synced from the Pi's encoder menu
+/** Live, mutable denylist settings, synced from the deck's encoder menu
  * (firmware/deck/menu.py) over link/transport.ts's action endpoint. Starts
- * fail-closed (every category enabled) until the Pi says otherwise. */
+ * fail-closed (every category enabled) until the deck says otherwise. */
 export class DenylistSettingsStore {
   private settings: DenylistSettings = { enabled: { ...defaultDenylistSettings.enabled } };
 

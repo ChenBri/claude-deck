@@ -2,60 +2,96 @@
 
 ## Why the pinout looks like this
 
+The brain changed from a Raspberry Pi Zero 2 W to a Radxa ZERO 3W on
+2026-09-23 (DECISIONS.md #1, global Pi Zero 2 W shortage). This section is a
+full redo, not a relabel: the RK3566's pin functions and numbering share
+nothing with Broadcom's, so every assignment below was re-derived from
+Radxa's own hardware interface reference
+(docs.radxa.com/en/zero/zero3/hardware-design/hardware-interface), not
+carried over. Provisional in the same sense case.scad is provisional
+(DECISIONS.md #49/#52): real once hardware and overlays are in hand and
+tested, a considered first pass until then.
+
 A full panel wants NeoPixels, I2S audio, an I2C bus, an encoder, a 6-position
-rotary switch, four mech keys, three toggles and three buttons. That does not
-fit on 26 usable GPIOs without thought, and several of the peripherals collide
-on the same silicon. The display used to be SPI (an early collision point,
-see below); it's HDMI now (DECISIONS.md #20, 11.6in 1366x768), which frees
-GPIO8-11, 17, 22 and 23 entirely rather than resolving a collision on them.
+rotary switch, four mech keys, three toggles and three buttons. The display
+is HDMI (DECISIONS.md #20, 11.6in 1366x768), which the ZERO 3W provides
+natively via its own Micro HDMI port - no SPI or GPIO pins spent on it either
+way.
 
-The collisions and how they resolve:
+The collisions and how they resolve on this SoC:
 
-- **I2S audio takes GPIO18, 19 and 21.** Those are also SPI1 and the PCM
-  peripheral, so once audio is in, SPI1 is gone and `rpi_ws281x` cannot use PCM.
-- **NeoPixels need precise timing**, which on a Pi means PWM, PCM or SPI DMA.
-  PCM is gone to audio, so NeoPixels go on **PWM0 via GPIO12**. `rpi_ws281x`
-  needs root, so it runs in a systemd service. (SPI0 was the other DMA option
-  and is free now the display moved to HDMI, but PWM0 already works and
-  there's no reason to redo it.)
-- **The Pi has no analog output.** Both needles are driven from the PCA9685 at
-  ~1.6kHz through an RC filter, with a trimpot per meter for full-scale calibration.
-- **Not enough input pins.** An MCP23017 on I2C adds 16, which absorbs the rotary
-  switch, the mech keys and the toggles. Latency-sensitive inputs (the three
-  buttons and the encoder) stay on real GPIO.
-- **3.3V logic, 5V LEDs.** WS2812B data goes through a 74AHCT125. Skipping this
-  works until it randomly does not, and then you debug it for an evening.
+- **No PWM-DMA NeoPixel path like `rpi_ws281x` exists here** - that library is
+  Broadcom PWM/PCM-DMA specific and does not run on Rockchip silicon. NeoPixel
+  data instead goes out **SPI3's MOSI line (pin 19)**, bit-banged to WS2812
+  timing the same way `rpi_ws281x` bit-bangs PWM - the peripheral is
+  repurposed for its timing precision, not used as a real SPI transaction.
+  Radxa's own docs cover WS2812B wiring directly. Needs root or a udev rule
+  for `/dev/spidevX.Y`, same class of requirement `rpi_ws281x` had for GPIO.
+- **The board has no analog output**, same as before. Both needles are driven
+  from the PCA9685 at ~1.6kHz through an RC filter, with a trimpot per meter.
+- **Not enough input pins.** An MCP23017 on I2C adds 16, which absorbs the
+  rotary switch, the mech keys and the toggles. Latency-sensitive inputs (the
+  three buttons and the encoder) stay on real GPIO.
+- **3.3V logic, 5V LEDs**, same as before - the ZERO 3W's GPIOs are 3.3V
+  (3.63V absolute max) same as the Pi's. WS2812B data still goes through a
+  74AHCT125. Not optional.
+- **Pins 3, 5, 27 and 28 carry extra pull-up resistors** for I2C device power
+  (Radxa's own hardware note) and "work abnormally when used as GPIOs." The
+  main I2C bus is deliberately placed on 27/28 to use those pull-ups rather
+  than fight them; pins 3 and 5 are left spare rather than used as plain I/O.
+- **Power comes in through the GPIO header, not a dedicated power port.** The
+  ZERO 3W has exactly one OTG-capable port (USB-C 1) and it does both power
+  and data - there's no second, power-only port like the Pi Zero 2 W's
+  separate PWR IN. Confirmed on Radxa's own forum: pins 2 and 4 are tied
+  directly to the same 5V rail as the USB-C 1 power path, so 5V from the buck
+  converter goes there instead, and USB-C 1 stays data-only to the host -
+  the same split the old "data port stays data-only" rule intended, just
+  moved to a different physical pin. See "USB gadget mode" below.
 
 ## Pin map
 
-| GPIO | Pin | Function |
+| Pin | Radxa GPIO | Function |
 |---|---|---|
-| 2 | 3 | I2C1 SDA, to PCA9685, two MCP23017, ADS1115 |
-| 3 | 5 | I2C1 SCL |
-| 4 | 7 | APPROVE button, active low, internal pull-up |
-| 5 | 29 | DENY button |
-| 6 | 31 | PANIC mushroom |
-| 7 | 26 | MCP23017 INT, interrupt on input change |
-| 8 | 24 | spare, SPI0 CE0 (was display CS on the old SPI TFT) |
-| 9 | 21 | spare, SPI0 MISO |
-| 10 | 19 | spare, SPI0 MOSI (was display SDA) |
-| 11 | 23 | spare, SPI0 SCLK (was display SCL) |
-| 12 | 32 | NeoPixel data, PWM0, via 74AHCT125 |
-| 13 | 33 | spare, PWM1 |
-| 14 | 8 | spare, UART TX, serial console disabled |
-| 15 | 10 | spare, UART RX |
-| 16 | 36 | Encoder A |
-| 17 | 11 | spare (was display backlight enable; HDMI panel's driver board handles its own backlight) |
-| 18 | 12 | I2S BCLK, MAX98357A |
-| 19 | 35 | I2S LRCLK |
-| 20 | 38 | spare |
-| 21 | 40 | I2S DIN |
-| 22 | 15 | spare (was display DC) |
-| 23 | 16 | spare (was display RST) |
-| 24 | 18 | spare |
-| 25 | 22 | Shutdown request / status |
-| 26 | 37 | Encoder B |
-| 27 | 13 | Encoder push |
+| 1 | - | +3.3V |
+| 2 | - | **+5V power in**, from the buck converter (see "Power comes in through the GPIO header" above) |
+| 3 | GPIO1_A0 | spare (extra I2C pull-up present, see above - don't use as plain I/O) |
+| 4 | - | +5V, same rail as pin 2 |
+| 5 | GPIO1_A1 | spare (extra I2C pull-up present, same as pin 3) |
+| 6 | - | GND |
+| 7 | GPIO3_C4 | Encoder A |
+| 8 | GPIO0_D1 | spare (UART2_M0 TX, the board's debug console - Radxa's own docs warn against repurposing it, leave the overlay off) |
+| 9 | - | GND |
+| 10 | GPIO0_D0 | spare (UART2_M0 RX, debug console, same caveat as pin 8) |
+| 11 | GPIO3_A1 | APPROVE button, active low, internal pull-up |
+| 12 | GPIO3_A3 | I2S3 BCLK (SCLK_M0), MAX98357A |
+| 13 | GPIO3_A2 | spare (I2S3 MCLK_M0, unused - MAX98357A needs no MCLK) |
+| 14 | - | GND |
+| 15 | GPIO3_B0 | DENY button |
+| 16 | GPIO3_B1 | Encoder B |
+| 17 | - | +3.3V |
+| 18 | GPIO3_B2 | Encoder push |
+| 19 | GPIO4_C3 | NeoPixel data, SPI3 MOSI_M1, via 74AHCT125 |
+| 20 | - | GND |
+| 21 | GPIO4_C5 | spare (SPI3 MISO_M1, unused - NeoPixels are output-only) |
+| 22 | GPIO3_C1 | Shutdown request / status |
+| 23 | GPIO4_C2 | spare (SPI3 CLK_M1) |
+| 24 | GPIO4_C6 | spare (SPI3 CS0_M1) |
+| 25 | - | GND |
+| 26 | - | not connected |
+| 27 | GPIO4_B2 | I2C4 SDA, to PCA9685, two MCP23017, ADS1115 |
+| 28 | GPIO4_B3 | I2C4 SCL |
+| 29 | GPIO3_B3 | spare (I2C5 SCL_M0 - a second I2C bus, unused) |
+| 30 | - | GND |
+| 31 | GPIO3_B4 | spare (I2C5 SDA_M0) |
+| 32 | GPIO3_C2 | spare |
+| 33 | GPIO3_C3 | spare |
+| 34 | - | GND |
+| 35 | GPIO3_A4 | I2S3 LRCLK (LRCK_M0), MAX98357A |
+| 36 | GPIO3_A7 | PANIC mushroom |
+| 37 | GPIO1_A4 | MCP23017 INT, interrupt on input change |
+| 38 | GPIO3_A6 | spare (I2S3 SDI_M0, unused - no audio input) |
+| 39 | - | GND |
+| 40 | GPIO3_A5 | I2S3 DIN (SDO_M0), into MAX98357A |
 
 ## PCA9685 channels, all outputs
 
@@ -81,6 +117,8 @@ which is what makes NIGHT mode and the blocked-state pulse possible.
 
 ## I2C bus, addresses
 
+On I2C4 (pins 27/28, see "Pin map" above - chosen for its built-in pull-ups).
+
 | Device | Address | Job |
 |---|---|---|
 | PCA9685 | 0x40 | lamps, legend backlight, button LEDs, meters |
@@ -96,8 +134,9 @@ spare from Digi-Key and is now the joystick's home.
 KY-023 dual-axis thumbstick. VRx and VRy are 10k pots swept across 3.3V, read by
 the ADS1115 at 16 bits; centre reads ~1.65V. SW is the push button, active low,
 into MCP23017 #2 B0 with its internal pull-up. Deadzone and axis calibration live
-in the settings file. Snake and Tetris consume it as a 4-way plus centre; the
-Game Boy app uses it as the d-pad.
+in the settings file. Snake, Tetris and 2048 consume it as a 4-way plus centre,
+Pong reads the raw y-axis continuously for paddle position; the Game Boy app
+uses it as the d-pad.
 
 ## Game Boy buttons
 
@@ -126,7 +165,7 @@ A standalone panel-mount potentiometer (RV24YN20S, 10K ohm, docs/BOM.md E11),
 not the joystick's KY-023 pots, wired the same way as the joystick's own
 axes: swept across 3.3V, read by the ADS1115 at 16 bits on A2. Real 24mm
 panel-mount part, nut-and-bushing mounted like the rotary switches, not a
-PCB-mount type. Purely local to the Pi - scales `chiptune.py`'s mixer
+PCB-mount type. Purely local to the deck - scales `chiptune.py`'s mixer
 output, no daemon round-trip. Independent of the MUTE toggle.
 
 ## Game Boy audio
@@ -188,35 +227,35 @@ filter and the movement.
 2A, DC 5.5mm barrel**, same connector standard already used elsewhere in
 this project, just not the 5V this whole design otherwise runs on. That
 changes which rail is "primary": the display needs 12V directly, and
-everything else (Pi, PCA9685, MCP23017s, NeoPixels, amp) still wants 5V,
+everything else (the Radxa, PCA9685, MCP23017s, NeoPixels, amp) still wants 5V,
 so the plan is now **one 12V input, with a small buck converter stepping
 it down to 5V for the logic side** - a single wall wart and barrel jack,
 not two power cords into the case.
 
 | Load (5V side, through the buck converter) | Typical | Peak |
 |---|---|---|
-| Pi Zero 2 W | 350mA | 600mA |
+| Radxa ZERO 3W | 400mA | 700mA (a quad A55 @ 1.6GHz with WiFi 6 draws somewhat more than the Pi Zero 2 W did; treat as an estimate until measured) |
 | NeoPixels, 30 total, capped at 40% brightness | 250mA | 700mA |
 | Speaker on transients | 80mA | 500mA |
 | Lamps and legend backlight, 7 channels | 90mA | 110mA |
 | Meters and their backlights | 40mA | 60mA |
-| **5V subtotal** | **810mA (4.05W)** | **1.97A (9.85W)** |
+| **5V subtotal** | **860mA (4.30W)** | **2.07A (10.35W)** |
 
 At an estimated 88% buck efficiency (a typical cheap module, not a
 datasheet number for a specific one yet), that 5V load pulls roughly
-**0.38A typical / 0.93A peak from the 12V rail.**
+**0.41A typical / 0.98A peak from the 12V rail.**
 
 | Load (12V side) | Typical | Peak |
 |---|---|---|
-| 5V logic, via the buck converter | 0.38A | 0.93A |
+| 5V logic, via the buck converter | 0.41A | 0.98A |
 | Display + driver board | ~0.3A (estimated; an LED-backlit panel this size doesn't really draw its full rated 2A continuously - that rating is the manufacturer's recommended supply headroom, not confirmed continuous draw) | up to 2A (the board's own rated max) |
-| **12V total** | **~0.7A (8.4W)** | **~2.9A (35W)** |
+| **12V total** | **~0.7A (8.5W)** | **~3.0A (36W)** |
 
 Plan on a **12V 3A supply** (36W) for real margin over that estimated peak,
 the same proportional headroom the old 5V 3A recommendation had over its
-own computed peak. The buck converter module itself is a new, cheap BOM
-line (docs/BOM.md); everything downstream of it (Pi's own micro-USB power
-in, PCA9685, MCP23017s) is unchanged, it just now receives 5V from the
+own computed peak. The buck converter module itself is a cheap BOM line
+(docs/BOM.md); everything downstream of it (the Radxa's GPIO 5V pins,
+PCA9685, MCP23017s) is unchanged, it just now receives 5V from the
 converter instead of straight off the barrel jack.
 
 One nice side effect: the KCD1 rocker switch's built-in LED (docs/BOM.md's
@@ -227,19 +266,21 @@ brightness now - no mod needed.
 
 **Wire the power correctly.** 12V from the barrel jack feeds the display board
 and the buck converter directly; the buck converter's 5V output goes to the
-Pi through the PWR IN micro-USB port exactly as before. Never feed the raw
-12V rail into the Pi or its GPIO header - only the buck converter's 5V
-output goes there. The USB data port only ever connects to the computer.
-Never feed 5V (or 12V) into the GPIO header while the data port is attached
-to a host.
+Radxa through GPIO **pin 2 or 4** (see "Pin map" and the note above on why
+there's no separate power port on this board). Never feed the raw 12V rail
+into the Radxa or its GPIO header - only the buck converter's 5V output goes
+there. The USB-C OTG port only ever carries data to the computer, never
+power. Never feed 5V (or 12V) into the USB-C OTG port itself.
 
 ## USB gadget mode
 
-The Pi presents a composite USB device over the data port:
+The Radxa presents a composite USB device over its USB-C 1 (OTG) port - the
+board's second port, USB-C 2, is host-mode only and cannot do this, see the
+"Power comes in through the GPIO header" note above:
 
 - **CDC-ECM** for macOS and Linux, **RNDIS** for Windows. Each host picks the
   configuration it understands. This is the status and control channel:
-  a private point-to-point link at 10.55.0.1 (Pi) and 10.55.0.2 (host),
+  a private point-to-point link at 10.55.0.1 (deck) and 10.55.0.2 (host),
   not routable, not on your LAN.
 - **HID keyboard**, which only ever emits F13 through F20. See SAFETY.md.
 
@@ -250,12 +291,12 @@ channel with HID still over USB. The `WIFI` toggle exists for exactly this.
 composite gadget already carries CDC-ECM/RNDIS plus HID; a `g_mass_storage`
 function can sit alongside them, backed by a FAT32 image file on the
 writable `/var/deck` partition (root is read-only, so the backing file has
-to live on partition 3, see SD card layout below). Normal operation: the Pi
-loop-mounts that image at `/var/deck/roms` and the Game Boy app reads it
-like any other folder. Flip a new "USB drive mode" toggle in Settings: the
-Pi unmounts its own loop mount, binds the mass storage function via
+to live on partition 3, see SD card layout below). Normal operation: the
+deck loop-mounts that image at `/var/deck/roms` and the Game Boy app reads
+it like any other folder. Flip a new "USB drive mode" toggle in Settings:
+the deck unmounts its own loop mount, binds the mass storage function via
 configfs, and the same image appears as a drive on the connected PC to drag
-ROMs onto. Flip it back and the Pi unbinds the function and re-mounts
+ROMs onto. Flip it back and the deck unbinds the function and re-mounts
 locally. Not implemented yet: no hardware to build the gadget config
 against, same status as RealPanel (see docs/BUILD.md phase 0). Decision 56.
 

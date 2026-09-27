@@ -1,6 +1,6 @@
-/** HTTP to the Pi over the USB link (docs/HARDWARE.md: 10.55.0.1 the Pi,
+/** HTTP to the deck over the USB link (docs/HARDWARE.md: 10.55.0.1 the deck,
  * 10.55.0.2 the host). Two directions: push classified events and idle-info
- * out to the Pi, and receive button/toggle actions back from it.
+ * out to the deck, and receive button/toggle actions back from it.
  *
  * All four addresses are overridable so the daemon and firmware/deck/link.py
  * can both run on one dev machine before any hardware exists - see
@@ -22,7 +22,7 @@ function postJson(host: string, port: number, path: string, body: unknown): void
     { host, port, path, method: "POST", timeout: SEND_TIMEOUT_MS, headers: { "Content-Type": "application/json" } },
     (res) => res.resume(),
   );
-  req.on("error", () => {}); // the Pi being unreachable must never crash the daemon
+  req.on("error", () => {}); // the deck being unreachable must never crash the daemon
   req.on("timeout", () => req.destroy());
   req.end(data);
 }
@@ -37,7 +37,7 @@ export function sendIdleInfo(info: Record<string, unknown>): void {
 
 /** A bare keepalive, sent on its own schedule (see index.ts) independent of
  * hook events or the idle-info refresh - those are irregular/slow and must
- * not double as the link's liveness signal, or the Pi flags OFFLINE in the
+ * not double as the link's liveness signal, or the deck flags OFFLINE in the
  * gaps between them even though the daemon never went anywhere. */
 export function sendHeartbeat(): void {
   postJson(PI_HOST, PI_PORT, "/heartbeat", {});
@@ -70,13 +70,13 @@ export function startActionListener(guard: Guard): http.Server {
   server.on("error", (err: NodeJS.ErrnoException) => {
     console.warn(
       `link/transport: could not bind ${LISTEN_HOST}:${LISTEN_PORT} (${err.code}). ` +
-        "Expected until the USB gadget link is configured; button actions from the Pi won't arrive.",
+        "Expected until the USB gadget link is configured; button actions from the deck won't arrive.",
     );
   });
   server.on("listening", () => {
     console.log(
       `link/transport: action listener up on ${LISTEN_HOST}:${LISTEN_PORT}, ` +
-        `sending events to the Pi at ${PI_HOST}:${PI_PORT}`,
+        `sending events to the deck at ${PI_HOST}:${PI_PORT}`,
     );
   });
   server.listen(LISTEN_PORT, LISTEN_HOST);

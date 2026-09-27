@@ -1,4 +1,4 @@
-"""Event loop: entry point on the Pi (--panel real) and for desktop
+"""Event loop: entry point on the deck (--panel real) and for desktop
 development (--panel sim). tools/replay.py drives the same Deck/Panel/menu
 objects directly, feeding registry events on its own thread instead of
 starting a DaemonLink.
@@ -24,7 +24,7 @@ from deck.ui.scenes.menu import draw_menu
 
 DENYLIST_CATEGORIES = ("database", "destructive_fs_git", "infrastructure", "secrets")
 
-BOOT_SECONDS = 3.0  # trimmed way down from the real ~25s Pi boot for desktop dev
+BOOT_SECONDS = 3.0  # trimmed way down from the real ~25s boot for desktop dev
 LONG_PRESS_SECONDS = 1.5
 PRUNE_INTERVAL_SECONDS = 30.0
 
@@ -81,7 +81,7 @@ class App:
             self._sync_denylist_settings()
 
     def _sync_denylist_settings(self) -> None:
-        """Best-effort push of the Pi's current denylist categories to the
+        """Best-effort push of the deck's current denylist categories to the
         daemon, so a freshly (re)started daemon picks up whatever the
         encoder menu last set rather than falling back to its own defaults."""
         if self.link is None:
@@ -115,7 +115,13 @@ class App:
     def _on_mech_key(self, ev, frame_inputs: dict) -> None:
         frame_inputs.setdefault("mech_keys", set()).add(ev.name)
         if self.link is not None:
-            self.link.send_action("mech_key", name=ev.name)
+            # PLAN needs to know which session's permission_mode the daemon
+            # last saw, to compute how many Shift+Tab presses reach plan mode
+            # (see daemon/src/guard.ts). Harmless for CLD/NEW/MIC, which ignore it.
+            session = self.deck.active_session()
+            self.link.send_action(
+                "mech_key", name=ev.name, session_id=session.session_id if session else None
+            )
 
     def _on_gb_button(self, ev, frame_inputs: dict) -> None:
         # Game Boy app input only, never forwarded to the daemon: ev.value is
@@ -151,7 +157,7 @@ class App:
         self.deck.set_selector(ev.value)
 
     def _on_volume(self, ev, frame_inputs: dict) -> None:
-        # Purely local: the volume knob only ever affects this Pi's own
+        # Purely local: the volume knob only ever affects this deck's own
         # audio output, no reason to round-trip it through the daemon.
         chiptune.set_volume(ev.value)
 

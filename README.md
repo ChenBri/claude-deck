@@ -3,7 +3,7 @@
 A hand-built desk instrument that shows what Claude Code is doing, and lets you
 answer it without touching the keyboard.
 
-Raspberry Pi Zero 2 W behind a 3D printed retro terminal shell. Five labelled
+Radxa ZERO 3W behind a 3D printed retro terminal shell. Five labelled
 lamps behind a backlit engraved legend strip, a 2.4" pixel-art screen with an
 animated mascot, two analog needles, a NeoPixel halo and underglow, lit arcade
 buttons, a mushroom interrupt under a flip cover, two knobs, four mech keys and
@@ -12,7 +12,7 @@ three toggles.
 It is driven by Claude Code hooks. It never touches the internet.
 
 ```
-Claude Code  --hooks-->  daemon (your PC)  --USB link-->  claude-deck (Pi Zero 2 W)
+Claude Code  --hooks-->  daemon (your PC)  --USB link-->  claude-deck (Radxa ZERO 3W)
                               ^                                  |
                               +--------- button events ----------+
 ```
@@ -31,7 +31,7 @@ Design complete. Software phase in progress, hardware not yet ordered.
 ## Repo layout
 
 ```
-firmware/   Python. Runs on the Pi. Also runs on your desktop as a simulator.
+firmware/   Python. Runs on the deck. Also runs on your desktop as a simulator.
 daemon/     TypeScript. Runs on Windows and macOS. Talks to Claude Code hooks.
 hooks/      Hook scripts and the settings.json snippet.
 case/       OpenSCAD source for the enclosure.
@@ -75,7 +75,7 @@ approve/deny round-trip. Here's how to run that too, still on one PC with
 nothing ordered yet.
 
 The daemon and firmware normally talk over the USB gadget's fixed addresses
-(10.55.0.1 the Pi, 10.55.0.2 the host, see docs/HARDWARE.md); point both at
+(10.55.0.1 the deck, 10.55.0.2 the host, see docs/HARDWARE.md); point both at
 loopback instead so they don't try to bind an address that doesn't exist yet:
 
 ```powershell

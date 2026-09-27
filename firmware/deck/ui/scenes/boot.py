@@ -5,7 +5,7 @@ from deck.ui.scenes.base import Context, Scene
 
 
 class BootScene(Scene):
-    """Covers the ~25s Pi boot so the panel never looks broken."""
+    """Covers the ~25s boot so the panel never looks broken."""
 
     def draw(self, canvas, ctx: Context) -> None:
         clear(canvas)

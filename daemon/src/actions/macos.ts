@@ -54,13 +54,24 @@ export const macosActions: HostActions = {
     await keystroke("t", "command down"); // new tab, then `claude` still has to be typed/aliased
   },
 
-  async planMode() {
-    await keystroke("p", "option down");
+  async planMode(presses) {
+    if (presses <= 0) return;
+    // Shift+Tab, the real mode-cycle key. One osascript call with a repeat
+    // loop rather than N round-trips, so a multi-press cycle stays one focus.
+    await osascript(`
+      ${activateApp()}
+      delay 0.08
+      tell application "System Events"
+        repeat ${presses} times
+          keystroke tab using {shift down}
+          delay 0.05
+        end repeat
+      end tell
+    `);
   },
 
   async effortSelect(level) {
-    // Real Claude Code slash command (confirmed against the docs, not a
-    // placeholder like planMode() above): /effort low|medium|high|xhigh|max,
+    // Real Claude Code slash command: /effort low|medium|high|xhigh|max,
     // typed mid-session. LOW/MEDIUM/HIGH/XHIGH/MAX map straight onto it.
     const argByLevel: Record<string, string> = {
       LOW: "low", MEDIUM: "medium", HIGH: "high", XHIGH: "xhigh", MAX: "max",

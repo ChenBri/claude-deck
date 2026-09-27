@@ -1,6 +1,6 @@
 /**
- * Truncate and redact before anything leaves the daemon for the Pi.
- * docs/SAFETY.md rule 7: the Pi renders text to a screen and writes state
+ * Truncate and redact before anything leaves the daemon for the deck.
+ * docs/SAFETY.md rule 7: the deck renders text to a screen and writes state
  * transitions to its card, so nothing sensitive may reach it.
  */
 

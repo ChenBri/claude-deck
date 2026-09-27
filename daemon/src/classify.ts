@@ -1,5 +1,5 @@
 /** Maps a raw Claude Code hook payload onto a normalized (sessionId, event,
- * meta) the Pi's state machine (firmware/deck/state.py) understands, and
+ * meta) the deck's state machine (firmware/deck/state.py) understands, and
  * runs the denylist over pending permission requests. */
 
 import { DenylistSettings, defaultDenylistSettings, isApprovable, matchDenylist } from "./denylist";
@@ -36,6 +36,21 @@ export function classify(
   hookName: string,
   payload: Record<string, unknown>,
   denylistSettings: DenylistSettings = defaultDenylistSettings,
+): ClassifiedEvent | null {
+  const classified = classifyEvent(hookName, payload, denylistSettings);
+  // Not every hook event carries this, but when one does it's the ground
+  // truth for guard.ts's plan-mode Shift+Tab count - passthrough regardless
+  // of which branch below matched.
+  if (classified && typeof payload.permission_mode === "string") {
+    classified.meta.permission_mode = payload.permission_mode;
+  }
+  return classified;
+}
+
+function classifyEvent(
+  hookName: string,
+  payload: Record<string, unknown>,
+  denylistSettings: DenylistSettings,
 ): ClassifiedEvent | null {
   const sessionId = String(payload.session_id ?? "default");
 
