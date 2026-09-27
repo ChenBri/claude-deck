@@ -58,6 +58,8 @@ firmware/deck/
   state.py            state machine, priority, latching, timeouts
   link.py             talks to the daemon, heartbeat drives the LINK lamp
   menu.py             encoder-driven settings menu, writes /var/deck/settings.yaml
+  hwtest.py           bench bring-up: live input readout, output sweep (Settings)
+  calibration.py      per-meter 5-point needle curve and its wizard (Settings)
   panel/
     base.py           abstract Panel: lamps, meters, pixels, inputs, screen surface
     real.py           GPIO, SPI, I2C, PCA9685, MCP23017, WS2812-over-SPI
@@ -75,11 +77,14 @@ firmware/deck/
       idle.py         clock, date, your name, weather, git status, today's totals
       snake.py        joystick steers, encoder push pauses
       tetris.py       joystick moves, mech keys rotate and drop
+      breakout.py     encoder detents move the paddle, joystick too
       gameboy.py      PyBoy (GB/GBC) core, own 160x144 canvas, letterboxed
       boot.py         covers the ~25s boot so it never looks broken
   audio/
     chiptune.py       generated blips, one per event, mute switch respected;
+                      swappable themes (classic, soft, arcade, minimal);
                       also owns the mixer for the Game Boy app's streamed audio
+    cues.py           which state change plays which blip
 ```
 
 ## The simulator

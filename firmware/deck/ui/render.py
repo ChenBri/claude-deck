@@ -8,6 +8,7 @@ from deck.state import State
 from deck.ui.scenes.base import Context, Scene
 from deck.ui.scenes.blocked import BlockedInputScene, BlockedPermissionScene
 from deck.ui.scenes.boot import BootScene
+from deck.ui.scenes.breakout import BreakoutScene
 from deck.ui.scenes.compacting import CompactingScene
 from deck.ui.scenes.done import DoneScene
 from deck.ui.scenes.error import ErrorScene
@@ -52,6 +53,7 @@ GAMES: dict[str, type[Scene]] = {
     "tetris": TetrisScene,
     "2048": Twenty48Scene,
     "pong": PongScene,
+    "breakout": BreakoutScene,
     "gameboy": GameBoyScene,
 }
 

@@ -9,7 +9,7 @@ highlighted app, joystick push backs out to the idle dashboard.
 from __future__ import annotations
 
 from deck.apps import APPS
-from deck.ui.gfx import clear, draw_text
+from deck.ui.gfx import clear, draw_text, get_font
 
 
 def draw_home(canvas, selected_index: int) -> None:
@@ -21,13 +21,17 @@ def draw_home(canvas, selected_index: int) -> None:
     slot_w = w // count
     icon_y = h // 2 - 14
     label_y = icon_y + 20
+    icon_font = get_font(12)
 
     for i, app in enumerate(APPS):
-        x = i * slot_w
         focused = i == selected_index
         color = (255, 210, 140) if focused else (170, 170, 170)
-        icon = f"[{app.icon}]" if focused else f" {app.icon} "
-        draw_text(canvas, icon, (x + slot_w // 2 - 12, icon_y), size=16, color=color)
-        draw_text(canvas, app.label, (x + 4, label_y), size=8, color=color)
+        icon = f"[{app.icon}]" if focused else app.icon
+        icon_w = icon_font.size(icon)[0]
+        draw_text(canvas, icon, (i * slot_w + (slot_w - icon_w) // 2, icon_y), size=12, color=color)
+
+    label = APPS[selected_index].label
+    label_w = get_font(8).size(label)[0]
+    draw_text(canvas, label, ((w - label_w) // 2, label_y), size=8, color=(255, 210, 140))
 
     draw_text(canvas, "joystick: move/open  push: back", (2, h - 10), size=7, color=(120, 120, 120))

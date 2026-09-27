@@ -10,16 +10,22 @@ from __future__ import annotations
 import argparse
 import time
 
+from deck import calibration
 from deck import link as link_mod
 from deck.apps import APPS
 from deck.audio import chiptune
+from deck.audio.cues import event_for_transition
+from deck.calibration import CalibrationWizard
+from deck.hwtest import HardwareTest
 from deck.menu import Menu, _get
-from deck.panel.base import GB_CANVAS_HEIGHT, GB_CANVAS_WIDTH, PIXEL_COUNT, Panel
+from deck.panel.base import GB_CANVAS_HEIGHT, GB_CANVAS_WIDTH, METERS, PIXEL_COUNT, Panel
 from deck.state import LAMP, Deck, State
 from deck.ui.pixels import pixels_for_state
 from deck.ui.render import GAMES, SceneManager, new_canvas
 from deck.ui.scenes.base import Context
+from deck.ui.scenes.calibrate import draw_calibrate
 from deck.ui.scenes.home import draw_home
+from deck.ui.scenes.hwtest import draw_hwtest
 from deck.ui.scenes.menu import draw_menu
 
 DENYLIST_CATEGORIES = ("database", "destructive_fs_git", "infrastructure", "secrets")
@@ -27,6 +33,14 @@ DENYLIST_CATEGORIES = ("database", "destructive_fs_git", "infrastructure", "secr
 BOOT_SECONDS = 3.0  # trimmed way down from the real ~25s boot for desktop dev
 LONG_PRESS_SECONDS = 1.5
 PRUNE_INTERVAL_SECONDS = 30.0
+
+# Reached from Settings, and they return there rather than to home.
+MAINTENANCE_APPS = ("hwtest", "calibrate")
+
+# Apps may hold the screen in these states. OFFLINE is included so the
+# hardware test and calibration work on the bench before the daemon is
+# up; a session going live still takes the screen straight back.
+APP_STATES = (State.IDLE, State.OFFLINE)
 
 
 def build_panel(name: str) -> Panel:
@@ -51,9 +65,14 @@ class App:
         self.gb_canvas = new_canvas(GB_CANVAS_WIDTH, GB_CANVAS_HEIGHT)
         self.idle_info: dict = {}
         # None: plain IDLE dashboard (or a live session's own scene). "home":
-        # the app launcher. "settings", or a key from ui.render.GAMES: that
-        # app is showing.
+        # the app launcher. "settings", one of MAINTENANCE_APPS, or a key
+        # from ui.render.GAMES: that app is showing.
         self.current_app: str | None = None
+        self.hwtest = HardwareTest()
+        self.calibrate = CalibrationWizard()
+        self._hwtest_label = ""
+        self._last_state: State | None = None
+        self._last_subagents: tuple[str | None, int] = (None, 0)
         self.home_index = 0
         self.night_on = False
         self._gb_buttons_held: set[str] = set()
@@ -70,6 +89,7 @@ class App:
             )
 
         chiptune.init()
+        chiptune.set_theme(str(menu.settings.get("sound_theme", chiptune.DEFAULT_THEME)))
         deck.idle_after_seconds = float(menu.settings.get("idle_after_seconds", deck.idle_after_seconds))
 
     def _on_idle_info(self, info: dict) -> None:
@@ -100,6 +120,8 @@ class App:
 
     def _handle_events(self, events, frame_inputs: dict) -> None:
         for ev in events:
+            if self.current_app == "hwtest" and self.hwtest.observe(ev, time.monotonic()):
+                chiptune.play("tick")
             handler = getattr(self, f"_on_{ev.kind}", None)
             if handler is not None:
                 handler(ev, frame_inputs)
@@ -114,7 +136,7 @@ class App:
 
     def _on_mech_key(self, ev, frame_inputs: dict) -> None:
         frame_inputs.setdefault("mech_keys", set()).add(ev.name)
-        if self.link is not None:
+        if self.link is not None and self.current_app != "hwtest":
             # PLAN needs to know which session's permission_mode the daemon
             # last saw, to compute how many Shift+Tab presses reach plan mode
             # (see daemon/src/guard.ts). Harmless for CLD/NEW/MIC, which ignore it.
@@ -167,6 +189,8 @@ class App:
         # The simulator has no HID gadget to be faithful to, so it substitutes
         # this HTTP action; guard.ts verifies it against the same request id
         # either way.
+        if self.current_app == "hwtest":
+            return  # being tested, not pressed in anger: never forwarded
         session = self.deck.active_session()
         if session is None or session.pending is None:
             return
@@ -190,6 +214,8 @@ class App:
         if ev.name in ("cw", "ccw"):
             if self.current_app == "settings":
                 self.menu.rotate(1 if ev.name == "cw" else -1)
+            elif self.current_app == "calibrate":
+                self.calibrate.rotate(1 if ev.name == "cw" else -1)
             else:
                 frame_inputs["encoder_edge"] = ev.name  # e.g. the Game Boy rom picker
         elif ev.name == "push_down":
@@ -207,12 +233,34 @@ class App:
             frame_inputs["encoder_push_edge"] = True  # the game itself decides: pause, or retry if over
             return
 
+        if self.current_app == "hwtest":
+            return  # HardwareTest.observe already saw it; a double push exits
+
+        if self.current_app == "calibrate":
+            self.calibrate.push()
+            if self.calibrate.finished:
+                self.menu.settings["meter_cal"] = self.calibrate.curves
+                self.menu.save()
+                self.current_app = "settings"
+            return
+
         if self.current_app == "settings":
             item = self.menu.current_item()
             if item.key == "EXIT":
                 self.current_app = "home"
                 return
+            if item.key == "HWTEST":
+                self.hwtest.reset()
+                self.current_app = "hwtest"
+                return
+            if item.key == "CALIBRATE":
+                self.calibrate.start(self.menu.settings.get("meter_cal", {}))
+                self.current_app = "calibrate"
+                return
             self.menu.activate()
+            if item.key == "sound_theme":
+                chiptune.set_theme(str(_get(self.menu.settings, item.key)))
+                chiptune.play("finished")  # preview
             if item.key.startswith("denylist.") and self.link is not None:
                 category = item.key.split(".", 1)[1]
                 self.link.send_action(
@@ -243,7 +291,12 @@ class App:
                 self.home_index = (self.home_index + 1) % len(APPS)
 
         if frame_inputs.get("joystick_push_edge") and self.current_app is not None:
-            self.current_app = None if self.current_app == "home" else "home"
+            if self.current_app == "hwtest":
+                return  # joystick push is one of the inputs under test
+            if self.current_app in MAINTENANCE_APPS:
+                self.current_app = "settings"  # calibrate: cancel, nothing saved
+            else:
+                self.current_app = None if self.current_app == "home" else "home"
 
     def _shutdown(self) -> None:
         # Real hardware: play the goodbye animation, then `sudo shutdown -h now`.
@@ -268,14 +321,24 @@ class App:
                 self.deck.registry.prune(now=now)
 
             booting = (now - self._boot_started) < BOOT_SECONDS
-            if self.current_app is not None and self.deck.current_state(now) is not State.IDLE:
+            if self.current_app == "hwtest" and self.hwtest.exit_requested:
+                self.current_app = "settings"
+            if self.current_app is not None and self.deck.current_state(now) not in APP_STATES:
                 self.current_app = None  # a live session takes the screen back over
+            if not booting:
+                self._play_cues(now)
 
             if self.current_app == "settings":
                 draw_menu(self.canvas, self.menu)
                 canvas = self.canvas
             elif self.current_app == "home":
                 draw_home(self.canvas, self.home_index)
+                canvas = self.canvas
+            elif self.current_app == "hwtest":
+                draw_hwtest(self.canvas, self.hwtest, now, self._hwtest_label)
+                canvas = self.canvas
+            elif self.current_app == "calibrate":
+                draw_calibrate(self.canvas, self.calibrate)
                 canvas = self.canvas
             else:
                 canvas = self.gb_canvas if self.current_app == "gameboy" else self.canvas
@@ -297,7 +360,40 @@ class App:
             self._update_indicators(now)
             self.panel.present(canvas)
 
+    def _play_cues(self, now: float) -> None:
+        state = self.deck.current_state(now)
+        event = event_for_transition(self._last_state, state)
+        self._last_state = state
+
+        session = self.deck.active_session()
+        subagents = (session.session_id, session.subagent_count) if session else (None, 0)
+        if event is None and subagents[0] == self._last_subagents[0] and subagents[1] > self._last_subagents[1]:
+            event = "subagent_spawn"
+        self._last_subagents = subagents
+
+        if event is not None:
+            chiptune.play(event)
+
+    def _set_meter(self, name: str, level: float) -> None:
+        curve = self.menu.settings.get("meter_cal", {}).get(name)
+        self.panel.set_meter(name, calibration.apply(level, curve))
+
+    def _update_hwtest_indicators(self, now: float) -> None:
+        # Raw duty on the meters, no calibration: bring-up comes before it.
+        out = self.hwtest.outputs(now, PIXEL_COUNT)
+        self._hwtest_label = out["label"]
+        for name, level in out["lamps"].items():
+            self.panel.set_lamp(name, level)
+        for name, level in out["leds"].items():
+            self.panel.set_button_led(name, level)
+        for name, level in out["meters"].items():
+            self.panel.set_meter(name, level)
+        self.panel.set_pixels(out["pixels"])
+
     def _update_indicators(self, now: float) -> None:
+        if self.current_app == "hwtest":
+            self._update_hwtest_indicators(now)
+            return
         state = self.deck.current_state(now)
         lamp_name = LAMP.get(state)
         brightness = self._brightness()
@@ -310,9 +406,13 @@ class App:
         self.panel.set_button_led("APPROVE", brightness if self.deck.approve_button_live(now) else 0.0)
         self.panel.set_button_led("DENY", brightness if state == State.BLOCKED_PERMISSION else 0.0)
 
-        session = self.deck.active_session()
-        self.panel.set_meter("CONTEXT", session.context_pct if session else 0.0)
-        self.panel.set_meter("FIVE_HOUR", float(self.idle_info.get("five_hour_pct", 0.0)))
+        if self.current_app == "calibrate":
+            for name in METERS:
+                self.panel.set_meter(name, self.calibrate.drive() if name == self.calibrate.meter else 0.0)
+        else:
+            session = self.deck.active_session()
+            self._set_meter("CONTEXT", session.context_pct if session else 0.0)
+            self._set_meter("FIVE_HOUR", float(self.idle_info.get("five_hour_pct", 0.0)))
 
         self.panel.set_pixels(pixels_for_state(state, now, brightness, PIXEL_COUNT))
 

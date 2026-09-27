@@ -10,11 +10,16 @@ on screen either.
 """
 from __future__ import annotations
 
+import copy
 import os
 from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
+
+from deck.audio.chiptune import DEFAULT_THEME, THEMES
+from deck.calibration import default_curve
+from deck.panel.base import METERS
 
 DEFAULT_SETTINGS_PATH = Path(os.environ.get("DECK_VAR", "./var/deck")) / "settings.yaml"
 
@@ -28,17 +33,20 @@ DEFAULT_SETTINGS = {
     },
     "wifi": False,
     "night_brightness": 0.2,
+    "sound_theme": DEFAULT_THEME,
+    "meter_cal": {m: default_curve() for m in METERS},
 }
 
 
 @dataclass
 class MenuItem:
-    key: str  # dotted path into settings, or "EXIT"
+    key: str  # dotted path into settings, or an action name ("EXIT", "HWTEST", "CALIBRATE")
     label: str
-    kind: str  # "action" | "bool" | "int" | "float"
+    kind: str  # "action" | "bool" | "int" | "float" | "choice"
     step: float = 1
     minimum: float = 0
     maximum: float = 1
+    choices: tuple[str, ...] = ()
 
 
 ITEMS = [
@@ -50,6 +58,9 @@ ITEMS = [
     MenuItem("denylist.secrets", "block: secrets", "bool"),
     MenuItem("wifi", "wifi radio", "bool"),
     MenuItem("night_brightness", "night brightness", "float", step=0.05, minimum=0.0, maximum=1.0),
+    MenuItem("sound_theme", "sounds", "choice", choices=tuple(THEMES)),
+    MenuItem("HWTEST", "hardware test", "action"),
+    MenuItem("CALIBRATE", "calibrate meters", "action"),
 ]
 
 
@@ -79,8 +90,11 @@ class Menu:
         if self.settings_path.exists():
             with open(self.settings_path) as f:
                 loaded = yaml.safe_load(f) or {}
-            return {**DEFAULT_SETTINGS, **loaded}
-        return {k: (dict(v) if isinstance(v, dict) else v) for k, v in DEFAULT_SETTINGS.items()}
+            return {**copy.deepcopy(DEFAULT_SETTINGS), **loaded}
+        return copy.deepcopy(DEFAULT_SETTINGS)
+
+    def save(self) -> None:
+        self._save()
 
     def _save(self) -> None:
         self.settings_path.parent.mkdir(parents=True, exist_ok=True)
@@ -99,9 +113,14 @@ class Menu:
 
     def activate(self) -> None:
         """Encoder push while Settings is showing: act on the focused item.
-        The EXIT item is intercepted by main.py before this is called."""
+        Action items are intercepted by main.py before this is called."""
         item = self.current_item()
-        if item.kind == "bool":
+        if item.kind == "choice":
+            current = _get(self.settings, item.key)
+            index = item.choices.index(current) if current in item.choices else -1
+            _set(self.settings, item.key, item.choices[(index + 1) % len(item.choices)])
+            self._save()
+        elif item.kind == "bool":
             _set(self.settings, item.key, not _get(self.settings, item.key))
             self._save()
         elif item.kind in ("int", "float"):  # push steps through the range, then wraps
