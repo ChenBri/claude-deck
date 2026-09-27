@@ -29,8 +29,10 @@ daemon/     TypeScript. Cross-platform, Windows and macOS. Ingests Claude Code h
 hooks/      Hook scripts and the settings.json snippet.
 case/       OpenSCAD source for the enclosure.
 panel/      Inkscape SVG for the laser-cut engraved legend strip.
-tools/      Hook event recorder and replayer.
+deploy/     Provisioning the deck: USB gadget, services, read-only root.
 ```
+
+The hook event recorder and replayer live in `firmware/tools/`.
 
 ## Non-negotiables
 
@@ -52,12 +54,25 @@ asking:
 
 ## Hardware constraints that bite
 
-- I2S audio claims GPIO18/19/21, which kills SPI1 and PCM. NeoPixels therefore
-  run on GPIO12 (PWM0) via `rpi_ws281x` as root in a systemd service.
-- The board is 3.3V, WS2812B wants 5V data. The 74AHCT125 is not optional.
-- No analog output. The needles are PWM through an RC filter, trimpot calibrated.
-- Root filesystem is read-only with a RAM overlay. Writable data lives on a third
-  partition at `/var/deck`.
+- It's a Rockchip RK3566, not a Pi: nothing Broadcom-specific runs (no
+  `rpi_ws281x`). NeoPixels go out SPI3 MOSI (pin 19) encoded to WS2812 timing,
+  capped at 40% brightness in the driver because that's the power budget.
+- 3.3V logic everywhere. WS2812B wants 5V data, so the 74AHCT125 is not
+  optional. The PCA9685's logic is 3.3V too, so it runs open-drain: LEDs sink
+  from 5V, each meter has a 1k pull-up to 5V, and meter duty is inverted in
+  software (DECISIONS.md #68).
+- The main I2C bus is I2C4 on pins 27/28, for their built-in pull-ups. Pins 3
+  and 5 carry the same extra pull-ups and misbehave as plain GPIO; leave them.
+- 12V in for the display, a buck converter to 5V, and 5V into the GPIO header
+  (pins 2/4). USB-C 1 is data only to the PC. Never power the board through it.
+- No analog output. The needles are PWM through an RC filter, trimpot plus the
+  calibration wizard.
+- Root filesystem is read-only with a RAM overlay. The app, its venv and all
+  writable data live on the DECKDATA partition at `/var/deck`. The firmware
+  runs as the unprivileged `deck` user, not root (deploy/).
+- Every press goes out twice, as its F13-F20 HID key and as an HTTP action,
+  and the daemon only acts when the two pair up (DECISIONS.md #69). The
+  simulator has no HID, so its daemon needs `DECK_REQUIRE_HID=0`.
 
 ## Working style
 

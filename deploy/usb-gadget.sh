@@ -98,7 +98,10 @@ ln -s functions/ecm.usb0 configs/c.2/
 ln -s functions/hid.usb0 configs/c.2/
 ln -s configs/c.1 os_desc/
 
-udc=$(ls /sys/class/udc | head -n 1)
+udc=""
+for path in /sys/class/udc/*; do
+    [ -e "$path" ] && udc=$(basename "$path") && break
+done
 if [ -z "$udc" ]; then
     echo "usb-gadget: no USB device controller found; is the OTG port in peripheral mode?" >&2
     exit 1
